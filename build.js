@@ -113,7 +113,11 @@ const { execSync } = require('child_process');
 
   function stripInvisibleChars(value) {
     return String(value ?? '')
+      .normalize('NFC')
+      // Ударения и прочая диакритика (U+0300–U+036F) в T2A не поддерживаются.
+      .replace(/[\u0300-\u036F]/g, '')
       .replace(INVISIBLE_CHARS_RE, '')
+      .replace(/[\u2028\u2029]/g, ' ')
       .replace(/\u00A0/g, ' ');
   }
 
@@ -160,6 +164,11 @@ const { execSync } = require('child_process');
       .replace(/_\\min(?![A-Za-z])/g, '_{\\min}')
       .replace(/\^\\max(?![A-Za-z])/g, '^{\\max}')
       .replace(/\^\\min(?![A-Za-z])/g, '^{\\min}')
+      // Двойные индексы без скобок: q_m_2 → q_{m_2}, v_0_x → v_{0_x}
+      // Сначала закрываем аргумент акцента: \vec_a_1 → \vec{a}_1
+      .replace(/\\(vec|bar|hat|tilde|dot|ddot|overline|underline|overrightarrow|overleftarrow)_([A-Za-z0-9])/g, '\\$1{$2}')
+      .replace(/_([A-Za-z]+)_([A-Za-z0-9])/g, '_{$1_$2}')
+      .replace(/_([0-9])_([A-Za-z0-9])/g, '_{$1_$2}')
       // \ChemFormN, \ChemForm Mg, \ChemForm^{A}_Z X и т.п.
       .replace(/\\ChemForm\s+([A-Z][a-z]?)/g, '\\mathrm{$1}')
       .replace(/\\ChemForm([A-Z][a-z]?)(?![A-Za-z])/g, '\\mathrm{$1}')
@@ -170,7 +179,23 @@ const { execSync } = require('child_process');
     return fixKnownLatexTypos(stripInvisibleChars(value))
       .replace(/[α-ωΑ-Ωµ]/g, (ch) => `\\ensuremath{${GREEK_TO_LATEX[ch] || ch}}`)
       .replace(/²/g, '\\ensuremath{{}^{2}}')
-      .replace(/³/g, '\\ensuremath{{}^{3}}');
+      .replace(/³/g, '\\ensuremath{{}^{3}}')
+      // Буквоподобные и типографские символы, которых нет в T2A.
+      .replace(/ℰ/g, '\\ensuremath{\\mathcal{E}}')
+      .replace(/ʋ/g, '\\ensuremath{\\upsilon}')
+      .replace(/[óό]/g, 'о')
+      .replace(/[º°]/g, '\\ensuremath{^\\circ}')
+      .replace(/[′’]/g, "'")
+      .replace(/‚/g, ',')
+      .replace(/→/g, '\\ensuremath{\\to}')
+      .replace(/←/g, '\\ensuremath{\\leftarrow}')
+      .replace(/↑/g, '\\ensuremath{\\uparrow}')
+      .replace(/↓/g, '\\ensuremath{\\downarrow}')
+      .replace(/≈/g, '\\ensuremath{\\approx}')
+      .replace(/−/g, '-')
+      .replace(/–/g, '-')
+      .replace(/·/g, '\\ensuremath{\\cdot}')
+      .replace(/±/g, '\\ensuremath{\\pm}');
   }
 
   // Очистка единиц измерения для отображения в веб-бланке
@@ -377,7 +402,7 @@ ${keyMap.filter(k => k.part === 1).map(k => `${k.num} & \\texttt{${escapeLatex(k
   }
 
   teacherTex += `\\section*{Разбор заданий и критерии оценивания}
-${keyMap.map(k => `\\kimtask{${k.num}}{\\textbf{ID:} \\texttt{${escapeLatex(k.id)}} (Макс. балл: ${k.max_points})\\\\[4pt] ${k.solution}\\\\ \\textbf{Ответ:} ${sanitizeLatex(k.answer)}}`).join('\n\n')}
+${keyMap.map(k => `\\kimtask{${k.num}}{\\textbf{ID:} \\texttt{${escapeLatex(k.id)}} (Макс. балл: ${k.max_points})\\\\[4pt] ${k.solution}\n\n\\noindent\\textbf{Ответ:} ${sanitizeLatex(k.answer)}}`).join('\n\n')}
 \\end{document}\n`;
 
   // ── 6. Сохранение полных ключей и публичного манифеста ───────────────────────
