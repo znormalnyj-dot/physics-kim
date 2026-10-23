@@ -1,0 +1,130 @@
+% fipi_style.sty
+% Макросы оформления КИМ в стиле ФИПИ (рамки, номера, QR-код, бланки)
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{fipi_style}[2026/10/20 FIPI KIM Style]
+
+% ─── Пакеты ───────────────────────────────────────────────────────────────────
+\RequirePackage[T2A]{fontenc}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[russian]{babel}
+\RequirePackage{geometry}
+\RequirePackage{amsmath, amssymb}
+\RequirePackage{array, tabularx, booktabs}
+\RequirePackage{enumitem}
+\RequirePackage{graphicx}
+\RequirePackage{xcolor}
+\RequirePackage{fancyhdr}
+\RequirePackage{lastpage}
+\RequirePackage{qrcode}
+\RequirePackage{hyperref}
+\RequirePackage{mdframed}
+
+% Поддержка путей к изображениям (в output/ и tasks/images/)
+\graphicspath{{images/}{../tasks/images/}{tasks/images/}}
+
+% ─── Поля страницы ────────────────────────────────────────────────────────────
+\geometry{
+  a4paper,
+  left=18mm, right=14mm,
+  top=14mm, bottom=14mm,
+  headheight=14pt
+}
+\setlength{\parskip}{4pt}
+
+% ─── Колонтитулы ──────────────────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textbf{\ExamHeaderTitle}}
+\fancyhead[R]{\small Класс: \ExamGrade}
+\fancyfoot[C]{\small Страница \thepage\ из \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ─── Команды оформления КИМ ───────────────────────────────────────────────────
+
+% \webblankbox{EXAM-ID}{URL}
+% Информационная рамка с QR-кодом для перехода в электронный бланк ответов
+\newcommand{\webblankbox}[2]{%
+  \par\vspace{4pt}%
+  \begin{mdframed}[linewidth=0.8pt, innertopmargin=4pt, innerbottommargin=4pt, innerleftmargin=8pt, innerrightmargin=8pt]
+    \begin{minipage}[c]{0.78\linewidth}
+      {\large\bfseries Электронный бланк ответов}\\[2pt]
+      \textbf{Вариант:} \texttt{#1}\\[3pt]
+      \footnotesize Для внесения ответов к Части~1 и отправки решений Части~2 перейдите по ссылке или отсканируйте QR-код:\\[2pt]
+      \url{#2}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}[c]{0.19\linewidth}
+      \centering
+      \qrcode[height=1.6cm]{#2}
+    \end{minipage}
+  \end{mdframed}
+  \vspace{4pt}
+}
+
+% \kimimg{путь к рисунку} — компактная вставка рисунка в задаче
+\newcommand{\kimimg}[1]{%
+    \par\vspace{3pt}%
+    {\centering\includegraphics[width=0.33\textwidth,height=0.16\textheight,keepaspectratio]{#1}\par}%
+    \vspace{3pt}%
+}
+
+% \kimpart{Название части}{Инструкция}
+\newcommand{\kimpart}[2]{%
+  \bigskip
+  \noindent\rule{\linewidth}{1.2pt}\\[3pt]
+  {\large\bfseries #1}\\[3pt]
+  {\small\itshape #2}\\[4pt]
+  \noindent\rule{\linewidth}{0.4pt}
+  \medskip
+}
+
+% \kimtask{Номер}{Текст задания}
+\newcommand{\kimtask}[2]{%
+  \bigskip
+  \noindent
+  \begin{mdframed}[linewidth=0.5pt, innerleftmargin=8pt, innerrightmargin=8pt,
+                   innertopmargin=6pt, innerbottommargin=6pt, nobreak=true]
+    \textbf{Задание #1.}~#2
+  \end{mdframed}
+}
+
+% \ansline{Единица измерения} — строка для ввода числового ответа
+\newcommand{\ansline}[1]{%
+  \par\vspace{6pt}
+  \noindent\textbf{Ответ:}~\underline{\hspace{3.5cm}}~\ifx\relax#1\relax\else#1\fi
+  \vspace{2pt}
+}
+
+% \ansAB — бланк для записи ответа в виде последовательности цифр
+\newcommand{\ansAB}{%
+  \par\vspace{6pt}
+  \noindent\textbf{Ответ:}\hspace{6pt}%
+  \begin{tabular}{|c|c|}
+    \hline
+    А & Б \\ \hline
+    \rule{0pt}{14pt}\hspace{1.2cm} & \hspace{1.2cm} \\ \hline
+  \end{tabular}
+  \vspace{2pt}
+}
+
+% \ansTwoCols{Величина 1}{Величина 2} — таблица на соответствие (2 величины)
+\newcommand{\ansTwoCols}[2]{%
+  \par\vspace{6pt}
+  \noindent
+  \begin{tabular}{|>{\raggedright\arraybackslash}p{8cm}|c|}
+    \hline
+    \textbf{Физическая величина} & \textbf{Характер изменения} \\
+    \hline
+    А) #1 & \hspace{2.5cm} \\
+    \hline
+    Б) #2 & \hspace{2.5cm} \\
+    \hline
+  \end{tabular}\\[4pt]
+  \textbf{Ответ:}\hspace{6pt}%
+  \begin{tabular}{|c|c|}
+    \hline
+    А & Б \\ \hline
+    \rule{0pt}{14pt}\hspace{1.2cm} & \hspace{1.2cm} \\ \hline
+  \end{tabular}
+  \vspace{2pt}
+}

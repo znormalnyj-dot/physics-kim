@@ -1,0 +1,15 @@
+{
+  "variant_id": "OGE-201",
+  "exam": "OGE",
+  "title": "Тренировочный вариант №201",
+  "duration_minutes": 180,
+  "tasks": [
+    {
+      "num": 1,
+      "part": 1,
+      "rule": "numeric",
+      "max_points": 1,
+      "unit": "м"
+    }
+  ]
+}

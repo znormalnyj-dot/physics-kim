@@ -1,0 +1,27 @@
+{
+  "variant_id": "EGE-102",
+  "exam": "EGE",
+  "title": "Тренировочный вариант №102",
+  "duration_minutes": 235,
+  "tasks": [
+    {
+      "num": 1,
+      "part": 1,
+      "rule": "numeric",
+      "max_points": 1,
+      "unit": "м/с²"
+    },
+    {
+      "num": 2,
+      "part": 1,
+      "rule": "ordered_sequence",
+      "max_points": 2
+    },
+    {
+      "num": 3,
+      "part": 2,
+      "rule": "manual",
+      "max_points": 2
+    }
+  ]
+}

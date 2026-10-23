@@ -1,0 +1,2247 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>Конструктор вариантов КИМ — панель преподавателя</title>
+  <style>
+    :root {
+      --bg: #eef2f9;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --ink: #0f172a;
+      --ink-soft: #334155;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --line-strong: #cbd5e1;
+      --blue: #2563eb;
+      --blue-dark: #1d4ed8;
+      --blue-soft: #eff6ff;
+      --violet: #7c3aed;
+      --violet-soft: #f5f3ff;
+      --green: #059669;
+      --green-soft: #ecfdf5;
+      --red: #dc2626;
+      --red-soft: #fef2f2;
+      --amber: #b45309;
+      --amber-soft: #fffbeb;
+      --shadow: 0 12px 34px rgba(15, 23, 42, 0.07);
+      --shadow-sm: 0 4px 14px rgba(15, 23, 42, 0.05);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--ink);
+      background:
+        radial-gradient(1100px 520px at 8% -10%, rgba(37, 99, 235, 0.11), transparent 60%),
+        radial-gradient(900px 480px at 100% 0%, rgba(124, 58, 237, 0.09), transparent 55%),
+        var(--bg);
+    }
+
+    [hidden] { display: none !important; }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(255, 255, 255, 0.86);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+    }
+
+    .topbar-inner {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      flex: none;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      color: #fff;
+      font-weight: 800;
+      font-size: 21px;
+      letter-spacing: 0.5px;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.28);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 19px;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand p {
+      margin: 2px 0 0;
+      font-size: 12.5px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .topbar-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 13px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--muted);
+      background: #eef2f7;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .pill::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #94a3b8;
+      flex: none;
+    }
+
+    .pill.ok { color: #065f46; background: var(--green-soft); border-color: #a7f3d0; }
+    .pill.ok::before { background: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15); }
+
+    .ghost-link {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      padding: 7px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      white-space: nowrap;
+    }
+
+    .ghost-link:hover { text-decoration: none; border-color: var(--line-strong); background: var(--surface-soft); }
+
+    .page {
+      max-width: 1380px;
+      margin: 0 auto;
+      padding: 24px 28px 64px;
+    }
+
+    .exam-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      padding: 14px 18px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .segmented {
+      display: inline-flex;
+      padding: 4px;
+      gap: 4px;
+      border-radius: 13px;
+      background: #e8edf5;
+      border: 1px solid #dde5ef;
+    }
+
+    .exam-btn {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      padding: 9px 20px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: baseline;
+      gap: 7px;
+      transition: all 0.16s ease;
+    }
+
+    .exam-btn span {
+      font-size: 11.5px;
+      font-weight: 600;
+      opacity: 0.72;
+    }
+
+    .exam-btn:hover { color: var(--ink-soft); }
+
+    .exam-btn.is-active {
+      color: var(--blue-dark);
+      background: var(--surface);
+      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.1);
+    }
+
+    .exam-totals {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      flex-wrap: wrap;
+    }
+
+    .total-pill {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: 10px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      font-size: 12.5px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .total-pill b { color: var(--ink-soft); font-size: 12.5px; }
+    .total-pill small { font-size: 11.5px; color: #94a3b8; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(340px, 0.85fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 21px 22px 16px;
+    }
+
+    .card-head h2 {
+      margin: 0;
+      font-size: 17px;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .step-badge {
+      width: 25px;
+      height: 25px;
+      flex: none;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--blue-soft);
+      color: var(--blue-dark);
+      font-size: 12.5px;
+      font-weight: 800;
+    }
+
+    .card-head p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12.8px;
+    }
+
+    .head-actions {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .link-btn {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink-soft);
+      border-radius: 9px;
+      padding: 7px 11px;
+      font-size: 12.5px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .link-btn:hover { background: var(--surface-soft); border-color: var(--line-strong); }
+    .link-btn.accent { color: var(--blue-dark); border-color: #bfdbfe; background: var(--blue-soft); }
+    .link-btn.accent:hover { background: #dbeafe; }
+    .link-btn.tiny { padding: 4px 8px; font-size: 11.2px; border-radius: 7px; }
+
+    .field-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .field-head .field-label {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--ink-soft);
+    }
+
+    .field-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .inline-status {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .inline-status.ok { color: #047857; }
+    .inline-status.error { color: #b91c1c; }
+
+    .hint code {
+      font-family: Consolas, monospace;
+      font-size: 11px;
+      background: #f1f5f9;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 0 4px;
+    }
+
+    .topics-list {
+      padding: 0 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .topic-section {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--surface);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .topic-section:hover { border-color: #cbd5e1; }
+    .topic-section.has-selection { border-color: #bfdbfe; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.06); }
+
+    .topic-section-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 14px;
+      background: #fbfcfe;
+      border-bottom: 1px solid #eef2f7;
+    }
+
+    .section-check {
+      display: grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      flex: none;
+      cursor: pointer;
+    }
+
+    .section-check input,
+    .subtopic input {
+      width: 17px;
+      height: 17px;
+      accent-color: var(--blue);
+      cursor: pointer;
+      margin: 0;
+    }
+
+    .section-info { flex: 1; min-width: 0; }
+
+    .section-info h3 {
+      margin: 0;
+      font-size: 14.5px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .section-badges {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 10.8px;
+      font-weight: 700;
+      line-height: 1.5;
+      white-space: nowrap;
+    }
+
+    .badge.part1 { background: var(--blue-soft); color: var(--blue-dark); }
+    .badge.part2 { background: var(--violet-soft); color: #6d28d9; }
+    .badge.zero { background: #f1f5f9; color: #94a3b8; }
+
+    .section-pick {
+      border: 0;
+      background: transparent;
+      color: var(--blue-dark);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 7px;
+      border-radius: 7px;
+      white-space: nowrap;
+    }
+
+    .section-pick:hover { background: var(--blue-soft); }
+
+    .subtopics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1px;
+      background: #eef2f7;
+      padding: 1px;
+    }
+
+    .subtopic {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 46px;
+      padding: 9px 13px;
+      background: var(--surface);
+      cursor: pointer;
+      transition: background 0.13s ease;
+    }
+
+    .subtopic:hover { background: #f8fafc; }
+    .subtopic.is-checked { background: #f6f9ff; }
+    .subtopic.is-zero { opacity: 0.68; }
+
+    .subtopic-name {
+      flex: 1;
+      min-width: 0;
+      font-size: 13.3px;
+      color: var(--ink-soft);
+      line-height: 1.3;
+    }
+
+    .subtopic.is-checked .subtopic-name { color: var(--ink); font-weight: 600; }
+
+    .subtopic .badges {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      flex: none;
+    }
+
+    .side {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: sticky;
+      top: 88px;
+    }
+
+    .params-card { padding-bottom: 20px; }
+
+    .params-body {
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+
+    .field > label {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--ink-soft);
+    }
+
+    .hint {
+      margin: 0;
+      font-size: 11.7px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .hint b { color: var(--ink-soft); }
+
+    .input-prefix {
+      display: flex;
+      align-items: stretch;
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--surface);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .input-prefix:focus-within {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .input-prefix span {
+      display: inline-flex;
+      align-items: center;
+      padding: 0 11px;
+      background: #f1f5f9;
+      border-right: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      font-family: "JetBrains Mono", Consolas, monospace;
+    }
+
+    .input-prefix input {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      background: transparent;
+      font-family: "JetBrains Mono", Consolas, monospace;
+    }
+
+    .text-input {
+      width: 100%;
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13.5px;
+      color: var(--ink);
+      background: var(--surface);
+      outline: 0;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .text-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .number-input {
+      width: 100%;
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      background: var(--surface);
+      outline: 0;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .number-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .switch-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-soft);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .switch-row input { position: absolute; opacity: 0; width: 0; height: 0; }
+
+    .switch {
+      width: 38px;
+      height: 22px;
+      border-radius: 999px;
+      background: #cbd5e1;
+      flex: none;
+      position: relative;
+      transition: background 0.18s ease;
+      margin-top: 1px;
+    }
+
+    .switch::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+      transition: transform 0.18s ease;
+    }
+
+    .switch-row input:checked + .switch { background: var(--green); }
+    .switch-row input:checked + .switch::after { transform: translateX(16px); }
+    .switch-row input:focus-visible + .switch { box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2); }
+
+    .switch-text { min-width: 0; }
+    .switch-text b { display: block; font-size: 12.7px; line-height: 1.35; }
+    .switch-text small { display: block; margin-top: 2px; font-size: 11.5px; color: var(--muted); line-height: 1.35; }
+
+    .summary-box {
+      border: 1px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 11px 12px;
+      background: #fbfdff;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12.4px;
+    }
+
+    .summary-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .summary-row span { color: var(--muted); }
+    .summary-row b { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+    .summary-warning {
+      font-size: 11.7px;
+      line-height: 1.4;
+      color: var(--amber);
+      background: var(--amber-soft);
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 7px 9px;
+    }
+
+    .summary-ok {
+      font-size: 11.7px;
+      line-height: 1.4;
+      color: #065f46;
+      background: var(--green-soft);
+      border: 1px solid #a7f3d0;
+      border-radius: 8px;
+      padding: 7px 9px;
+    }
+
+    .btn-primary {
+      position: relative;
+      width: 100%;
+      border: 0;
+      border-radius: 12px;
+      padding: 13px 18px;
+      color: #fff;
+      font-size: 14.5px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      background: linear-gradient(135deg, #2563eb, #4f46e5 55%, #7c3aed);
+      box-shadow: 0 9px 22px rgba(37, 99, 235, 0.28);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 26px rgba(37, 99, 235, 0.34);
+    }
+
+    .btn-primary:active:not(:disabled) { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+      flex: none;
+    }
+
+    .btn-primary.is-busy .spinner { display: inline-block; }
+    .btn-primary.is-busy { opacity: 0.9; cursor: wait; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .build-status {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--blue-soft);
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+      font-size: 12.3px;
+      line-height: 1.45;
+    }
+
+    .build-status .spinner {
+      display: inline-block;
+      border-color: rgba(37, 99, 235, 0.25);
+      border-top-color: var(--blue);
+      margin-top: 1px;
+    }
+
+    .alert {
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 12.8px;
+      line-height: 1.5;
+    }
+
+    .alert.error {
+      color: #991b1b;
+      background: var(--red-soft);
+      border: 1px solid #fecaca;
+    }
+
+    .alert b { display: block; margin-bottom: 3px; }
+
+    .alert details { margin-top: 8px; }
+    .alert summary { cursor: pointer; font-weight: 700; }
+
+    .alert pre,
+    .log-pre {
+      margin: 8px 0 0;
+      max-height: 260px;
+      overflow: auto;
+      padding: 10px;
+      border-radius: 8px;
+      background: #0f172a;
+      color: #cbd5e1;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 11px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .help-card {
+      padding: 15px 17px;
+      background: linear-gradient(150deg, #f8fafc, #ffffff);
+    }
+
+    .help-card h3 { margin: 0 0 7px; font-size: 13px; }
+    .help-card ul { margin: 0; padding-left: 17px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .help-card li + li { margin-top: 3px; }
+    .help-card code { font-family: Consolas, monospace; font-size: 11px; background: #eef2f7; padding: 1px 5px; border-radius: 5px; color: var(--ink-soft); }
+
+    .result-card {
+      margin-top: 20px;
+      border-color: #a7f3d0;
+      background:
+        radial-gradient(700px 260px at 100% 0%, rgba(16, 185, 129, 0.09), transparent 70%),
+        var(--surface);
+      animation: result-in 0.35s ease both;
+    }
+
+    @keyframes result-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-head {
+      display: flex;
+      align-items: flex-start;
+      gap: 13px;
+      padding: 22px 22px 4px;
+    }
+
+    .ok-icon {
+      width: 42px;
+      height: 42px;
+      flex: none;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      background: var(--green-soft);
+      color: var(--green);
+      font-size: 21px;
+      font-weight: 800;
+      border: 1px solid #a7f3d0;
+    }
+
+    .result-head h2 { margin: 0; font-size: 18px; letter-spacing: -0.01em; }
+    .result-meta { margin: 4px 0 0; color: var(--muted); font-size: 12.8px; }
+    .result-meta b { color: var(--ink-soft); }
+
+    .result-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      padding: 16px 22px 8px;
+    }
+
+    .result-btn {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+      padding: 13px 14px;
+      border-radius: 13px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .result-btn:hover {
+      text-decoration: none;
+      transform: translateY(-1px);
+      border-color: #bfdbfe;
+      box-shadow: 0 7px 18px rgba(37, 99, 235, 0.11);
+    }
+
+    .result-btn .rb-icon {
+      width: 38px;
+      height: 38px;
+      flex: none;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: var(--blue-soft);
+      color: var(--blue-dark);
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+    }
+
+    .result-btn.teacher .rb-icon { background: var(--violet-soft); color: #6d28d9; }
+    .result-btn.blank .rb-icon { background: var(--green-soft); color: var(--green); }
+
+    .result-btn .rb-text { min-width: 0; }
+    .result-btn .rb-text b { display: block; font-size: 12.9px; line-height: 1.3; }
+    .result-btn .rb-text small { display: block; margin-top: 2px; color: var(--muted); font-size: 11.3px; }
+
+    .result-btn.blank {
+      cursor: default;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .result-btn.blank:hover { transform: none; box-shadow: none; border-color: var(--line); }
+
+    .result-btn.blank > a {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+      color: inherit;
+      flex: 1;
+    }
+
+    .result-btn.blank > a:hover { text-decoration: none; }
+
+    .copy-btn {
+      border: 1px solid var(--line-strong);
+      background: var(--surface-soft);
+      color: var(--ink-soft);
+      border-radius: 8px;
+      padding: 6px 9px;
+      font-size: 11.3px;
+      font-weight: 700;
+      white-space: nowrap;
+      margin-left: auto;
+    }
+
+    .copy-btn:hover { background: #eef2f7; border-color: #94a3b8; }
+
+    .result-foot {
+      padding: 4px 22px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .blank-url {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .blank-url code {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 11.5px;
+      color: var(--ink-soft);
+      background: #f1f5f9;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 4px 8px;
+      word-break: break-all;
+    }
+
+    .result-log { padding: 0 22px 20px; }
+    .result-log summary { cursor: pointer; font-size: 12.4px; font-weight: 700; color: var(--muted); }
+    .result-log summary:hover { color: var(--ink-soft); }
+
+    .archive-card { margin-top: 20px; }
+
+    .archive-list {
+      padding: 0 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .archive-item {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 13px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+      transition: border-color 0.14s ease, background 0.14s ease;
+    }
+
+    .archive-item:hover { border-color: #cbd5e1; background: #fbfdff; }
+
+    .exam-tag {
+      display: inline-grid;
+      place-items: center;
+      width: 43px;
+      height: 31px;
+      border-radius: 8px;
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      flex: none;
+    }
+
+    .exam-tag.ege { color: var(--blue-dark); background: var(--blue-soft); border: 1px solid #bfdbfe; }
+    .exam-tag.oge { color: #6d28d9; background: var(--violet-soft); border: 1px solid #ddd6fe; }
+
+    .archive-main { min-width: 0; }
+
+    .archive-title {
+      font-size: 13.4px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .archive-title .archive-title-text {
+      font-weight: 500;
+      color: var(--ink-soft);
+    }
+
+    .archive-sub {
+      margin-top: 2px;
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    .archive-actions {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .mini-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px 8px;
+      border-radius: 7px;
+      border: 1px solid var(--line);
+      background: var(--surface-soft);
+      color: var(--ink-soft);
+      font-size: 11.2px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .mini-btn:hover { text-decoration: none; background: var(--blue-soft); border-color: #bfdbfe; color: var(--blue-dark); }
+    .mini-btn.disabled { color: #cbd5e1; background: #f8fafc; border-color: #eef2f7; cursor: not-allowed; }
+
+    .empty-state {
+      padding: 30px 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      border: 1px dashed var(--line-strong);
+      border-radius: 12px;
+      background: var(--surface-soft);
+    }
+
+    .empty-state b { display: block; color: var(--ink-soft); margin-bottom: 3px; font-size: 13.5px; }
+
+    .skeleton-wrap { padding: 4px 6px 8px; display: flex; flex-direction: column; gap: 10px; }
+    .skeleton {
+      height: 74px;
+      border-radius: 14px;
+      background: linear-gradient(90deg, #f1f5f9 25%, #e8eef6 37%, #f1f5f9 63%);
+      background-size: 400% 100%;
+      animation: shimmer 1.25s ease infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 100% 0; }
+      100% { background-position: 0 0; }
+    }
+
+    .page-footer {
+      margin-top: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 11.8px;
+    }
+
+    .page-footer code {
+      font-family: Consolas, monospace;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      padding: 1px 5px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 60;
+      max-width: min(420px, calc(100vw - 44px));
+      padding: 12px 16px;
+      border-radius: 12px;
+      color: #fff;
+      background: #1e293b;
+      box-shadow: 0 16px 38px rgba(15, 23, 42, 0.28);
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { background: #047857; }
+    .toast.error { background: #b91c1c; }
+
+    @media (max-width: 1080px) {
+      .layout { grid-template-columns: minmax(0, 1fr); }
+      .side { position: static; }
+      .result-actions { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .topbar-inner, .page { padding-left: 15px; padding-right: 15px; }
+      .brand h1 { font-size: 16px; }
+      .brand p { display: none; }
+      .topbar-meta .ghost-link { display: none; }
+      .exam-bar { align-items: stretch; }
+      .segmented { width: 100%; }
+      .exam-btn { flex: 1; justify-content: center; padding-left: 10px; padding-right: 10px; }
+      .subtopics { grid-template-columns: 1fr; }
+      .card-head { flex-direction: column; padding-bottom: 12px; }
+      .head-actions { justify-content: flex-start; }
+      .archive-item { grid-template-columns: auto minmax(0, 1fr); }
+      .archive-actions { grid-column: 1 / -1; justify-content: flex-start; padding-left: 55px; }
+      .result-head, .result-actions, .result-foot, .result-log { padding-left: 16px; padding-right: 16px; }
+      .page-footer { flex-direction: column; align-items: flex-start; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">Ф</div>
+        <div>
+          <h1>Конструктор вариантов КИМ</h1>
+          <p>Физика · панель преподавателя · ЕГЭ и ОГЭ</p>
+        </div>
+      </div>
+      <div class="topbar-meta">
+        <span class="pill" id="dbPill">Загрузка базы…</span>
+        <a class="ghost-link" href="/" target="_blank" rel="noopener">Открыть бланк ученика ↗</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div id="globalError" class="alert error" hidden></div>
+
+    <section class="exam-bar" aria-label="Выбор экзамена">
+      <div class="segmented" role="tablist" aria-label="Экзамен">
+        <button type="button" class="exam-btn is-active" data-exam="EGE" role="tab" aria-selected="true">
+          ЕГЭ <span>11 класс</span>
+        </button>
+        <button type="button" class="exam-btn" data-exam="OGE" role="tab" aria-selected="false">
+          ОГЭ <span>9 класс</span>
+        </button>
+      </div>
+      <div class="exam-totals" id="examTotals"></div>
+    </section>
+
+    <div class="layout">
+      <section class="card" aria-labelledby="topicsTitle">
+        <div class="card-head">
+          <div>
+            <h2 id="topicsTitle"><span class="step-badge">1</span> Темы варианта</h2>
+            <p>Отметьте подтемы или выберите раздел целиком. Бейджи показывают, сколько задач есть в базе.</p>
+          </div>
+          <div class="head-actions">
+            <button type="button" class="link-btn accent" id="selectAllBtn">Выбрать все</button>
+            <button type="button" class="link-btn" id="resetAllBtn">Сбросить все</button>
+          </div>
+        </div>
+
+        <div class="topics-list" id="topicsList">
+          <div class="skeleton-wrap" aria-hidden="true">
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+            <div class="skeleton"></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side">
+        <section class="card params-card" aria-labelledby="paramsTitle">
+          <div class="card-head">
+            <div>
+              <h2 id="paramsTitle"><span class="step-badge">2</span> Параметры варианта</h2>
+              <p>Номер, заголовок и количество задач.</p>
+            </div>
+          </div>
+
+          <div class="params-body">
+            <div class="field">
+              <label for="variantInput">Номер / код варианта</label>
+              <div class="input-prefix">
+                <span id="examPrefix">EGE-</span>
+                <input id="variantInput" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="106">
+              </div>
+              <p class="hint">Следующий свободный: <b id="nextVariantHint">—</b>. Можно ввести свой номер.</p>
+            </div>
+
+            <div class="field">
+              <label for="titleInput">Заголовок варианта</label>
+              <input id="titleInput" class="text-input" type="text" autocomplete="off" maxlength="200"
+                     placeholder="Тематический пробник: Механика">
+              <p class="hint">Если оставить пустым — будет «Тренировочный вариант №…».</p>
+            </div>
+
+            <div class="field">
+              <label for="webBaseUrlInput">Публичный URL веб-бланка (для QR-кода)</label>
+              <input id="webBaseUrlInput" class="text-input" type="url" inputmode="url" autocomplete="off"
+                     spellcheck="false" placeholder="https://example.github.io/physics-kim/">
+              <p class="hint">QR-код в PDF будет вести на <code>…?v=EGE-106</code>. Значение сохраняется в config.json.</p>
+              <div class="field-actions">
+                <button type="button" class="link-btn accent tiny" id="saveWebUrlBtn">Сохранить URL</button>
+                <button type="button" class="link-btn tiny" id="localWebUrlBtn">Локальный адрес</button>
+                <span class="inline-status" id="webUrlStatus"></span>
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="field-head">
+                <span class="field-label">Количество задач</span>
+                <button type="button" class="link-btn tiny" id="standardCountsBtn"
+                        title="Вернуть стандартное число заданий выбранного экзамена">
+                  Стандарт экзамена (20+6 / 16+6)
+                </button>
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label for="part1Input">Задач Части 1</label>
+                  <input id="part1Input" class="number-input" type="number" min="0" max="200" step="1" value="20">
+                </div>
+                <div class="field">
+                  <label for="part2Input">Задач Части 2</label>
+                  <input id="part2Input" class="number-input" type="number" min="0" max="200" step="1" value="6">
+                </div>
+              </div>
+              <p class="hint" id="countsHint">Стандарт ЕГЭ: 20 + 6 = 26 заданий.</p>
+            </div>
+
+            <label class="switch-row" for="gasInput">
+              <input id="gasInput" type="checkbox" checked>
+              <span class="switch" aria-hidden="true"></span>
+              <span class="switch-text">
+                <b>Зарегистрировать ключи в Google Таблице (GAS)</b>
+                <small>Ключи и решения отправятся в подключённую Google Таблицу.</small>
+              </span>
+            </label>
+
+            <div class="summary-box">
+              <div class="summary-row">
+                <span>Доступно в выбранных темах</span>
+                <b id="availableCounts">—</b>
+              </div>
+              <div class="summary-row">
+                <span>Будет выбрано</span>
+                <b id="willPickCounts">20 + 6 = 26</b>
+              </div>
+              <div class="summary-row">
+                <span>Выбрано подтем</span>
+                <b id="selectedTopicsCount">0</b>
+              </div>
+              <div id="selectionWarning" class="summary-warning" hidden></div>
+              <div id="selectionOk" class="summary-ok" hidden></div>
+            </div>
+
+            <button type="button" class="btn-primary" id="buildBtn" disabled>
+              <span class="spinner" aria-hidden="true"></span>
+              <span class="btn-label">Сгенерировать вариант КИМ</span>
+            </button>
+
+            <div class="build-status" id="buildStatus" hidden>
+              <span class="spinner" aria-hidden="true"></span>
+              <span id="buildStatusText">Компиляция LaTeX… это может занять до минуты.</span>
+            </div>
+
+            <div class="alert error" id="buildError" hidden>
+              <b>Не удалось собрать вариант</b>
+              <div id="buildErrorText"></div>
+              <details id="buildErrorDetails" hidden>
+                <summary>Показать лог сборки</summary>
+                <pre id="buildErrorLog"></pre>
+              </details>
+            </div>
+          </div>
+        </section>
+
+        <section class="card help-card" aria-label="Подсказка">
+          <h3>Как это работает</h3>
+          <ul>
+            <li>Вариант собирается тем же <code>build.js</code>, что и из командной строки.</li>
+            <li>PDF-файлы сохраняются в <code>output/</code> и доступны по прямым ссылкам.</li>
+            <li>QR-код в работе ведёт на электронный бланк этого же сервера.</li>
+            <li>Готовые варианты остаются в архиве внизу страницы.</li>
+          </ul>
+        </section>
+      </aside>
+    </div>
+
+    <section class="card result-card" id="resultSection" hidden aria-live="polite">
+      <div class="result-head">
+        <div class="ok-icon" aria-hidden="true">✓</div>
+        <div>
+          <h2>Вариант готов</h2>
+          <p class="result-meta" id="resultMeta"></p>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <a class="result-btn student" id="studentLink" href="#" target="_blank" rel="noopener">
+          <span class="rb-icon" aria-hidden="true">PDF</span>
+          <span class="rb-text">
+            <b>Открыть PDF для ученика</b>
+            <small>КИМ без ответов</small>
+          </span>
+        </a>
+
+        <a class="result-btn teacher" id="teacherLink" href="#" target="_blank" rel="noopener">
+          <span class="rb-icon" aria-hidden="true">PDF</span>
+          <span class="rb-text">
+            <b>Открыть PDF для учителя</b>
+            <small>С ключами и решениями</small>
+          </span>
+        </a>
+
+        <div class="result-btn blank">
+          <a id="blankLink" href="#" target="_blank" rel="noopener">
+            <span class="rb-icon" aria-hidden="true">QR</span>
+            <span class="rb-text">
+              <b>Открыть электронный бланк</b>
+              <small>Ответы ученика</small>
+            </span>
+          </a>
+          <button type="button" class="copy-btn" id="copyLinkBtn">Скопировать ссылку</button>
+        </div>
+      </div>
+
+      <div class="result-foot">
+        <div class="blank-url">
+          <span>Ссылка на бланк:</span>
+          <code id="resultBlankUrl">—</code>
+        </div>
+      </div>
+
+      <details class="result-log" id="resultLogDetails">
+        <summary>Показать лог сборки</summary>
+        <pre class="log-pre" id="resultLog"></pre>
+      </details>
+    </section>
+
+    <section class="card archive-card" aria-labelledby="archiveTitle">
+      <div class="card-head">
+        <div>
+          <h2 id="archiveTitle">Архив вариантов</h2>
+          <p id="archiveCount">Загрузка…</p>
+        </div>
+        <div class="head-actions">
+          <button type="button" class="link-btn" id="refreshArchiveBtn">Обновить список</button>
+        </div>
+      </div>
+      <div class="archive-list" id="archiveList">
+        <div class="empty-state">Загрузка архива…</div>
+      </div>
+    </section>
+
+    <footer class="page-footer">
+      <div>Сервер: <code id="serverAddress">http://localhost:3000</code> · локальный режим</div>
+      <div>Сборка: <code>node build.js</code> · панель: <code>node server.js</code></div>
+    </footer>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const state = {
+        exam: 'EGE',
+        stats: null,
+        selected: new Set(),
+        busy: false,
+        variantAuto: true,
+        toastTimer: null,
+        buildTimer: null,
+        buildStartedAt: 0,
+        webBaseUrl: ''
+      };
+
+      // Стандартное количество заданий реального экзамена (ФИПИ)
+      const EXAM_STANDARDS = {
+        EGE: { part1: 20, part2: 6 },
+        OGE: { part1: 16, part2: 6 }
+      };
+
+      const els = {
+        dbPill: document.getElementById('dbPill'),
+        globalError: document.getElementById('globalError'),
+        examTotals: document.getElementById('examTotals'),
+        topicsList: document.getElementById('topicsList'),
+        selectAllBtn: document.getElementById('selectAllBtn'),
+        resetAllBtn: document.getElementById('resetAllBtn'),
+        variantInput: document.getElementById('variantInput'),
+        examPrefix: document.getElementById('examPrefix'),
+        nextVariantHint: document.getElementById('nextVariantHint'),
+        titleInput: document.getElementById('titleInput'),
+        webBaseUrlInput: document.getElementById('webBaseUrlInput'),
+        saveWebUrlBtn: document.getElementById('saveWebUrlBtn'),
+        localWebUrlBtn: document.getElementById('localWebUrlBtn'),
+        webUrlStatus: document.getElementById('webUrlStatus'),
+        part1Input: document.getElementById('part1Input'),
+        part2Input: document.getElementById('part2Input'),
+        standardCountsBtn: document.getElementById('standardCountsBtn'),
+        countsHint: document.getElementById('countsHint'),
+        gasInput: document.getElementById('gasInput'),
+        availableCounts: document.getElementById('availableCounts'),
+        willPickCounts: document.getElementById('willPickCounts'),
+        selectedTopicsCount: document.getElementById('selectedTopicsCount'),
+        selectionWarning: document.getElementById('selectionWarning'),
+        selectionOk: document.getElementById('selectionOk'),
+        buildBtn: document.getElementById('buildBtn'),
+        buildStatus: document.getElementById('buildStatus'),
+        buildStatusText: document.getElementById('buildStatusText'),
+        buildError: document.getElementById('buildError'),
+        buildErrorText: document.getElementById('buildErrorText'),
+        buildErrorDetails: document.getElementById('buildErrorDetails'),
+        buildErrorLog: document.getElementById('buildErrorLog'),
+        resultSection: document.getElementById('resultSection'),
+        resultMeta: document.getElementById('resultMeta'),
+        studentLink: document.getElementById('studentLink'),
+        teacherLink: document.getElementById('teacherLink'),
+        blankLink: document.getElementById('blankLink'),
+        copyLinkBtn: document.getElementById('copyLinkBtn'),
+        resultBlankUrl: document.getElementById('resultBlankUrl'),
+        resultLogDetails: document.getElementById('resultLogDetails'),
+        resultLog: document.getElementById('resultLog'),
+        archiveCount: document.getElementById('archiveCount'),
+        archiveList: document.getElementById('archiveList'),
+        refreshArchiveBtn: document.getElementById('refreshArchiveBtn'),
+        serverAddress: document.getElementById('serverAddress'),
+        toast: document.getElementById('toast')
+      };
+
+      // ── Вспомогательные функции ─────────────────────────────────────────────
+
+      function esc(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, function (ch) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+        });
+      }
+
+      function zero() {
+        return { part1: 0, part2: 0, total: 0 };
+      }
+
+      function countsFor(obj) {
+        return (obj && obj[state.exam]) ? obj[state.exam] : zero();
+      }
+
+      function badgesHTML(counts) {
+        const c = counts || zero();
+        const part1Class = c.part1 === 0 ? 'badge part1 zero' : 'badge part1';
+        const part2Class = c.part2 === 0 ? 'badge part2 zero' : 'badge part2';
+        return '<span class="' + part1Class + '">Ч.1: ' + (c.part1 || 0) + '</span>' +
+               '<span class="' + part2Class + '">Ч.2: ' + (c.part2 || 0) + '</span>';
+      }
+
+      function formatDate(iso) {
+        if (!iso) return '—';
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return '—';
+        return d.toLocaleString('ru-RU', {
+          day: '2-digit', month: '2-digit', year: 'numeric',
+          hour: '2-digit', minute: '2-digit'
+        });
+      }
+
+      function plural(n, one, few, many) {
+        const abs = Math.abs(n) % 100;
+        const last = abs % 10;
+        if (abs > 10 && abs < 20) return many;
+        if (last > 1 && last < 5) return few;
+        if (last === 1) return one;
+        return many;
+      }
+
+      function showToast(message, type) {
+        els.toast.textContent = message;
+        els.toast.className = 'toast show ' + (type || '');
+        clearTimeout(state.toastTimer);
+        state.toastTimer = setTimeout(function () {
+          els.toast.className = 'toast';
+        }, 3800);
+      }
+
+      function sectionByKey(key) {
+        return (state.stats && state.stats.topics || []).find(function (s) { return s.key === key; });
+      }
+
+      // ── Отрисовка экзамена и тем ────────────────────────────────────────────
+
+      function renderExamButtons() {
+        document.querySelectorAll('.exam-btn').forEach(function (btn) {
+          const active = btn.dataset.exam === state.exam;
+          btn.classList.toggle('is-active', active);
+          btn.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        els.examPrefix.textContent = state.exam + '-';
+      }
+
+      function renderExamTotals() {
+        if (!state.stats) {
+          els.examTotals.innerHTML = '';
+          return;
+        }
+        els.examTotals.innerHTML = ['EGE', 'OGE'].map(function (exam) {
+          const info = state.stats.exams[exam];
+          if (!info) return '';
+          const label = exam === 'EGE' ? 'ЕГЭ' : 'ОГЭ';
+          return '<span class="total-pill"><b>' + label + '</b> ' + info.total +
+                 ' <small>Ч.1 ' + info.part1 + ' · Ч.2 ' + info.part2 + '</small></span>';
+        }).join(' ');
+      }
+
+      function renderTopics() {
+        if (!state.stats) return;
+
+        els.topicsList.innerHTML = state.stats.topics.map(function (section) {
+          const sectionCounts = countsFor(section.counts);
+          const subtopicsHTML = section.subtopics.map(function (sub) {
+            const c = countsFor(sub.counts);
+            const checked = state.selected.has(sub.key);
+            const classes = 'subtopic' +
+              (checked ? ' is-checked' : '') +
+              (c.total === 0 ? ' is-zero' : '');
+            return '<label class="' + classes + '">' +
+              '<input type="checkbox" data-topic="' + esc(sub.key) + '"' + (checked ? ' checked' : '') + '>' +
+              '<span class="subtopic-name">' + esc(sub.title) + '</span>' +
+              '<span class="badges">' + badgesHTML(c) + '</span>' +
+              '</label>';
+          }).join('');
+
+          const allChecked = section.subtopics.length > 0 &&
+            section.subtopics.every(function (sub) { return state.selected.has(sub.key); });
+          const anyChecked = section.subtopics.some(function (sub) { return state.selected.has(sub.key); });
+
+          return '<section class="topic-section' + (anyChecked ? ' has-selection' : '') +
+            '" data-section="' + esc(section.key) + '">' +
+            '<div class="topic-section-head">' +
+              '<label class="section-check" title="Выбрать весь раздел">' +
+                '<input type="checkbox" data-section="' + esc(section.key) + '"' +
+                  (allChecked ? ' checked' : '') + '>' +
+              '</label>' +
+              '<div class="section-info">' +
+                '<h3>' + esc(section.title) + '</h3>' +
+                '<div class="section-badges">' + badgesHTML(sectionCounts) + '</div>' +
+              '</div>' +
+              '<button type="button" class="section-pick" data-section-pick="' + esc(section.key) + '">' +
+                (allChecked ? 'Снять раздел' : 'Выбрать раздел') +
+              '</button>' +
+            '</div>' +
+            '<div class="subtopics">' + subtopicsHTML + '</div>' +
+          '</section>';
+        }).join('');
+
+        els.topicsList.querySelectorAll('.topic-section').forEach(function (sectionEl) {
+          syncSectionCheckbox(sectionEl.dataset.section);
+        });
+      }
+
+      function syncSectionCheckbox(sectionKey) {
+        const el = els.topicsList.querySelector('.topic-section[data-section="' + sectionKey + '"]');
+        const section = sectionByKey(sectionKey);
+        if (!el || !section) return;
+
+        const boxes = Array.prototype.slice.call(el.querySelectorAll('input[data-topic]'));
+        const checked = boxes.filter(function (box) { return box.checked; }).length;
+        const sectionBox = el.querySelector('input[data-section]');
+        const pick = el.querySelector('[data-section-pick]');
+
+        if (sectionBox) {
+          sectionBox.checked = boxes.length > 0 && checked === boxes.length;
+          sectionBox.indeterminate = checked > 0 && checked < boxes.length;
+        }
+        if (pick) {
+          pick.textContent = checked === boxes.length && boxes.length > 0 ? 'Снять раздел' : 'Выбрать раздел';
+        }
+        el.classList.toggle('has-selection', checked > 0);
+
+        boxes.forEach(function (box) {
+          const label = box.closest('.subtopic');
+          if (label) label.classList.toggle('is-checked', box.checked);
+        });
+      }
+
+      // ── Подсчёт выбранного ──────────────────────────────────────────────────
+
+      function selectionSummary() {
+        const available = { part1: 0, part2: 0, total: 0 };
+        let selectedSubtopics = 0;
+
+        if (state.stats) {
+          state.stats.topics.forEach(function (section) {
+            const subs = section.subtopics || [];
+            const chosen = subs.filter(function (sub) { return state.selected.has(sub.key); });
+            selectedSubtopics += chosen.length;
+
+            if (subs.length > 0 && chosen.length === subs.length) {
+              const c = countsFor(section.counts);
+              available.part1 += c.part1;
+              available.part2 += c.part2;
+              available.total += c.total;
+            } else {
+              chosen.forEach(function (sub) {
+                const c = countsFor(sub.counts);
+                available.part1 += c.part1;
+                available.part2 += c.part2;
+                available.total += c.total;
+              });
+            }
+          });
+        }
+
+        return { available: available, selectedSubtopics: selectedSubtopics };
+      }
+
+      function updateSummary() {
+        const part1 = Math.max(0, Number(els.part1Input.value) || 0);
+        const part2 = Math.max(0, Number(els.part2Input.value) || 0);
+        const summary = selectionSummary();
+        const available = summary.available;
+        const willPick1 = part1 > 0 ? Math.min(part1, available.part1) : 0;
+        const willPick2 = part2 > 0 ? Math.min(part2, available.part2) : 0;
+        const willPickTotal = willPick1 + willPick2;
+
+        els.availableCounts.textContent = 'Ч.1 — ' + available.part1 + ' · Ч.2 — ' + available.part2;
+        els.willPickCounts.textContent = part1 + ' + ' + part2 + ' = ' + (part1 + part2);
+        els.selectedTopicsCount.textContent = String(summary.selectedSubtopics);
+
+        const warnings = [];
+        if (!state.stats) {
+          warnings.push('База задач ещё загружается.');
+        } else if (state.selected.size === 0) {
+          warnings.push('Выберите хотя бы одну тему.');
+        } else if (part1 + part2 === 0) {
+          warnings.push('Укажите хотя бы одну задачу.');
+        } else if (willPickTotal === 0) {
+          warnings.push('В выбранных темах нет задач для указанных частей. ' +
+            'Измените темы или количество задач.');
+        } else {
+          if (part1 > available.part1) {
+            warnings.push('В выбранных темах только ' + available.part1 + ' ' +
+              plural(available.part1, 'задача', 'задачи', 'задач') + ' Части 1 — будут взяты все доступные.');
+          }
+          if (part2 > available.part2) {
+            warnings.push('В выбранных темах только ' + available.part2 + ' ' +
+              plural(available.part2, 'задача', 'задачи', 'задач') + ' Части 2 — будут взяты все доступные.');
+          }
+        }
+
+        if (warnings.length > 0) {
+          els.selectionWarning.hidden = false;
+          els.selectionWarning.textContent = warnings.join(' ');
+          els.selectionOk.hidden = true;
+        } else {
+          els.selectionWarning.hidden = true;
+          els.selectionOk.hidden = false;
+          els.selectionOk.textContent = 'Можно собирать: задач хватает.';
+        }
+
+        const canBuild = !state.busy && !!state.stats && state.selected.size > 0 &&
+          (part1 + part2) > 0 && willPickTotal > 0;
+        els.buildBtn.disabled = !canBuild;
+      }
+
+      function collectTopics() {
+        const result = [];
+        if (!state.stats) return result;
+
+        state.stats.topics.forEach(function (section) {
+          const subKeys = (section.subtopics || []).map(function (sub) { return sub.key; });
+          const chosen = subKeys.filter(function (key) { return state.selected.has(key); });
+
+          if (subKeys.length > 0 && chosen.length === subKeys.length) {
+            result.push(section.key);
+            result.push.apply(result, subKeys);
+          } else {
+            result.push.apply(result, chosen);
+          }
+        });
+
+        return Array.from(new Set(result));
+      }
+
+      function updateVariantHint() {
+        if (!state.stats) {
+          els.nextVariantHint.textContent = '—';
+          return;
+        }
+        els.nextVariantHint.textContent = state.exam + '-' + state.stats.nextVariant[state.exam];
+      }
+
+      function setNextVariant(exam) {
+        if (!state.stats) return;
+        els.variantInput.value = String(state.stats.nextVariant[exam]);
+        state.variantAuto = true;
+        updateVariantHint();
+      }
+
+      // ── Стандартное количество заданий экзамена ─────────────────────────────
+
+      function examStandard(exam) {
+        return EXAM_STANDARDS[exam] || EXAM_STANDARDS.EGE;
+      }
+
+      function renderCountsHint() {
+        const standard = examStandard(state.exam);
+        const total = standard.part1 + standard.part2;
+        const label = state.exam === 'EGE' ? 'ЕГЭ' : 'ОГЭ';
+        els.countsHint.textContent = 'Стандарт ' + label + ': ' +
+          standard.part1 + ' + ' + standard.part2 + ' = ' + total + ' ' +
+          plural(total, 'задание', 'задания', 'заданий') + '.';
+      }
+
+      // Подставляет стандарт выбранного экзамена. Преподаватель может
+      // после этого вручную изменить числа в полях на любые другие.
+      function applyExamDefaults(exam) {
+        const standard = examStandard(exam);
+        els.part1Input.value = String(standard.part1);
+        els.part2Input.value = String(standard.part2);
+        renderCountsHint();
+        updateSummary();
+      }
+
+      // ── Архив ───────────────────────────────────────────────────────────────
+
+      function renderArchive() {
+        if (!state.stats) return;
+        const variants = state.stats.variants || [];
+
+        els.archiveCount.textContent = variants.length
+          ? variants.length + ' ' + plural(variants.length, 'вариант', 'варианта', 'вариантов') + ' в output/'
+          : 'Готовых вариантов пока нет';
+
+        if (variants.length === 0) {
+          els.archiveList.innerHTML = '<div class="empty-state"><b>Архив пуст</b>' +
+            'Сгенерируйте первый вариант — он появится здесь.</div>';
+          return;
+        }
+
+        els.archiveList.innerHTML = variants.map(function (v) {
+          const isEge = v.exam === 'EGE';
+          const examLabel = isEge ? 'ЕГЭ' : 'ОГЭ';
+          const student = v.hasStudentPdf
+            ? '<a class="mini-btn" href="' + esc(v.studentPdfUrl) + '" target="_blank" rel="noopener">Ученик</a>'
+            : '<span class="mini-btn disabled" title="PDF для ученика не найден">Ученик</span>';
+          const teacher = v.hasTeacherPdf
+            ? '<a class="mini-btn" href="' + esc(v.teacherPdfUrl) + '" target="_blank" rel="noopener">Учитель</a>'
+            : '<span class="mini-btn disabled" title="PDF для учителя не найден">Учитель</span>';
+
+          const tasks = v.tasksCount == null ? '' : ' · ' + v.tasksCount + ' ' +
+            plural(v.tasksCount, 'задача', 'задачи', 'задач');
+
+          return '<div class="archive-item">' +
+            '<span class="exam-tag ' + (isEge ? 'ege' : 'oge') + '">' + examLabel + '</span>' +
+            '<div class="archive-main">' +
+              '<div class="archive-title">' + esc(v.code) +
+                ' <span class="archive-title-text">' + esc(v.title) + '</span></div>' +
+              '<div class="archive-sub">' + formatDate(v.createdAt) + tasks + '</div>' +
+            '</div>' +
+            '<div class="archive-actions">' + student + teacher +
+              '<a class="mini-btn" href="' + esc(v.blankUrl) + '" target="_blank" rel="noopener">Бланк</a>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
+
+      // ── Публичный URL веб-бланка (config.json) ───────────────────────────────
+
+      function setWebUrlStatus(text, kind) {
+        els.webUrlStatus.textContent = text || '';
+        els.webUrlStatus.className = 'inline-status' + (kind ? ' ' + kind : '');
+      }
+
+      function parseWebUrl(raw) {
+        const value = String(raw == null ? '' : raw).trim();
+        if (!value) return { ok: true, value: '' };
+        let parsed;
+        try {
+          parsed = new URL(value);
+        } catch (e) {
+          return { ok: false, error: 'Некорректный URL. Пример: https://example.github.io/physics-kim/' };
+        }
+        if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+          return { ok: false, error: 'URL должен начинаться с http:// или https://.' };
+        }
+        return { ok: true, value: value };
+      }
+
+      function markWebUrlEdited() {
+        setWebUrlStatus('Не сохранено', '');
+      }
+
+      async function loadWebConfig() {
+        try {
+          const response = await fetch('/api/config', { cache: 'no-store' });
+          const data = await response.json().catch(function () { return null; });
+          if (!response.ok || !data || !data.ok) {
+            throw new Error((data && data.error) || ('HTTP ' + response.status));
+          }
+
+          state.webBaseUrl = data.webBaseUrl || '';
+          els.webBaseUrlInput.value = state.webBaseUrl;
+          if (data.defaultLocalUrl) els.webBaseUrlInput.placeholder = data.defaultLocalUrl;
+
+          if (!state.webBaseUrl) {
+            setWebUrlStatus('Не задан — QR ведёт на локальный адрес', '');
+          } else if (data.source === '.env') {
+            setWebUrlStatus('Загружен из .env', 'ok');
+          } else {
+            setWebUrlStatus('Загружен из config.json', 'ok');
+          }
+        } catch (error) {
+          state.webBaseUrl = els.webBaseUrlInput.value.trim();
+          setWebUrlStatus('Не удалось прочитать настройки', 'error');
+        }
+      }
+
+      async function saveWebBaseUrl() {
+        const parsed = parseWebUrl(els.webBaseUrlInput.value);
+        if (!parsed.ok) {
+          setWebUrlStatus(parsed.error, 'error');
+          showToast(parsed.error, 'error');
+          return;
+        }
+
+        els.saveWebUrlBtn.disabled = true;
+        setWebUrlStatus('Сохраняем…', '');
+
+        try {
+          const response = await fetch('/api/config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ webBaseUrl: parsed.value })
+          });
+          const data = await response.json().catch(function () { return null; });
+          if (!response.ok || !data || !data.ok) {
+            throw new Error((data && data.error) || ('HTTP ' + response.status));
+          }
+
+          state.webBaseUrl = data.webBaseUrl || '';
+          els.webBaseUrlInput.value = state.webBaseUrl;
+          setWebUrlStatus(state.webBaseUrl ? 'Сохранено' : 'Очищено — локальный адрес', 'ok');
+          showToast(state.webBaseUrl
+            ? 'Публичный URL сохранён. QR-коды новых вариантов будут вести на него.'
+            : 'Публичный URL очищен. Будет использоваться локальный адрес.', 'success');
+        } catch (error) {
+          setWebUrlStatus('Ошибка сохранения', 'error');
+          showToast('Не удалось сохранить URL: ' + error.message, 'error');
+        } finally {
+          els.saveWebUrlBtn.disabled = false;
+        }
+      }
+
+      // ── Загрузка статистики ─────────────────────────────────────────────────
+
+      async function loadStats(options) {
+        const opts = options || {};
+        if (!opts.silent) {
+          els.dbPill.textContent = 'Загрузка базы…';
+          els.dbPill.classList.remove('ok');
+        }
+
+        try {
+          const response = await fetch('/api/stats', { cache: 'no-store' });
+          const data = await response.json().catch(function () { return null; });
+
+          if (!response.ok || !data || !data.ok) {
+            throw new Error((data && data.error) || ('HTTP ' + response.status));
+          }
+
+          state.stats = data;
+
+          const allowed = new Set();
+          data.topics.forEach(function (section) {
+            allowed.add(section.key);
+            section.subtopics.forEach(function (sub) { allowed.add(sub.key); });
+          });
+          state.selected = new Set(Array.from(state.selected).filter(function (key) {
+            return allowed.has(key);
+          }));
+
+          if (opts.initial) {
+            state.variantAuto = true;
+            setNextVariant(state.exam);
+          }
+
+          els.dbPill.textContent = 'База: ' + data.totalTasks + ' ' +
+            plural(data.totalTasks, 'задача', 'задачи', 'задач');
+          els.dbPill.classList.add('ok');
+          els.dbPill.title = 'Файл базы: ' + data.source.dbPath +
+            '\nЗагружено: ' + formatDate(data.source.loadedAt);
+
+          renderExamButtons();
+          renderExamTotals();
+          renderTopics();
+          renderArchive();
+          updateSummary();
+          updateVariantHint();
+          els.globalError.hidden = true;
+        } catch (error) {
+          els.dbPill.textContent = 'База недоступна';
+          els.dbPill.classList.remove('ok');
+          els.globalError.hidden = false;
+          els.globalError.textContent = 'Не удалось загрузить статистику: ' + error.message +
+            '. Убедитесь, что сервер запущен командой «node server.js», ' +
+            'и откройте панель по адресу ' + location.origin + '/admin.';
+          els.buildBtn.disabled = true;
+          els.topicsList.innerHTML = '<div class="empty-state"><b>Нет связи с сервером</b>' +
+            'Запустите <code>node server.js</code> и обновите страницу.</div>';
+        }
+      }
+
+      // ── Сборка варианта ─────────────────────────────────────────────────────
+
+      function setBuildBusy(busy) {
+        state.busy = busy;
+        els.buildBtn.classList.toggle('is-busy', busy);
+        els.buildBtn.querySelector('.btn-label').textContent = busy
+          ? 'Собираем вариант…'
+          : 'Сгенерировать вариант КИМ';
+        els.buildStatus.hidden = !busy;
+
+        if (busy) {
+          state.buildStartedAt = Date.now();
+          els.buildStatusText.textContent = 'Компиляция LaTeX… это может занять до минуты.';
+          clearInterval(state.buildTimer);
+          state.buildTimer = setInterval(function () {
+            const seconds = Math.max(0, Math.round((Date.now() - state.buildStartedAt) / 1000));
+            els.buildStatusText.textContent = 'Компиляция LaTeX… прошло ' + seconds + ' с. Обычно это занимает до минуты.';
+          }, 1000);
+        } else {
+          clearInterval(state.buildTimer);
+          state.buildTimer = null;
+        }
+
+        updateSummary();
+      }
+
+      function showBuildError(error) {
+        els.buildError.hidden = false;
+        els.buildErrorText.textContent = error.message || 'Неизвестная ошибка.';
+        if (error.log) {
+          els.buildErrorDetails.hidden = false;
+          els.buildErrorLog.textContent = error.log;
+        } else {
+          els.buildErrorDetails.hidden = true;
+          els.buildErrorLog.textContent = '';
+        }
+        els.buildError.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      function showResult(data) {
+        const tasks = data.tasksCount == null ? data.requestedCount : data.tasksCount;
+        const seconds = Math.max(1, Math.round((data.durationMs || 0) / 1000));
+
+        els.resultMeta.innerHTML = 'Вариант <b>' + esc(data.code) + '</b> · ' +
+          (tasks == null ? 'задачи выбраны' : tasks + ' ' + plural(tasks, 'задача', 'задачи', 'задач')) +
+          ' · собрано за ' + seconds + ' с';
+
+        els.studentLink.href = data.studentPdfUrl;
+        els.teacherLink.href = data.teacherPdfUrl;
+        els.blankLink.href = data.blankUrl;
+
+        const absolute = new URL(data.blankUrl, location.origin).href;
+        const publicUrl = data.publicBlankUrl || absolute;
+        els.resultBlankUrl.textContent = publicUrl;
+        els.resultBlankUrl.dataset.url = publicUrl;
+
+        els.resultLog.textContent = data.log || 'Лог пуст.';
+        els.resultLogDetails.hidden = !data.log;
+        els.resultLogDetails.open = false;
+
+        els.resultSection.hidden = false;
+        els.buildError.hidden = true;
+        els.resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      async function generateVariant() {
+        if (state.busy) return;
+        if (!state.stats) {
+          showToast('База ещё не загружена.', 'error');
+          return;
+        }
+
+        const topics = collectTopics();
+        if (topics.length === 0) {
+          showToast('Выберите хотя бы одну тему.', 'error');
+          els.selectionWarning.hidden = false;
+          return;
+        }
+
+        if (els.part1Input.value.trim() === '' || els.part2Input.value.trim() === '') {
+          showToast('Укажите количество задач Части 1 и Части 2 (можно 0).', 'error');
+          return;
+        }
+
+        const part1 = Number(els.part1Input.value);
+        const part2 = Number(els.part2Input.value);
+        if (!Number.isInteger(part1) || part1 < 0 || !Number.isInteger(part2) || part2 < 0) {
+          showToast('Количество задач должно быть целым неотрицательным числом.', 'error');
+          return;
+        }
+        if (part1 + part2 === 0) {
+          showToast('Нужна хотя бы одна задача.', 'error');
+          return;
+        }
+
+        const payload = {
+          exam: state.exam,
+          topics: topics,
+          part1: part1,
+          part2: part2,
+          variant: els.variantInput.value.trim(),
+          title: els.titleInput.value.trim(),
+          webBaseUrl: els.webBaseUrlInput.value.trim(),
+          skipGas: !els.gasInput.checked
+        };
+
+        els.buildError.hidden = true;
+        setBuildBusy(true);
+
+        try {
+          const response = await fetch('/api/build', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await response.json().catch(function () { return null; });
+          if (!response.ok || !data || !data.ok) {
+            const error = new Error((data && data.error) || ('Сервер вернул HTTP ' + response.status));
+            error.log = (data && data.log) || '';
+            throw error;
+          }
+
+          showResult(data);
+          showToast('Вариант ' + data.code + ' успешно собран.', 'success');
+
+          await loadStats({ silent: true });
+
+          if (data.nextVariant) {
+            els.variantInput.value = String(data.nextVariant);
+            state.variantAuto = true;
+          }
+          updateVariantHint();
+          updateSummary();
+        } catch (error) {
+          showBuildError(error);
+          showToast('Сборка не удалась. Подробности в логе.', 'error');
+        } finally {
+          setBuildBusy(false);
+        }
+      }
+
+      // ── Копирование ссылки ──────────────────────────────────────────────────
+
+      async function copyText(text) {
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+            return true;
+          }
+        } catch (e) {
+          // fallback ниже
+        }
+
+        const area = document.createElement('textarea');
+        area.value = text;
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        area.style.pointerEvents = 'none';
+        document.body.appendChild(area);
+        area.select();
+        let ok = false;
+        try {
+          ok = document.execCommand('copy');
+        } catch (e) {
+          ok = false;
+        }
+        area.remove();
+        return ok;
+      }
+
+      async function copyBlankLink() {
+        const url = els.resultBlankUrl.dataset.url || els.resultBlankUrl.textContent;
+        if (!url || url === '—') return;
+
+        const ok = await copyText(url);
+        if (ok) {
+          const original = els.copyLinkBtn.textContent;
+          els.copyLinkBtn.textContent = 'Скопировано ✓';
+          showToast('Ссылка на бланк скопирована.', 'success');
+          setTimeout(function () { els.copyLinkBtn.textContent = original; }, 1800);
+        } else {
+          showToast('Не удалось скопировать. Скопируйте ссылку из поля ниже.', 'error');
+        }
+      }
+
+      // ── События ─────────────────────────────────────────────────────────────
+
+      function bindEvents() {
+        document.querySelectorAll('.exam-btn').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            const exam = btn.dataset.exam;
+            if (exam === state.exam) return;
+            state.exam = exam;
+            if (state.variantAuto) setNextVariant(exam);
+            applyExamDefaults(exam);
+            renderExamButtons();
+            renderExamTotals();
+            renderTopics();
+            updateSummary();
+            updateVariantHint();
+          });
+        });
+
+        els.topicsList.addEventListener('change', function (event) {
+          const target = event.target;
+
+          if (target.matches('input[data-topic]')) {
+            const key = target.dataset.topic;
+            if (target.checked) state.selected.add(key);
+            else state.selected.delete(key);
+
+            const sectionEl = target.closest('.topic-section');
+            if (sectionEl) syncSectionCheckbox(sectionEl.dataset.section);
+            updateSummary();
+            return;
+          }
+
+          if (target.matches('input[data-section]')) {
+            const section = sectionByKey(target.dataset.section);
+            if (!section) return;
+
+            section.subtopics.forEach(function (sub) {
+              if (target.checked) state.selected.add(sub.key);
+              else state.selected.delete(sub.key);
+            });
+
+            renderTopics();
+            updateSummary();
+          }
+        });
+
+        els.topicsList.addEventListener('click', function (event) {
+          const button = event.target.closest('[data-section-pick]');
+          if (!button) return;
+
+          const section = sectionByKey(button.dataset.sectionPick);
+          if (!section) return;
+
+          const allSelected = section.subtopics.length > 0 &&
+            section.subtopics.every(function (sub) { return state.selected.has(sub.key); });
+
+          section.subtopics.forEach(function (sub) {
+            if (allSelected) state.selected.delete(sub.key);
+            else state.selected.add(sub.key);
+          });
+
+          renderTopics();
+          updateSummary();
+        });
+
+        els.selectAllBtn.addEventListener('click', function () {
+          if (!state.stats) return;
+          state.stats.topics.forEach(function (section) {
+            section.subtopics.forEach(function (sub) { state.selected.add(sub.key); });
+          });
+          renderTopics();
+          updateSummary();
+        });
+
+        els.resetAllBtn.addEventListener('click', function () {
+          state.selected.clear();
+          renderTopics();
+          updateSummary();
+        });
+
+        els.variantInput.addEventListener('input', function () {
+          state.variantAuto = false;
+        });
+
+        els.part1Input.addEventListener('input', updateSummary);
+        els.part2Input.addEventListener('input', updateSummary);
+
+        els.standardCountsBtn.addEventListener('click', function () {
+          applyExamDefaults(state.exam);
+          const standard = examStandard(state.exam);
+          showToast('Стандарт ' + state.exam + ': ' + standard.part1 + ' + ' + standard.part2 +
+            ' = ' + (standard.part1 + standard.part2) + ' заданий.', 'success');
+        });
+
+        els.saveWebUrlBtn.addEventListener('click', saveWebBaseUrl);
+        els.localWebUrlBtn.addEventListener('click', function () {
+          els.webBaseUrlInput.value = location.origin + '/';
+          markWebUrlEdited();
+        });
+        els.webBaseUrlInput.addEventListener('input', markWebUrlEdited);
+
+        els.buildBtn.addEventListener('click', generateVariant);
+
+        els.copyLinkBtn.addEventListener('click', copyBlankLink);
+
+        els.refreshArchiveBtn.addEventListener('click', async function () {
+          els.refreshArchiveBtn.disabled = true;
+          els.refreshArchiveBtn.textContent = 'Обновляем…';
+          await loadStats({ silent: true });
+          els.refreshArchiveBtn.disabled = false;
+          els.refreshArchiveBtn.textContent = 'Обновить список';
+          showToast('Список вариантов обновлён.');
+        });
+
+        document.addEventListener('keydown', function (event) {
+          if (event.key !== 'Enter') return;
+          if (!event.target.closest('.params-card')) return;
+          if (event.target.tagName === 'TEXTAREA') return;
+          event.preventDefault();
+          if (!els.buildBtn.disabled) generateVariant();
+        });
+      }
+
+      function init() {
+        els.serverAddress.textContent = location.origin;
+        els.webBaseUrlInput.placeholder = location.origin + '/';
+        applyExamDefaults(state.exam);
+        bindEvents();
+        loadStats({ initial: true });
+        loadWebConfig();
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
