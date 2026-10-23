@@ -107,10 +107,76 @@ const { execSync } = require('child_process');
   // Экранирование спецсимволов для вывода в LaTeX-тексте
   const escapeLatex = (str) => String(str ?? '').replace(/_/g, '\\_');
 
+  // Невидимые символы, которые ломают pdflatex (в базе встречается U+2060
+  // WORD JOINER, например «м/⁠с»). Удаляем их перед генерацией .tex.
+  const INVISIBLE_CHARS_RE = /[\u00AD\u200B-\u200F\u2060\uFEFF]/g;
+
+  function stripInvisibleChars(value) {
+    return String(value ?? '')
+      .replace(INVISIBLE_CHARS_RE, '')
+      .replace(/\u00A0/g, ' ');
+  }
+
+  // Греческие буквы → LaTeX-макросы. \ensuremath работает и в тексте, и в формулах.
+  const GREEK_TO_LATEX = {
+    'α': '\\alpha', 'β': '\\beta', 'γ': '\\gamma', 'δ': '\\delta',
+    'ε': '\\varepsilon', 'ζ': '\\zeta', 'η': '\\eta', 'θ': '\\theta',
+    'ι': '\\iota', 'κ': '\\kappa', 'λ': '\\lambda', 'μ': '\\mu',
+    'ν': '\\nu', 'ξ': '\\xi', 'π': '\\pi', 'ρ': '\\rho',
+    'ς': '\\varsigma', 'σ': '\\sigma', 'τ': '\\tau', 'υ': '\\upsilon',
+    'φ': '\\varphi', 'χ': '\\chi', 'ψ': '\\psi', 'ω': '\\omega',
+    'Γ': '\\Gamma', 'Δ': '\\Delta', 'Θ': '\\Theta', 'Λ': '\\Lambda',
+    'Ξ': '\\Xi', 'Π': '\\Pi', 'Σ': '\\Sigma', 'Υ': '\\Upsilon',
+    'Φ': '\\Phi', 'Ψ': '\\Psi', 'Ω': '\\Omega',
+    'µ': '\\mu' // микро-знак U+00B5
+  };
+
+  // Исправление типичных опечаток LaTeX, встречающихся в базе задач.
+  // Без этого pdflatex падает на \mathcalE, \ChemFormN, \circC и т.п.
+  function fixKnownLatexTypos(value) {
+    return value
+      // OCR-разрывы команд: «\le ft|» вместо «\left|».
+      // Просто убираем \le ft — оставшиеся |...| и <...> компилируются.
+      .replace(/\\le\s+ft(?![A-Za-z])/g, '')
+      .replace(/\\equi\s*v(?![A-Za-z])/g, '\\equiv')
+      .replace(/\\phantom\s*\^\\circC(?![A-Za-z])/g, '\\phantom{^\\circ\\text{C}}')
+      .replace(/\\circC(?![A-Za-z])/g, '\\circ\\text{C}')
+      .replace(/\\circR(?![A-Za-z])/g, '\\circ\\text{R}')
+      .replace(/\\mathcalE(?![A-Za-z])/g, '\\mathcal{E}')
+      .replace(/\\overrightarrow([TFB])(?![A-Za-z])/g, '\\overrightarrow{$1}')
+      .replace(/\\mx(?![A-Za-z])/g, '_{\\max}')
+      .replace(/\\ctg(?![A-Za-z])/g, '\\cot')
+      .replace(/\\toX(?![A-Za-z])/g, '\\to X')
+      .replace(/\\aplha(?![A-Za-z])/g, '\\alpha')
+      .replace(/\\Dela(?![A-Za-z])/g, '\\Delta')
+      .replace(/\\epslon(?![A-Za-z])/g, '\\varepsilon')
+      .replace(/\\beginmatrix(?![A-Za-z])/g, '\\begin{matrix}')
+      .replace(/\\endmatrix(?![A-Za-z])/g, '\\end{matrix}')
+      .replace(/\\Rightarrowa(?![A-Za-z])/g, '\\Rightarrow a')
+      .replace(/\\RightarrowF(?![A-Za-z])/g, '\\Rightarrow F')
+      .replace(/\\ri(?![A-Za-z])/g, '\\pi')
+      // Операторы без фигурных скобок в индексах: P_\max → P_{\max}
+      .replace(/_\\max(?![A-Za-z])/g, '_{\\max}')
+      .replace(/_\\min(?![A-Za-z])/g, '_{\\min}')
+      .replace(/\^\\max(?![A-Za-z])/g, '^{\\max}')
+      .replace(/\^\\min(?![A-Za-z])/g, '^{\\min}')
+      // \ChemFormN, \ChemForm Mg, \ChemForm^{A}_Z X и т.п.
+      .replace(/\\ChemForm\s+([A-Z][a-z]?)/g, '\\mathrm{$1}')
+      .replace(/\\ChemForm([A-Z][a-z]?)(?![A-Za-z])/g, '\\mathrm{$1}')
+      .replace(/\\ChemForm(?![A-Za-z])/g, '');
+  }
+
+  function sanitizeLatex(value) {
+    return fixKnownLatexTypos(stripInvisibleChars(value))
+      .replace(/[α-ωΑ-Ωµ]/g, (ch) => `\\ensuremath{${GREEK_TO_LATEX[ch] || ch}}`)
+      .replace(/²/g, '\\ensuremath{{}^{2}}')
+      .replace(/³/g, '\\ensuremath{{}^{3}}');
+  }
+
   // Очистка единиц измерения для отображения в веб-бланке
   function cleanUnitForWeb(unit) {
     if (!unit) return '';
-    return unit
+    return stripInvisibleChars(unit)
       .replace(/\\text\{([^}]+)\}/g, '$1')
       .replace(/[$]/g, '')
       .replace(/\^2/g, '²')
@@ -217,19 +283,19 @@ const { execSync } = require('child_process');
   }
 
   for (const t of selectedTasks) {
-    t.latex_condition = compactFigureLatex(t.latex_condition);
-    t.latex_solution = compactFigureLatex(t.latex_solution);
+    t.latex_condition = sanitizeLatex(compactFigureLatex(t.latex_condition));
+    t.latex_solution = sanitizeLatex(compactFigureLatex(t.latex_solution));
   }
 
   function renderTaskStudent(task, index) {
     let answerBlock = '';
     if (task.part === 1) {
       if (Array.isArray(task.cols) && task.cols.length === 2) {
-        answerBlock = `\\ansTwoCols{${task.cols[0]}}{${task.cols[1]}}`;
+        answerBlock = `\\ansTwoCols{${sanitizeLatex(task.cols[0])}}{${sanitizeLatex(task.cols[1])}}`;
       } else if (task.grading_rule === 'ordered_sequence') {
         answerBlock = `\\ansAB`;
       } else {
-        answerBlock = `\\ansline{${task.unit || ''}}`;
+        answerBlock = `\\ansline{${sanitizeLatex(task.unit || '')}}`;
       }
     }
     return `\\kimtask{${index}}{${task.latex_condition}\n${answerBlock}}`;
@@ -240,7 +306,7 @@ const { execSync } = require('child_process');
 
   // ── 4. Генерация документа для ученика (КИМ) ────────────────────────────────
   let studentTex = `\\documentclass[11pt, a4paper]{article}
-\\newcommand{\\ExamHeaderTitle}{${TITLE}}
+\\newcommand{\\ExamHeaderTitle}{${sanitizeLatex(TITLE)}}
 \\newcommand{\\ExamGrade}{${grade}}
 \\usepackage{fipi_style}
 
@@ -262,7 +328,7 @@ const { execSync } = require('child_process');
         part: 1,
         rule: t.grading_rule,
         max_points: t.max_points,
-        answer: t.answer,
+        answer: stripInvisibleChars(t.answer),
         unit: cleanUnitForWeb(t.unit),
         cols: Array.isArray(t.cols) ? t.cols : undefined,
         solution: t.latex_solution
@@ -281,7 +347,7 @@ const { execSync } = require('child_process');
         part: 2,
         rule: 'manual',
         max_points: t.max_points,
-        answer: t.answer,
+        answer: stripInvisibleChars(t.answer),
         solution: t.latex_solution
       });
       globalIndex++;
@@ -292,7 +358,7 @@ const { execSync } = require('child_process');
 
   // ── 5. Генерация документа для преподавателя (Ключи и решения) ──────────────
   let teacherTex = `\\documentclass[11pt, a4paper]{article}
-\\newcommand{\\ExamHeaderTitle}{${TITLE} — КЛЮЧИ И РЕШЕНИЯ}
+\\newcommand{\\ExamHeaderTitle}{${sanitizeLatex(TITLE)} — КЛЮЧИ И РЕШЕНИЯ}
 \\newcommand{\\ExamGrade}{${grade}}
 \\usepackage{fipi_style}
 
@@ -304,14 +370,14 @@ const { execSync } = require('child_process');
 \\begin{tabular}{|c|c|c|c|c|}
 \\hline
 \\textbf{№} & \\textbf{ID задачи} & \\textbf{Тип проверки} & \\textbf{Макс. балл} & \\textbf{Эталонный ответ} \\\\ \\hline
-${keyMap.filter(k => k.part === 1).map(k => `${k.num} & \\texttt{${escapeLatex(k.id)}} & \\texttt{${escapeLatex(k.rule)}} & ${k.max_points} & \\textbf{${k.answer}} \\\\ \\hline`).join('\n')}
+${keyMap.filter(k => k.part === 1).map(k => `${k.num} & \\texttt{${escapeLatex(k.id)}} & \\texttt{${escapeLatex(k.rule)}} & ${k.max_points} & \\textbf{${sanitizeLatex(k.answer)}} \\\\ \\hline`).join('\n')}
 \\end{tabular}
 \\vspace{12pt}
 `;
   }
 
   teacherTex += `\\section*{Разбор заданий и критерии оценивания}
-${keyMap.map(k => `\\kimtask{${k.num}}{\\textbf{ID:} \\texttt{${escapeLatex(k.id)}} (Макс. балл: ${k.max_points})\\\\[4pt] ${k.solution}\\\\ \\textbf{Ответ:} ${k.answer}}`).join('\n\n')}
+${keyMap.map(k => `\\kimtask{${k.num}}{\\textbf{ID:} \\texttt{${escapeLatex(k.id)}} (Макс. балл: ${k.max_points})\\\\[4pt] ${k.solution}\\\\ \\textbf{Ответ:} ${sanitizeLatex(k.answer)}}`).join('\n\n')}
 \\end{document}\n`;
 
   // ── 6. Сохранение полных ключей и публичного манифеста ───────────────────────
