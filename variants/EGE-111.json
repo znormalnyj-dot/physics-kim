@@ -1,0 +1,168 @@
+{
+  "variant_id": "EGE-111",
+  "exam": "EGE",
+  "title": "Тренировочный вариант №111",
+  "duration_minutes": 235,
+  "tasks": [
+    {
+      "num": 1,
+      "part": 1,
+      "rule": "numeric",
+      "max_points": 1,
+      "unit": "м/с"
+    },
+    {
+      "num": 2,
+      "part": 1,
+      "rule": "numeric",
+      "max_points": 1
+    },
+    {
+      "num": 3,
+      "part": 1,
+      "rule": "numeric",
+      "max_points": 1
+    },
+    {
+      "num": 4,
+      "part": 1,
+      "rule": "numeric",
+      "max_points": 1,
+      "unit": "Дж"
+    },
+    {
+      "num": 5,
+      "part": 1,
+      "rule": "numeric",
+      "max_points": 1
+    },
+    {
+      "num": 6,
+      "part": 1,
+      "rule": "numeric",
+      "max_points": 1,
+      "unit": "Н"
+    },
+    {
+      "num": 7,
+      "part": 1,
+      "rule": "numeric",
+      "max_points": 1
+    },
+    {
+      "num": 8,
+      "part": 1,
+      "rule": "numeric",
+      "max_points": 1
+    },
+    {
+      "num": 9,
+      "part": 1,
+      "rule": "unordered_set",
+      "max_points": 2
+    },
+    {
+      "num": 10,
+      "part": 1,
+      "rule": "numeric",
+      "max_points": 1
+    },
+    {
+      "num": 11,
+      "part": 1,
+      "rule": "unordered_set",
+      "max_points": 2
+    },
+    {
+      "num": 12,
+      "part": 1,
+      "rule": "unordered_set",
+      "max_points": 2
+    },
+    {
+      "num": 13,
+      "part": 1,
+      "rule": "numeric",
+      "max_points": 1,
+      "unit": "Ом"
+    },
+    {
+      "num": 14,
+      "part": 1,
+      "rule": "numeric",
+      "max_points": 1
+    },
+    {
+      "num": 15,
+      "part": 1,
+      "rule": "numeric",
+      "max_points": 1
+    },
+    {
+      "num": 16,
+      "part": 1,
+      "rule": "numeric",
+      "max_points": 1
+    },
+    {
+      "num": 17,
+      "part": 1,
+      "rule": "ordered_sequence",
+      "max_points": 2
+    },
+    {
+      "num": 18,
+      "part": 1,
+      "rule": "unordered_set",
+      "max_points": 2
+    },
+    {
+      "num": 19,
+      "part": 1,
+      "rule": "unordered_set",
+      "max_points": 2
+    },
+    {
+      "num": 20,
+      "part": 1,
+      "rule": "unordered_set",
+      "max_points": 2
+    },
+    {
+      "num": 21,
+      "part": 2,
+      "rule": "manual",
+      "max_points": 3
+    },
+    {
+      "num": 22,
+      "part": 2,
+      "rule": "manual",
+      "max_points": 3
+    },
+    {
+      "num": 23,
+      "part": 2,
+      "rule": "manual",
+      "max_points": 3
+    },
+    {
+      "num": 24,
+      "part": 2,
+      "rule": "manual",
+      "max_points": 3
+    },
+    {
+      "num": 25,
+      "part": 2,
+      "rule": "manual",
+      "max_points": 3
+    },
+    {
+      "num": 26,
+      "part": 2,
+      "rule": "manual",
+      "max_points": 4
+    }
+  ]
+}
