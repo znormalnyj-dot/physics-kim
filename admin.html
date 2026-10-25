@@ -1628,14 +1628,44 @@
 
     .archive-item {
       display: grid;
-      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-columns: auto auto minmax(0, 1fr) auto;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       padding: 12px 13px;
       border: 1px solid var(--line);
       border-radius: 12px;
       background: var(--surface);
       transition: border-color 0.14s ease, background 0.14s ease;
+    }
+
+    .archive-check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .archive-check input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      accent-color: var(--blue);
+      cursor: pointer;
+    }
+
+    .catalog-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0 16px 4px;
+    }
+
+    .catalog-links .mini-btn {
+      border-color: #bfdbfe;
+      background: var(--blue-soft);
+      color: var(--blue-dark);
     }
 
     .archive-item:hover { border-color: #cbd5e1; background: #fbfdff; }
@@ -1701,6 +1731,9 @@
 
     .mini-btn:hover { text-decoration: none; background: var(--blue-soft); border-color: #bfdbfe; color: var(--blue-dark); }
     .mini-btn.disabled { color: #cbd5e1; background: #f8fafc; border-color: #eef2f7; cursor: not-allowed; }
+    .mini-btn.danger { color: #b91c1c; background: #fff1f2; border-color: #fecdd3; }
+    .mini-btn.danger:hover { color: #991b1b; background: #ffe4e6; border-color: #fda4af; }
+    .mini-btn.danger:disabled { color: #fca5a5; background: #fff7f7; border-color: #fee2e2; cursor: not-allowed; }
 
     .empty-state {
       padding: 30px 20px;
@@ -1804,8 +1837,9 @@
       .line-subtopics { grid-template-columns: 1fr; }
       .line-meta { white-space: normal; }
       .line-name { font-size: 13.2px; }
-      .archive-item { grid-template-columns: auto minmax(0, 1fr); }
+      .archive-item { grid-template-columns: auto auto minmax(0, 1fr); }
       .archive-actions { grid-column: 1 / -1; justify-content: flex-start; padding-left: 55px; }
+      .catalog-links { padding-left: 16px; padding-right: 16px; }
       .result-head, .result-actions, .result-foot, .result-log { padding-left: 16px; padding-right: 16px; }
       .page-footer { flex-direction: column; align-items: flex-start; }
     }
@@ -2070,8 +2104,18 @@
           <p id="archiveCount">Загрузка…</p>
         </div>
         <div class="head-actions">
+          <button type="button" class="mini-btn danger" id="deleteSelectedBtn" disabled>Удалить выбранные (0)</button>
+          <button type="button" class="mini-btn danger" id="cleanupTestBtn">Очистить тестовые</button>
           <button type="button" class="link-btn" id="refreshArchiveBtn">Обновить список</button>
         </div>
+      </div>
+      <div class="catalog-links">
+        <a class="mini-btn" id="catalogEgeLink" href="/output/ALL_EGE_Catalog.pdf" target="_blank" rel="noopener">
+          Полный каталог всех задач ЕГЭ (3285 шт.) — PDF
+        </a>
+        <a class="mini-btn" id="catalogOgeLink" href="/output/ALL_OGE_Catalog.pdf" target="_blank" rel="noopener">
+          Полный каталог всех задач ОГЭ (2486 шт.) — PDF
+        </a>
       </div>
       <div class="archive-list" id="archiveList">
         <div class="empty-state">Загрузка архива…</div>
@@ -2103,6 +2147,8 @@
         activePreset: 'full',
         busy: false,
         variantAuto: true,
+        archiveBusy: false,
+        selectedVariants: new Set(),
         toastTimer: null,
         buildTimer: null,
         buildStartedAt: 0,
@@ -2174,6 +2220,10 @@
         archiveCount: document.getElementById('archiveCount'),
         archiveList: document.getElementById('archiveList'),
         refreshArchiveBtn: document.getElementById('refreshArchiveBtn'),
+        deleteSelectedBtn: document.getElementById('deleteSelectedBtn'),
+        cleanupTestBtn: document.getElementById('cleanupTestBtn'),
+        catalogEgeLink: document.getElementById('catalogEgeLink'),
+        catalogOgeLink: document.getElementById('catalogOgeLink'),
         serverAddress: document.getElementById('serverAddress'),
         toast: document.getElementById('toast')
       };
@@ -2239,9 +2289,22 @@
       }
 
       function topicKeysOf(value) {
-        return value && Array.isArray(value.topic_keys)
-          ? value.topic_keys.map(String)
-          : [];
+        if (!value) return [];
+        const keys = new Set();
+        if (Array.isArray(value.topic_keys)) {
+          value.topic_keys.forEach(function (key) { keys.add(String(key)); });
+        }
+        // topic_groups — фактические узкие теги задач линии/подтемы.
+        // Статические topic_keys из матрицы могут быть шире реального
+        // содержимого, поэтому обязательно учитываем и группы.
+        if (Array.isArray(value.topic_groups)) {
+          value.topic_groups.forEach(function (group) {
+            if (group && Array.isArray(group.keys)) {
+              group.keys.forEach(function (key) { keys.add(String(key)); });
+            }
+          });
+        }
+        return Array.from(keys);
       }
 
       function intersectsSelected(value, selected) {
@@ -2280,7 +2343,12 @@
         }
 
         const chosen = chosenSubtopics(line, spec);
-        if (chosen.length === 0) return 0;
+        if (chosen.length === 0) {
+          // Синтетические подтемы (auto_*) могут не попасть в статический
+          // список. В этом случае считаем по фактическим группам линии.
+          const fromLine = sumTopicGroups(line.topic_groups, selected, part);
+          return fromLine == null ? 0 : fromLine;
+        }
 
         return chosen.reduce(function (sum, sub) {
           const groups = sub.topic_groups;
@@ -2543,6 +2611,20 @@
             return;
           }
 
+          // В линии есть задачи выбранной темы, но ни одна статическая
+          // подтема не совпала (например, из-за auto_* в новой базе).
+          // Оставляем линию активной, а сужение выполняет selectedTopics.
+          const lineAvailable = availableForLineTopics(
+            line,
+            { subtopics: new Set() },
+            selected
+          );
+          if (lineAvailable > 0) {
+            spec.subtopics = new Set(lineSubtopicIds(line));
+            spec.count = 1;
+            return;
+          }
+
           spec.subtopics = new Set();
           spec.count = 0;
         });
@@ -2754,8 +2836,12 @@
         const part = Number(line.part) === 2 ? 2 : 1;
         const points = Number(line.max_points) || 0;
         const tasksCount = Number(line.tasks_count) || 0;
-        const baseBadge = tasksCount > 0
-          ? tasksCount + ' шт.'
+        const selectedTopics = selectedTopicSet();
+        const availableCount = selectedTopics.size > 0
+          ? availableForLine(line, spec, part)
+          : tasksCount;
+        const baseBadge = availableCount > 0
+          ? availableCount + ' шт.' + (selectedTopics.size > 0 ? ' по теме' : '')
           : '0 шт.';
         const subCountLabel = subs.length > 0
           ? selectedSubs + '/' + subs.length + ' подтем'
@@ -2768,7 +2854,15 @@
           ? subs.map(function (sub) {
               const id = String(sub.subtopic_id);
               const checked = spec.subtopics.has(id);
-              const count = Number(sub.count) || 0;
+              const totalCount = Number(sub.count) || 0;
+              const exact = selectedTopics.size > 0
+                ? sumTopicGroups(sub.topic_groups, selectedTopics, part)
+                : null;
+              const count = selectedTopics.size > 0
+                ? (exact == null
+                    ? (intersectsSelected(sub, selectedTopics) ? totalCount : 0)
+                    : exact)
+                : totalCount;
               const classes = 'line-subtopic' +
                 (checked ? ' is-checked' : '') +
                 (count === 0 ? ' is-zero' : '');
@@ -2776,7 +2870,8 @@
                 '<input type="checkbox" data-line-sub="' + number + '" data-subtopic="' + esc(id) + '"' +
                   (checked ? ' checked' : '') + '>' +
                 '<span class="line-subtopic-name">' + esc(sub.subtopic_title) + '</span>' +
-                '<span class="line-sub-count">' + count + ' шт.</span>' +
+                '<span class="line-sub-count">' + count + ' шт.' +
+                  (selectedTopics.size > 0 ? ' по теме' : '') + '</span>' +
                 '</label>';
             }).join('')
           : '<div class="line-subtopic is-zero"><span class="line-subtopic-name">Для этой линии подтемы не заданы.</span></div>';
@@ -2784,7 +2879,7 @@
         return '<article class="line-item' +
             (spec.count > 0 ? ' has-count' : '') +
             (isOpen ? ' is-open' : '') +
-            (tasksCount === 0 ? ' is-empty' : '') +
+            (availableCount === 0 ? ' is-empty' : '') +
           '" data-line="' + number + '">' +
           '<div class="line-row">' +
             '<div class="line-counter" aria-label="Количество задач линии ' + number + '">' +
@@ -2801,7 +2896,9 @@
               '<span class="line-chevron" aria-hidden="true"></span>' +
             '</button>' +
             '<div class="line-right">' +
-              '<span class="line-total' + (tasksCount === 0 ? ' is-empty' : '') + '" title="Всего задач этой линии в базе">' + baseBadge + '</span>' +
+              '<span class="line-total' + (availableCount === 0 ? ' is-empty' : '') + '" title="' +
+                (selectedTopics.size > 0 ? 'Доступно задач линии по выбранным темам' : 'Всего задач этой линии в базе') +
+              '">' + baseBadge + '</span>' +
               '<span class="line-subcount">' + subCountLabel + '</span>' +
             '</div>' +
           '</div>' +
@@ -3134,23 +3231,113 @@
 
       // ── Архив ───────────────────────────────────────────────────────────────
 
+      function setArchiveBusy(busy) {
+        state.archiveBusy = busy;
+        if (els.refreshArchiveBtn) els.refreshArchiveBtn.disabled = busy;
+        if (els.cleanupTestBtn) els.cleanupTestBtn.disabled = busy;
+        els.archiveList.querySelectorAll('[data-delete-variant]').forEach(function (btn) {
+          btn.disabled = busy;
+        });
+        updateArchiveSelection();
+      }
+
+      function updateArchiveSelection() {
+        if (!els.deleteSelectedBtn) return;
+        const count = state.selectedVariants.size;
+        els.deleteSelectedBtn.textContent = 'Удалить выбранные (' + count + ')';
+        els.deleteSelectedBtn.disabled = count === 0 || state.archiveBusy;
+      }
+
+      async function deleteVariants(codes, label) {
+        const unique = [...new Set((codes || []).map(function (code) { return String(code); }))];
+        if (unique.length === 0) {
+          showToast('Не выбрано ни одного варианта.', 'error');
+          return;
+        }
+        if (state.archiveBusy) return;
+
+        const question = unique.length === 1
+          ? 'Удалить ' + (label || unique[0]) + '? Будут удалены PDF, ключ, TeX и служебные файлы.'
+          : 'Удалить ' + unique.length + ' ' + plural(unique.length, 'вариант', 'варианта', 'вариантов') +
+            '? Будут удалены PDF, ключи, TeX и служебные файлы.';
+        if (!confirm(question)) return;
+
+        setArchiveBusy(true);
+        try {
+          const response = await fetch('/api/variants/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json; charset=utf-8' },
+            body: JSON.stringify({ codes: unique })
+          });
+          const data = await response.json().catch(function () { return null; });
+          if (!response.ok || !data) {
+            throw new Error((data && data.error) || ('HTTP ' + response.status));
+          }
+
+          (data.deleted || []).forEach(function (item) {
+            state.selectedVariants.delete(item.code);
+          });
+          if (data.variants && state.stats) {
+            state.stats.variants = data.variants;
+          } else {
+            await loadStats({ silent: true });
+          }
+          if (data.nextVariant && state.stats) {
+            state.stats.nextVariant = data.nextVariant;
+          }
+          renderArchive();
+          updateVariantHint();
+
+          const removed = Number(data.deletedCount || 0);
+          if (removed > 0) {
+            showToast('Удалено ' + removed + ' ' + plural(removed, 'вариант', 'варианта', 'вариантов') + '.', 'success');
+          }
+          if (data.failed && data.failed.length > 0) {
+            const details = data.failed.map(function (item) {
+              return item.code + ': ' + (item.errors || []).map(function (e) { return e.error; }).join('; ');
+            }).join(' | ');
+            showToast('Не удалось удалить часть файлов: ' + details, 'error');
+          } else if (removed === 0) {
+            showToast((data.skipped && data.skipped[0] && data.skipped[0].error) || 'Файлы не найдены.', 'error');
+          }
+        } catch (error) {
+          showToast('Не удалось удалить вариант: ' + error.message, 'error');
+        } finally {
+          setArchiveBusy(false);
+        }
+      }
+
       function renderArchive() {
         if (!state.stats) return;
         const variants = state.stats.variants || [];
+        const existing = new Set(variants.map(function (v) { return v.code; }));
+        Array.from(state.selectedVariants).forEach(function (code) {
+          if (!existing.has(code)) state.selectedVariants.delete(code);
+        });
 
         els.archiveCount.textContent = variants.length
           ? variants.length + ' ' + plural(variants.length, 'вариант', 'варианта', 'вариантов') + ' в output/'
           : 'Готовых вариантов пока нет';
 
+        const exams = state.stats.exams || {};
+        if (els.catalogEgeLink.textContent && exams.EGE) {
+          els.catalogEgeLink.textContent = 'Полный каталог всех задач ЕГЭ (' + exams.EGE.total + ' шт.) — PDF';
+        }
+        if (els.catalogOgeLink.textContent && exams.OGE) {
+          els.catalogOgeLink.textContent = 'Полный каталог всех задач ОГЭ (' + exams.OGE.total + ' шт.) — PDF';
+        }
+
         if (variants.length === 0) {
           els.archiveList.innerHTML = '<div class="empty-state"><b>Архив пуст</b>' +
             'Сгенерируйте первый вариант — он появится здесь.</div>';
+          updateArchiveSelection();
           return;
         }
 
         els.archiveList.innerHTML = variants.map(function (v) {
           const isEge = v.exam === 'EGE';
           const examLabel = isEge ? 'ЕГЭ' : 'ОГЭ';
+          const checked = state.selectedVariants.has(v.code) ? ' checked' : '';
           const student = v.hasStudentPdf
             ? '<a class="mini-btn" href="' + esc(v.studentPdfUrl) + '" target="_blank" rel="noopener">Ученик</a>'
             : '<span class="mini-btn disabled" title="PDF для ученика не найден">Ученик</span>';
@@ -3162,6 +3349,10 @@
             plural(v.tasksCount, 'задача', 'задачи', 'задач');
 
           return '<div class="archive-item">' +
+            '<label class="archive-check" title="Выбрать вариант">' +
+              '<input type="checkbox" data-select-variant="' + esc(v.code) + '"' + checked +
+              ' aria-label="Выбрать ' + esc(v.code) + '">' +
+            '</label>' +
             '<span class="exam-tag ' + (isEge ? 'ege' : 'oge') + '">' + examLabel + '</span>' +
             '<div class="archive-main">' +
               '<div class="archive-title">' + esc(v.code) +
@@ -3170,9 +3361,12 @@
             '</div>' +
             '<div class="archive-actions">' + student + teacher +
               '<a class="mini-btn" href="' + esc(v.blankUrl) + '" target="_blank" rel="noopener">Бланк</a>' +
+              '<button type="button" class="mini-btn danger" data-delete-variant="' + esc(v.code) + '">Удалить</button>' +
             '</div>' +
           '</div>';
         }).join('');
+
+        updateArchiveSelection();
       }
 
       // ── Публичный URL веб-бланка (config.json) ───────────────────────────────
@@ -3676,6 +3870,36 @@
         els.buildBtn.addEventListener('click', generateVariant);
 
         els.copyLinkBtn.addEventListener('click', copyBlankLink);
+
+        els.archiveList.addEventListener('change', function (event) {
+          const checkbox = event.target.closest('[data-select-variant]');
+          if (!checkbox) return;
+          const code = checkbox.dataset.selectVariant;
+          if (checkbox.checked) state.selectedVariants.add(code);
+          else state.selectedVariants.delete(code);
+          updateArchiveSelection();
+        });
+
+        els.archiveList.addEventListener('click', function (event) {
+          const button = event.target.closest('[data-delete-variant]');
+          if (button) deleteVariants([button.dataset.deleteVariant], 'вариант ' + button.dataset.deleteVariant);
+        });
+
+        els.deleteSelectedBtn.addEventListener('click', function () {
+          deleteVariants(Array.from(state.selectedVariants), 'выбранные варианты');
+        });
+
+        els.cleanupTestBtn.addEventListener('click', function () {
+          const variants = (state.stats && state.stats.variants) || [];
+          const codes = variants
+            .filter(function (v) { return !/^\d+$/.test(String(v.variant)); })
+            .map(function (v) { return v.code; });
+          if (codes.length === 0) {
+            showToast('Тестовых вариантов с нецифровым кодом нет.', 'success');
+            return;
+          }
+          deleteVariants(codes, 'тестовые варианты');
+        });
 
         els.refreshArchiveBtn.addEventListener('click', async function () {
           els.refreshArchiveBtn.disabled = true;
