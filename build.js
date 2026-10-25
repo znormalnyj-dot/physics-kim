@@ -558,6 +558,19 @@ const { execSync } = require('child_process');
 
   sortByKimLine(selectedTasks);
 
+  // Финальная страховка для всех режимов, включая --ids: ни одна задача
+  // не должна попасть в вариант, если она не содержит выбранный узкий тег.
+  // Fallback «взять хоть что-нибудь» запрещён.
+  if (SELECTED_TOPICS.length > 0) {
+    const selectedSet = new Set(SELECTED_TOPICS);
+    const foreign = selectedTasks.filter((task) => !matchesSelectedTopics(task, selectedSet));
+    if (foreign.length > 0) {
+      console.error('[ОШИБКА] В вариант попали задачи без выбранных тем ' +
+        `(${SELECTED_TOPICS.join(', ')}): ${foreign.map((task) => task.id).join(', ')}`);
+      process.exit(1);
+    }
+  }
+
   if (selectedTasks.length === 0) {
     console.error(`[ОШИБКА] После применения всех фильтров список задач пуст.`);
     process.exit(1);
@@ -582,7 +595,10 @@ const { execSync } = require('child_process');
         (_m, imgPath) => `\\kimimg{${imgPath}}`
       )
       // \begin{center} внутри ячеек tabular недопустим («Not allowed in LR mode»).
-      .replace(/\\begin\{center\}\s*([\s\S]*?)\s*\\end\{center\}/g, '$1');
+      .replace(/\\begin\{center\}\s*([\s\S]*?)\s*\\end\{center\}/g, '$1')
+      // Вложенные center в ячейках таблицы оставляют «Misplaced \cr».
+      .replace(/\\begin\{center\}/g, '')
+      .replace(/\\end\{center\}/g, '');
   }
 
   for (const t of selectedTasks) {

@@ -19,6 +19,7 @@ const { URL } = require('url');
 
 const ROOT = __dirname;
 const WEB_DIR = path.join(ROOT, 'web');
+const WEB_VARIANTS_DIR = path.join(WEB_DIR, 'variants');
 const OUTPUT_DIR = path.join(ROOT, 'output');
 const BUILD_SCRIPT = path.join(ROOT, 'build.js');
 const LOCAL_TASKS_DIR = path.join(ROOT, 'tasks');
@@ -537,27 +538,26 @@ function buildKimStats() {
           subtopic_title: sub.subtopic_title || titleById.get(id) || id,
           count: sub.count,
           counts: { part1: sub.part1, part2: sub.part2, total: sub.count },
+          // Фактические узкие теги задач этой подтемы, а не статический
+          // список из kim_matrix.json.
+          topic_keys: keysFromTopicGroups(sub.topicGroups),
           topic_groups: serializeTopicGroups(sub.topicGroups)
         };
         if (bySubtopic.has(id)) {
           const target = bySubtopic.get(id);
           Object.assign(target, payload);
         } else {
-          bySubtopic.set(id, {
-            ...payload,
-            topic_keys: keysFromTopicGroups(sub.topicGroups)
-          });
+          bySubtopic.set(id, payload);
         }
       }
 
       const subtopics = [...bySubtopic.values()];
       const availableSubtopics = subtopics.filter((sub) => sub.count > 0);
       const matrixTopicKeys = Array.isArray(line.topic_keys) ? line.topic_keys.map(String) : [];
-      const topicKeys = [...new Set(
-        matrixTopicKeys.length > 0
-          ? matrixTopicKeys
-          : subtopics.flatMap((sub) => sub.topic_keys || [])
-      )];
+      const actualTopicKeys = keysFromTopicGroups(entry.topicGroups);
+      const topicKeys = actualTopicKeys.length > 0
+        ? actualTopicKeys
+        : [...new Set(matrixTopicKeys)];
 
       return {
         ...line,
@@ -689,6 +689,65 @@ function scanVariants() {
 
   result.sort((a, b) => (b.createdAtMs - a.createdAtMs) || b.variant.localeCompare(a.variant, 'ru', { numeric: true }));
   return result;
+}
+
+// ─── Удаление вариантов ──────────────────────────────────────────────────────
+
+const VARIANT_CODE_RE = /^(EGE|OGE)-([A-Za-z0-9][A-Za-z0-9_-]{0,19})$/i;
+
+function parseVariantCode(value) {
+  const match = String(value == null ? '' : value).trim().match(VARIANT_CODE_RE);
+  if (!match) return null;
+  return { code: `${match[1].toUpperCase()}-${match[2]}`, exam: match[1].toUpperCase(), variant: match[2] };
+}
+
+function variantArtifactPaths(exam, variant) {
+  const baseName = `KIM_${exam}_${variant}`;
+  const suffixes = [
+    '_Student.pdf', '_Teacher.pdf', '_Key.json',
+    '_Student.tex', '_Teacher.tex',
+    '_Student.aux', '_Teacher.aux',
+    '_Student.log', '_Teacher.log',
+    '_Student.out', '_Teacher.out',
+    '_Student.synctex.gz', '_Teacher.synctex.gz',
+    '_Student.fls', '_Teacher.fls',
+    '_Student.fdb_latexmk', '_Teacher.fdb_latexmk'
+  ];
+  return suffixes.map((suffix) => path.join(OUTPUT_DIR, `${baseName}${suffix}`));
+}
+
+function deleteVariantArtifacts(code) {
+  const parsed = parseVariantCode(code);
+  if (!parsed) {
+    return { code: String(code || ''), ok: false, error: 'Некорректный код варианта. Ожидается EGE-113 или OGE-201.', files: [], errors: [] };
+  }
+
+  const candidates = variantArtifactPaths(parsed.exam, parsed.variant);
+  candidates.push(path.join(WEB_VARIANTS_DIR, `${parsed.exam}-${parsed.variant}.json`));
+
+  const files = [];
+  const errors = [];
+  for (const filePath of candidates) {
+    if (!isInsideDir(OUTPUT_DIR, filePath) && !isInsideDir(WEB_VARIANTS_DIR, filePath)) {
+      errors.push({ file: filePath, error: 'Путь вне каталога вариантов' });
+      continue;
+    }
+    if (!fs.existsSync(filePath)) continue;
+    try {
+      fs.rmSync(filePath, { force: true });
+      files.push(displayPath(filePath));
+    } catch (e) {
+      errors.push({ file: displayPath(filePath), error: e.message });
+    }
+  }
+
+  return {
+    code: parsed.code,
+    ok: errors.length === 0,
+    found: files.length,
+    files,
+    errors
+  };
 }
 
 function nextVariantMap(variants) {
@@ -1123,7 +1182,7 @@ async function handleApi(req, res, url) {
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204, {
-      'Allow': 'GET, POST, OPTIONS',
+      'Allow': 'GET, POST, DELETE, OPTIONS',
       'Cache-Control': 'no-store'
     });
     res.end();
@@ -1196,6 +1255,119 @@ async function handleApi(req, res, url) {
       return;
     }
     sendJson(res, 200, payload);
+    return;
+  }
+
+  // Массовое удаление выбранных вариантов и очистка тестовых.
+  if (pathname === '/api/variants/delete') {
+    if (req.method !== 'POST') {
+      sendJson(res, 405, { ok: false, error: 'Метод не поддерживается. Используйте POST.' });
+      return;
+    }
+    if (buildInProgress) {
+      sendJson(res, 409, { ok: false, error: 'Идёт сборка варианта. Дождитесь её завершения.' });
+      return;
+    }
+
+    let body;
+    try {
+      body = await readJsonBody(req, MAX_BODY_BYTES);
+    } catch (e) {
+      sendJson(res, e.statusCode || 400, { ok: false, error: e.message });
+      return;
+    }
+
+    let rawCodes = body.codes ?? body.variants ?? body.code ?? [];
+    if (!Array.isArray(rawCodes)) rawCodes = [rawCodes];
+    if (body.testOnly === true || body.test === true || body.cleanupTest === true) {
+      rawCodes = scanVariants()
+        .filter((item) => !/^\d+$/.test(String(item.variant)))
+        .map((item) => item.code);
+    }
+
+    const codes = [...new Set(rawCodes.map((value) => String(value || '').trim()).filter(Boolean))];
+    if (codes.length === 0) {
+      sendJson(res, 400, { ok: false, error: 'Не выбрано ни одного варианта для удаления.' });
+      return;
+    }
+    if (codes.length > 500) {
+      sendJson(res, 400, { ok: false, error: 'За один раз можно удалить не более 500 вариантов.' });
+      return;
+    }
+
+    const deleted = [];
+    const skipped = [];
+    for (const code of codes) {
+      if (!parseVariantCode(code)) {
+        skipped.push({ code, error: 'Некорректный код варианта' });
+        continue;
+      }
+      const result = deleteVariantArtifacts(code);
+      if (result.found === 0 && result.ok) {
+        skipped.push({ code: result.code || code, error: 'Файлы не найдены' });
+      } else {
+        deleted.push(result);
+      }
+      if (result.errors.length > 0) {
+        console.error(`[УДАЛЕНИЕ] ${result.code}: ошибок ${result.errors.length}`);
+      }
+    }
+
+    const failed = deleted.filter((item) => !item.ok);
+    console.log(`[УДАЛЕНИЕ] Удалено вариантов: ${deleted.length - failed.length}, пропущено: ${skipped.length}, ошибок: ${failed.length}`);
+    sendJson(res, 200, {
+      ok: failed.length === 0,
+      deleted,
+      failed,
+      skipped,
+      deletedCount: deleted.length - failed.length,
+      variants: scanVariants(),
+      nextVariant: nextVariantMap(scanVariants())
+    });
+    return;
+  }
+
+  // Удаление одного варианта: DELETE /api/variants/EGE-113
+  if (pathname.startsWith('/api/variants/')) {
+    if (req.method !== 'DELETE') {
+      sendJson(res, 405, { ok: false, error: 'Метод не поддерживается. Используйте DELETE.' });
+      return;
+    }
+    if (buildInProgress) {
+      sendJson(res, 409, { ok: false, error: 'Идёт сборка варианта. Дождитесь её завершения.' });
+      return;
+    }
+
+    let rawCode = pathname.slice('/api/variants/'.length);
+    try {
+      rawCode = decodeURIComponent(rawCode);
+    } catch {
+      sendJson(res, 400, { ok: false, error: 'Некорректный код варианта.' });
+      return;
+    }
+    const parsed = parseVariantCode(rawCode);
+    if (!parsed) {
+      sendJson(res, 400, { ok: false, error: 'Некорректный код варианта. Ожидается EGE-113 или OGE-201.' });
+      return;
+    }
+
+    const result = deleteVariantArtifacts(parsed.code);
+    if (result.found === 0 && result.ok) {
+      sendJson(res, 404, { ok: false, error: `Вариант ${parsed.code} не найден.`, code: parsed.code });
+      return;
+    }
+    if (result.errors.length > 0) {
+      sendJson(res, 500, { ok: false, error: 'Не все файлы удалось удалить.', result });
+      return;
+    }
+
+    console.log(`[УДАЛЕНИЕ] ${parsed.code}: удалено файлов ${result.found}.`);
+    sendJson(res, 200, {
+      ok: true,
+      deleted: result,
+      variants: scanVariants(),
+      nextVariant: nextVariantMap(scanVariants())
+    });
     return;
   }
 
