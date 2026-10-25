@@ -11,12 +11,23 @@
  *   node bulk_import.js --exam=OGE --category=54 --limit=10
  *   node bulk_import.js --exam=EGE --ids=106,107,108
  *   node bulk_import.js --exam=EGE --url=https://phys-ege.sdamgia.ru/test?theme=204&print=true
+ *
+ * Служебные режимы (эталонная матрица линий и покрытие базы):
+ *   node bulk_import.js --build-matrix                 # tasks/kim_matrix.json
+ *   node bulk_import.js --exam=EGE --index-catalog     # кэш каталога: source_id → подтема
+ *   node bulk_import.js --backfill-subtopics           # заполнить subtopic_id/subtopic_title
+ *   node bulk_import.js --exam=ALL --ensure-coverage --min-per-line=25
+ *   node bulk_import.js --coverage-report              # сводная таблица по линиям
  */
 
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
+const {
+  NARROW_TOPIC_KEYS,
+  buildTopicList,
+} = require('./topic_classifier');
 
 let cheerio, sharp;
 try {
@@ -71,6 +82,123 @@ const PRESETS = {
 };
 
 const MAX_LINE = { EGE: 26, OGE: 22 };
+
+// ───────────────────────────────────────────────────────────────────────────
+// Эталонная матрица линий КИМ (tasks/kim_matrix.json).
+// Номера линий, названия, формат ответа и баллы соответствуют спецификации
+// ФИПИ для ЕГЭ (26 линий) и ОГЭ (22 линии) по физике.
+// Подтемы каждой линии подтягиваются из каталога заданий (/prob_catalog,
+// данные — /newapi/catalog/types) и сохраняются вместе с матрицей.
+// ───────────────────────────────────────────────────────────────────────────
+const MATRIX_PATH = path.join(ROOT, 'tasks', 'kim_matrix.json');
+const CATALOG_CACHE_PATH = path.join(ROOT, 'tasks', 'catalog_cache.json');
+const TOPICS_PATH = path.join(ROOT, 'tasks', 'topics.json');
+
+const SECTION_TITLES = {
+  mechanics: 'Механика',
+  mkt_thermo: 'Молекулярная физика и термодинамика',
+  electrodynamics: 'Электродинамика',
+  quantum: 'Квантовая физика и элементы астрофизики',
+  methods: 'Методы научного познания',
+  mixed: 'Комплексное задание (несколько разделов)',
+};
+
+const EGE_LINE_SPECS = [
+  { line: 1, title: 'Кинематика', grading_rule: 'numeric', max_points: 1, section: 'mechanics' },
+  { line: 2, title: 'Динамика', grading_rule: 'numeric', max_points: 1, section: 'mechanics' },
+  { line: 3, title: 'Законы сохранения в механике', grading_rule: 'numeric', max_points: 1, section: 'mechanics' },
+  { line: 4, title: 'Статика. Механические колебания и волны', grading_rule: 'numeric', max_points: 1, section: 'mechanics' },
+  { line: 5, title: 'Механика. Анализ физических процессов', grading_rule: 'unordered_set', max_points: 2, section: 'mechanics' },
+  { line: 6, title: 'Механика. Изменение физических величин и соответствие', grading_rule: 'ordered_sequence', max_points: 2, section: 'mechanics' },
+  { line: 7, title: 'Молекулярная физика', grading_rule: 'numeric', max_points: 1, section: 'mkt_thermo' },
+  { line: 8, title: 'МКТ и термодинамика', grading_rule: 'numeric', max_points: 1, section: 'mkt_thermo' },
+  { line: 9, title: 'Молекулярная физика и термодинамика. Анализ процессов', grading_rule: 'unordered_set', max_points: 2, section: 'mkt_thermo' },
+  { line: 10, title: 'Молекулярная физика и термодинамика. Изменение величин', grading_rule: 'ordered_sequence', max_points: 2, section: 'mkt_thermo' },
+  { line: 11, title: 'Электрическое поле. Законы постоянного тока', grading_rule: 'numeric', max_points: 1, section: 'electrodynamics' },
+  { line: 12, title: 'Магнитное поле. Электромагнитная индукция', grading_rule: 'numeric', max_points: 1, section: 'electrodynamics' },
+  { line: 13, title: 'Электромагнитные колебания и волны. Оптика', grading_rule: 'numeric', max_points: 1, section: 'electrodynamics' },
+  { line: 14, title: 'Электродинамика. Анализ физических процессов', grading_rule: 'unordered_set', max_points: 2, section: 'electrodynamics' },
+  { line: 15, title: 'Электродинамика. Изменение величин и соответствие', grading_rule: 'ordered_sequence', max_points: 2, section: 'electrodynamics' },
+  { line: 16, title: 'Ядерная физика', grading_rule: 'numeric', max_points: 1, section: 'quantum' },
+  { line: 17, title: 'Квантовая физика. Изменение величин и соответствие', grading_rule: 'ordered_sequence', max_points: 2, section: 'quantum' },
+  { line: 18, title: 'Физический смысл величин, законов и закономерностей', grading_rule: 'unordered_set', max_points: 2, section: 'methods' },
+  { line: 19, title: 'Показания измерительных приборов с погрешностью', grading_rule: 'measurement', max_points: 1, section: 'methods' },
+  { line: 20, title: 'Планирование эксперимента', grading_rule: 'unordered_set', max_points: 1, section: 'methods' },
+  { line: 21, title: 'Качественная задача (МКТ, термодинамика, электродинамика)', grading_rule: 'manual', max_points: 3, section: 'mixed' },
+  { line: 22, title: 'Расчетная задача. Механика', grading_rule: 'manual', max_points: 2, section: 'mechanics' },
+  { line: 23, title: 'Расчетная задача. МКТ и электродинамика', grading_rule: 'manual', max_points: 2, section: 'mixed' },
+  { line: 24, title: 'Расчетная задача высокого уровня. МКТ и термодинамика', grading_rule: 'manual', max_points: 3, section: 'mkt_thermo' },
+  { line: 25, title: 'Расчетная задача высокого уровня. Электродинамика', grading_rule: 'manual', max_points: 3, section: 'electrodynamics' },
+  { line: 26, title: 'Расчетная задача высокого уровня с обоснованием. Механика', grading_rule: 'manual', max_points: 4, section: 'mechanics' },
+];
+
+const OGE_LINE_SPECS = [
+  { line: 1, title: 'Физические понятия, величины и приборы', grading_rule: 'ordered_sequence', max_points: 2 },
+  { line: 2, title: 'Принцип действия приборов и формулы', grading_rule: 'ordered_sequence', max_points: 2 },
+  { line: 3, title: 'Распознавание физических явлений', grading_rule: 'numeric', max_points: 1 },
+  { line: 4, title: 'Описание свойств физических явлений (текст с пропусками)', grading_rule: 'ordered_sequence', max_points: 2 },
+  { line: 5, title: 'Вычислительные задачи. Механические явления', grading_rule: 'numeric', max_points: 1, section: 'mechanics' },
+  { line: 6, title: 'Вычислительные задачи. Механические явления', grading_rule: 'numeric', max_points: 1, section: 'mechanics' },
+  { line: 7, title: 'Вычислительные задачи. Тепловые явления', grading_rule: 'numeric', max_points: 1, section: 'mkt_thermo' },
+  { line: 8, title: 'Вычислительные задачи. Электромагнитные явления', grading_rule: 'numeric', max_points: 1, section: 'electrodynamics' },
+  { line: 9, title: 'Вычислительные задачи. Оптика и электромагнитные явления', grading_rule: 'numeric', max_points: 1, section: 'electrodynamics' },
+  { line: 10, title: 'Вычислительные задачи. Квантовая и ядерная физика', grading_rule: 'numeric', max_points: 1, section: 'quantum' },
+  { line: 11, title: 'Описание изменения физических величин (Механика / Тепловые явления)', grading_rule: 'ordered_sequence', max_points: 2 },
+  { line: 12, title: 'Описание изменения физических величин (Электродинамика / Кванты)', grading_rule: 'ordered_sequence', max_points: 2 },
+  { line: 13, title: 'Анализ графиков, таблиц и схем', grading_rule: 'unordered_set', max_points: 2 },
+  { line: 14, title: 'Верные утверждения на основе текста/схем', grading_rule: 'unordered_set', max_points: 2 },
+  { line: 15, title: 'Прямые измерения физических величин', grading_rule: 'numeric', max_points: 1, section: 'methods' },
+  { line: 16, title: 'Интерпретация результатов опытов', grading_rule: 'unordered_set', max_points: 2, section: 'methods' },
+  { line: 17, title: 'Экспериментальные задания', grading_rule: 'manual', max_points: 3 },
+  { line: 18, title: 'Установление соответствия / текст физического содержания', grading_rule: 'manual', max_points: 2 },
+  { line: 19, title: 'Качественная задача (по тексту и явлениям)', grading_rule: 'manual', max_points: 2 },
+  { line: 20, title: 'Качественная задача', grading_rule: 'manual', max_points: 2 },
+  { line: 21, title: 'Расчетная задача высокого уровня', grading_rule: 'manual', max_points: 3 },
+  { line: 22, title: 'Комбинированная расчетная задача', grading_rule: 'manual', max_points: 3 },
+];
+
+const LINE_SPECS = { EGE: EGE_LINE_SPECS, OGE: OGE_LINE_SPECS };
+
+function defaultPart(exam, line) {
+  return exam === 'EGE' ? (Number(line) <= 20 ? 1 : 2) : (Number(line) <= 16 ? 1 : 2);
+}
+
+function lineSpec(exam, line) {
+  const specs = LINE_SPECS[exam] || [];
+  return specs.find(s => Number(s.line) === Number(line)) || null;
+}
+
+// Соответствие «линия КИМ ОГЭ → группы каталога».
+// В каталоге ОГЭ осталась устаревшая линия 5 «Объяснение физических явлений»,
+// которой нет в актуальной матрице, поэтому нумерация начиная с 5-й линии
+// сдвинута. Категории линии 14 (анализ) разделены между линиями 13 и 14,
+// а категории линии 19 (качественные задачи) — между линиями 19 и 20,
+// чтобы у каждой линии была своя подтема и не было дублей задач.
+const OGE_CATALOG_LINES = {
+  1: { groups: [1] },
+  2: { groups: [2] },
+  3: { groups: [3] },
+  4: { groups: [4] },
+  5: { groups: [6] },
+  6: { groups: [7] },
+  7: { groups: [8] },
+  8: { groups: [9] },
+  9: { groups: [10] },
+  10: { groups: [11] },
+  11: { groups: [12] },
+  12: { groups: [13] },
+  13: { groups: [14], subtopics: [65, 66, 64] },
+  14: { groups: [14], subtopics: [63, 42] },
+  15: { groups: [15] },
+  16: { groups: [16] },
+  17: { groups: [17] },
+  18: { groups: [18] },
+  19: { groups: [19], subtopics: [47, 83] },
+  20: { groups: [19], subtopics: [82] },
+  21: { groups: [21] },
+  22: { groups: [22] },
+};
+
 
 // Встроенная карта: тема -> основные линии КИМ (Часть 1 и Часть 2).
 // Для каждой пары «тема + линия» импортируется не больше --per-topic задач.
@@ -205,26 +333,24 @@ const OGE_FALLBACK_PATTERNS = {
   measurements: TOPIC_PATTERNS.methods,
 };
 
-function egeLineToMeta(line) {
-  const n = Number(line);
-  if ([1, 2, 3, 4, 7, 8, 11, 12, 13, 16].includes(n)) return { part: 1, grading_rule: 'numeric', max_points: 1 };
-  if ([5, 9, 14, 18].includes(n)) return { part: 1, grading_rule: 'unordered_set', max_points: 2 };
-  if ([6, 10, 15, 17].includes(n)) return { part: 1, grading_rule: 'ordered_sequence', max_points: 2 };
-  if (n === 19) return { part: 1, grading_rule: 'measurement', max_points: 1 };
-  if (n === 20) return { part: 1, grading_rule: 'unordered_set', max_points: 1 };
-  const p2 = { 21: 3, 22: 2, 23: 2, 24: 3, 25: 3, 26: 4 };
-  if (p2[n] !== undefined) return { part: 2, grading_rule: 'manual', max_points: p2[n] };
+function lineToMeta(exam, line) {
+  const spec = lineSpec(exam, line);
+  if (spec) {
+    return {
+      part: defaultPart(exam, spec.line),
+      grading_rule: spec.grading_rule,
+      max_points: spec.max_points,
+    };
+  }
   return { part: 1, grading_rule: 'numeric', max_points: 1 };
 }
 
+function egeLineToMeta(line) {
+  return lineToMeta('EGE', line);
+}
+
 function ogeLineToMeta(line) {
-  const n = Number(line);
-  if ([1, 2, 12, 13, 15, 16].includes(n)) return { part: 1, grading_rule: 'ordered_sequence', max_points: 2 };
-  if ([3, 4].includes(n)) return { part: 1, grading_rule: 'numeric', max_points: 1 };
-  if (n >= 5 && n <= 10) return { part: 1, grading_rule: 'numeric', max_points: 1 };
-  if ([11, 14].includes(n)) return { part: 1, grading_rule: 'unordered_set', max_points: 2 };
-  if (n >= 17 && n <= 22) return { part: 2, grading_rule: 'manual', max_points: 3 };
-  return { part: 1, grading_rule: 'numeric', max_points: 1 };
+  return lineToMeta('OGE', line);
 }
 
 function sleep(ms) {
@@ -328,7 +454,8 @@ function writeDB(db) {
 // force=true используется в конце работы и при SIGINT, чтобы не потерять хвост.
 function checkpoint(state, force = false) {
   if (!state || state.dryRun || !state.dirty) return;
-  if (!force && (state.pending || 0) < CHECKPOINT_EVERY) return;
+  const every = Number(state.checkpointEvery) > 0 ? Number(state.checkpointEvery) : CHECKPOINT_EVERY;
+  if (!force && (state.pending || 0) < every) return;
   writeDB(state.db);
   console.log(`  💾 Чекпоинт: ${state.db.length} задач сохранено в tasks/db.json`);
   state.pending = 0;
@@ -1014,9 +1141,54 @@ function parseTaskFromRoot($, root, fallbackId, lineHint) {
 }
 
 const catalogCache = new Map();
+let catalogDocCache = null;
 
-async function fetchCatalog(exam) {
-  if (catalogCache.has(exam)) return catalogCache.get(exam);
+function emptyCatalogDoc() {
+  return { version: 1, updated_at: null, exams: {}, problem_index: {} };
+}
+
+// Кэш каталога /prob_catalog (JSON /newapi/catalog/types + индекс задач).
+// В индексе хранится точное соответствие source_id → линия/подтема, чтобы
+// размечать уже скачанные задачи без повторных запросов к сайту.
+function catalogDoc() {
+  if (catalogDocCache) return catalogDocCache;
+  if (fs.existsSync(CATALOG_CACHE_PATH)) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(CATALOG_CACHE_PATH, 'utf8'));
+      catalogDocCache = {
+        version: parsed.version || 1,
+        updated_at: parsed.updated_at || null,
+        exams: parsed.exams || {},
+        problem_index: parsed.problem_index || {},
+      };
+      return catalogDocCache;
+    } catch (e) {
+      console.warn(`  ⚠️  Не удалось прочитать кэш каталога: ${e.message}`);
+    }
+  }
+  catalogDocCache = emptyCatalogDoc();
+  return catalogDocCache;
+}
+
+function saveCatalogDoc() {
+  if (!catalogDocCache) return;
+  catalogDocCache.updated_at = new Date().toISOString();
+  try {
+    fs.writeFileSync(CATALOG_CACHE_PATH, JSON.stringify(catalogDocCache, null, 1), 'utf8');
+  } catch (e) {
+    console.warn(`  ⚠️  Не удалось сохранить кэш каталога: ${e.message}`);
+  }
+}
+
+async function fetchCatalog(exam, options = {}) {
+  if (!options.refresh && catalogCache.has(exam)) return catalogCache.get(exam);
+  if (!options.refresh) {
+    const cached = catalogDoc().exams[exam];
+    if (cached && Array.isArray(cached.groups) && cached.groups.length) {
+      catalogCache.set(exam, cached.groups);
+      return cached.groups;
+    }
+  }
   const base = DOMAINS[exam];
   const raw = await fetchJson(`${base}/newapi/catalog/types`, '{}');
   const data = JSON.parse(raw);
@@ -1027,8 +1199,39 @@ async function fetchCatalog(exam) {
   }
   const themes = type.catalogs[0].themes || [];
   if (!themes.length) throw new Error('Каталог сайта пуст');
+  catalogDoc().exams[exam] = {
+    catalog_url: `${base}/prob_catalog`,
+    api_url: `${base}/newapi/catalog/types`,
+    fetched_at: new Date().toISOString(),
+    groups: themes,
+  };
+  saveCatalogDoc();
   catalogCache.set(exam, themes);
   return themes;
+}
+
+function lookupProblem(exam, sourceId) {
+  if (!sourceId) return null;
+  const index = catalogDoc().problem_index[exam] || {};
+  return index[String(sourceId)] || null;
+}
+
+function indexProblem(exam, sourceId, cat) {
+  if (!sourceId || !cat) return false;
+  const doc = catalogDoc();
+  if (!doc.problem_index[exam]) doc.problem_index[exam] = {};
+  const map = doc.problem_index[exam];
+  const key = String(sourceId);
+  const next = {
+    line: Number(cat.line) || null,
+    group: cat.groupTitle || '',
+    subtopic_id: `theme_${cat.id}`,
+    subtopic_title: cat.topicTitle || '',
+  };
+  const prev = map[key];
+  if (prev && prev.subtopic_id === next.subtopic_id && prev.line === next.line) return false;
+  map[key] = next;
+  return true;
 }
 
 function groupNumber(group) {
@@ -1042,10 +1245,24 @@ function groupCategoriesDetailed(group, lineHint) {
   if (children.length) {
     return children
       .filter(ch => ch && ch.id != null)
-      .map(ch => ({ id: Number(ch.id), line, groupTitle: group.title || '', topicTitle: ch.title || '' }));
+      .map(ch => ({
+        id: Number(ch.id),
+        line,
+        groupTitle: group.title || '',
+        topicTitle: ch.title || '',
+        count: Number(ch.count) || 0,
+        subtopic_id: `theme_${Number(ch.id)}`,
+      }));
   }
   if (group.id != null) {
-    return [{ id: Number(group.id), line, groupTitle: group.title || '', topicTitle: group.title || '' }];
+    return [{
+      id: Number(group.id),
+      line,
+      groupTitle: group.title || '',
+      topicTitle: group.title || '',
+      count: Number(group.count) || 0,
+      subtopic_id: `theme_${Number(group.id)}`,
+    }];
   }
   return [];
 }
@@ -1147,6 +1364,47 @@ async function resolveCategoriesForPresetLine(exam, topic, line) {
   return [];
 }
 
+// Номер линии КИМ для категории каталога. Для ЕГЭ совпадает с номером группы,
+// для ОГЭ используется явная карта OGE_CATALOG_LINES (см. выше).
+function examLineForCatalogCategory(exam, groupLine, categoryId) {
+  const groupNo = Number(groupLine);
+  if (exam !== 'OGE') return groupNo || null;
+  for (const [line, map] of Object.entries(OGE_CATALOG_LINES)) {
+    if (!map.groups.includes(groupNo)) continue;
+    if (map.subtopics && !map.subtopics.includes(Number(categoryId))) continue;
+    return Number(line);
+  }
+  return groupNo || null;
+}
+
+// Все категории каталога, закреплённые за линией КИМ. Именно эта функция
+// используется для матрицы, индексации каталога и докачки линий.
+async function resolveCategoriesForExamLine(exam, line) {
+  const themes = await fetchCatalog(exam);
+  const lineNo = Number(line);
+  const groups = [];
+  if (exam === 'OGE') {
+    const map = OGE_CATALOG_LINES[lineNo];
+    if (!map) return [];
+    for (const groupNo of map.groups) {
+      const group = themes.find(g => groupNumber(g) === groupNo);
+      if (group) groups.push({ group, filter: map.subtopics || null });
+    }
+  } else {
+    const group = themes.find(g => groupNumber(g) === lineNo);
+    if (group) groups.push({ group, filter: null });
+  }
+  const result = [];
+  for (const { group, filter } of groups) {
+    let cats = groupCategoriesDetailed(group, lineNo);
+    if (filter) cats = cats.filter(cat => filter.includes(cat.id));
+    for (const cat of cats) {
+      result.push({ ...cat, line: lineNo, exam_line: lineNo });
+    }
+  }
+  return result;
+}
+
 async function resolveCategoryArg(exam, categoryId, lineHint) {
   try {
     const themes = await fetchCatalog(exam);
@@ -1154,7 +1412,15 @@ async function resolveCategoryArg(exam, categoryId, lineHint) {
       const children = Array.isArray(group.children) ? group.children : [];
       const child = children.find(ch => Number(ch.id) === Number(categoryId));
       if (child) {
-        return [{ id: Number(categoryId), line: groupNumber(group) || lineHint || null, groupTitle: group.title || '', topicTitle: child.title || '' }];
+        const line = examLineForCatalogCategory(exam, groupNumber(group), categoryId) || lineHint || null;
+        return [{
+          id: Number(categoryId),
+          line,
+          groupTitle: group.title || '',
+          topicTitle: child.title || '',
+          count: Number(child.count) || 0,
+          subtopic_id: `theme_${Number(categoryId)}`,
+        }];
       }
     }
     const group = themes.find(g => groupNumber(g) === Number(categoryId));
@@ -1208,6 +1474,42 @@ function primaryTopic(topics, topicArg) {
   return topics.find(t => !PARENT_TOPICS.has(t)) || topics[0] || 'GEN';
 }
 
+let validTopicKeysCache = null;
+
+function validTopicKeys() {
+  if (validTopicKeysCache) return validTopicKeysCache;
+  try {
+    const raw = JSON.parse(fs.readFileSync(TOPICS_PATH, 'utf8'));
+    const keys = new Set();
+    for (const [sectionKey, section] of Object.entries(raw)) {
+      keys.add(sectionKey);
+      for (const subKey of Object.keys(section.subtopics || {})) keys.add(subKey);
+    }
+    validTopicKeysCache = keys;
+  } catch {
+    validTopicKeysCache = new Set([...PRESET_TOPICS, ...PARENT_TOPICS,
+      'mechanics', 'mkt_thermo', 'electrodynamics', 'quantum', 'methods']);
+  }
+  return validTopicKeysCache;
+}
+
+// Узкие темы новой задачи: матрица подтемы + контентный классификатор
+// (mkt/vapors/em_oscillations в широких разделах ОГЭ и ЕГЭ).
+function topicsForImportedTask(exam, kimLine, subtopicId, text, topicArg) {
+  const matrix = readMatrix();
+  const extraKeys = topicArg && NARROW_TOPIC_KEYS.includes(topicArg) ? [topicArg] : [];
+  return buildTopicList({
+    exam,
+    line: kimLine,
+    subtopicId,
+    matrix,
+    text: String(text || ''),
+    existingTopics: lineToTopics(exam, kimLine, topicArg),
+    extraKeys,
+    validKeys: validTopicKeys(),
+  });
+}
+
 function generateId(db, exam, topic) {
   const examPart = (exam || 'TASK').toUpperCase();
   const topicPart = SHORT_TOPICS[topic] || String(topic || 'GEN').toUpperCase().slice(0, 3);
@@ -1246,6 +1548,8 @@ async function importOneRoot($, root, fallbackId, lineHint, state) {
   const header = extractTaskHeader($, root, fallbackId);
   const sourceId = header.sourceId || (fallbackId ? String(fallbackId) : '');
   if (!sourceId) return 'skip';
+  const cat = state.currentCategory || null;
+  const indexed = lookupProblem(state.exam, sourceId);
   const seenKey = `${state.exam}:${sourceId}`;
   if (state.seen.has(seenKey)) {
     console.log(`⏭️  Пропуск [${sourceId}] — уже в базе.`);
@@ -1260,9 +1564,20 @@ async function importOneRoot($, root, fallbackId, lineHint, state) {
     return 'fail';
   }
 
-  const kimLine = header.kimLine || content.kimLine || state.lineArg || lineHint || 1;
-  const topics = lineToTopics(state.exam, kimLine, state.topicArg);
-  const meta = state.exam === 'EGE' ? egeLineToMeta(kimLine) : ogeLineToMeta(kimLine);
+  // Линия и подтема берутся из категории каталога (/prob_catalog) — это
+  // точная привязка к КИМ, в отличие от «Тип N» на странице задачи.
+  const kimLine = (cat && cat.line) || header.kimLine || content.kimLine || (indexed && indexed.line) ||
+    state.lineArg || lineHint || 1;
+  const subtopicId = cat ? `theme_${cat.id}` : ((indexed && indexed.subtopic_id) || '');
+  const subtopicTitle = cat ? (cat.topicTitle || '') : ((indexed && indexed.subtopic_title) || '');
+  const topics = topicsForImportedTask(
+    state.exam,
+    kimLine,
+    subtopicId,
+    `${content.condLatex || ''}\n${content.solLatex || ''}`,
+    state.topicArg
+  );
+  const meta = lineToMeta(state.exam, kimLine);
   const newId = generateId(state.db, state.exam, primaryTopic(topics, state.topicArg));
 
   let condLatex;
@@ -1294,6 +1609,8 @@ async function importOneRoot($, root, fallbackId, lineHint, state) {
     exam: state.exam,
     part: meta.part,
     kim_line: kimLine,
+    subtopic_id: subtopicId,
+    subtopic_title: subtopicTitle,
     topics,
     grading_rule: meta.grading_rule,
     max_points: meta.max_points,
@@ -1319,11 +1636,26 @@ async function importOneRoot($, root, fallbackId, lineHint, state) {
   return 'ok';
 }
 
+// Индексируем все задачи страницы каталога: source_id → линия/подтема.
+// Это позволяет потом размечать уже скачанные задачи без повторных запросов.
+function indexPageRoots($, roots, cat, exam) {
+  if (!cat) return 0;
+  let added = 0;
+  roots.each((_, el) => {
+    const header = extractTaskHeader($, $(el), null);
+    if (header.sourceId && indexProblem(exam, header.sourceId, cat)) added++;
+  });
+  if (added) saveCatalogDoc();
+  return added;
+}
+
 async function processPageHtml(html, pageInfo, state, maxNew = null) {
   const $ = cheerio.load(html);
   let roots = $('.prob_maindiv');
   if (!roots.length && pageInfo.fallbackId) roots = $('body');
   if (!roots.length) return 'empty';
+  state.currentCategory = pageInfo.category || null;
+  indexPageRoots($, roots, pageInfo.category, state.exam);
   const startedAt = state.imported;
   for (let i = 0; i < roots.length; i++) {
     if (maxNew != null && state.imported - startedAt >= maxNew) return 'limit';
@@ -1360,6 +1692,515 @@ function groupCategoriesByLine(categories) {
     byLine.get(line).push(cat);
   }
   return Array.from(byLine.entries()).sort((a, b) => a[0] - b[0]);
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Эталонная матрица линий КИМ: tasks/kim_matrix.json
+// ───────────────────────────────────────────────────────────────────────────
+function readMatrix() {
+  try {
+    return JSON.parse(fs.readFileSync(MATRIX_PATH, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function matrixSubtopics(matrix, exam, line) {
+  const spec = matrix && matrix.exams && matrix.exams[exam];
+  if (!spec || !Array.isArray(spec.lines)) return null;
+  const row = spec.lines.find(item => Number(item.line) === Number(line));
+  return row && Array.isArray(row.subtopics) ? row.subtopics : null;
+}
+
+async function buildMatrixFile(exams = ['EGE', 'OGE']) {
+  const matrix = {
+    version: 1,
+    generated_at: new Date().toISOString(),
+    description: 'Эталонная матрица линий КИМ ЕГЭ (1–26) и ОГЭ (1–22) по физике. ' +
+      'Названия линий, формат ответа и баллы — по спецификации ФИПИ; ' +
+      'подтемы — категории каталога заданий (/prob_catalog).',
+    source: {
+      catalog_ege: 'https://phys-ege.sdamgia.ru/prob_catalog',
+      catalog_oge: 'https://phys-oge.sdamgia.ru/prob_catalog',
+      catalog_api: 'https://phys-ege.sdamgia.ru/newapi/catalog/types',
+    },
+    exams: {},
+  };
+
+  for (const exam of exams) {
+    const specs = LINE_SPECS[exam] || [];
+    const lines = [];
+    console.log(`\n📐 Матрица ${exam}: ${specs.length} линий`);
+    for (const spec of specs) {
+      let cats = [];
+      try {
+        cats = await resolveCategoriesForExamLine(exam, spec.line);
+      } catch (e) {
+        console.warn(`  ⚠️  ${exam} линия ${spec.line}: каталог недоступен (${e.message})`);
+      }
+      const catalogGroups = exam === 'OGE'
+        ? ((OGE_CATALOG_LINES[spec.line] || {}).groups || [])
+        : [spec.line];
+      lines.push({
+        line: spec.line,
+        part: defaultPart(exam, spec.line),
+        title: spec.title,
+        grading_rule: spec.grading_rule,
+        max_points: spec.max_points,
+        section: spec.section || null,
+        section_title: spec.section ? SECTION_TITLES[spec.section] : null,
+        catalog_groups: catalogGroups,
+        subtopics: cats.map(cat => ({
+          id: `theme_${cat.id}`,
+          catalog_id: cat.id,
+          title: cat.topicTitle,
+          catalog_count: cat.count || 0,
+        })),
+      });
+      console.log(`  ${String(spec.line).padStart(2)}. ${spec.title} — подтем: ${cats.length}`);
+    }
+    matrix.exams[exam] = {
+      title: exam === 'EGE' ? 'ЕГЭ по физике' : 'ОГЭ по физике',
+      max_line: MAX_LINE[exam],
+      parts: exam === 'EGE'
+        ? [
+          { part: 1, title: 'Часть 1. Задания с кратким ответом', lines: [1, 20] },
+          { part: 2, title: 'Часть 2. Задания с развёрнутым ответом', lines: [21, 26] },
+        ]
+        : [
+          { part: 1, title: 'Часть 1. Задания с кратким ответом', lines: [1, 16] },
+          { part: 2, title: 'Часть 2. Задания с развёрнутым ответом', lines: [17, 22] },
+        ],
+      sections: SECTION_TITLES,
+      lines,
+    };
+  }
+
+  fs.writeFileSync(MATRIX_PATH, JSON.stringify(matrix, null, 2), 'utf8');
+  console.log(`\n✅ Матрица сохранена: ${MATRIX_PATH}`);
+  return matrix;
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Индексация каталога: source_id → линия КИМ + точная подтема
+// ───────────────────────────────────────────────────────────────────────────
+async function indexCatalog(exam) {
+  const maxLine = MAX_LINE[exam] || 26;
+  let pages = 0;
+  let problems = 0;
+  console.log(`\n🗂  Индексация каталога ${exam} (${maxLine} линий)...`);
+  for (let line = 1; line <= maxLine; line++) {
+    let cats = [];
+    try {
+      cats = await resolveCategoriesForExamLine(exam, line);
+    } catch (e) {
+      console.warn(`  ⚠️  ${exam} линия ${line}: ${e.message}`);
+      continue;
+    }
+    console.log(`\n── Линия ${line}: категорий ${cats.length}`);
+    for (const cat of cats) {
+      if (!cat.count) {
+        console.log(`   ⏭  theme_${cat.id} | ${cat.topicTitle} — 0 задач`);
+        continue;
+      }
+      try {
+        const html = await fetchHtml(`${DOMAINS[exam]}/test?theme=${cat.id}&print=true`);
+        const $ = cheerio.load(html);
+        const roots = $('.prob_maindiv');
+        const added = indexPageRoots($, roots, cat, exam);
+        pages++;
+        problems += roots.length;
+        console.log(`   ✔ theme_${cat.id} | ${cat.topicTitle}: ${roots.length} задач (+${added} в индекс)`);
+      } catch (e) {
+        console.warn(`   ⚠️  theme_${cat.id}: ${e.message}`);
+      }
+    }
+  }
+  saveCatalogDoc();
+  const index = catalogDoc().problem_index[exam] || {};
+  console.log(`\n✅ Индекс ${exam}: страниц ${pages}, задач ${problems}, записей в кэше ${Object.keys(index).length}`);
+  return Object.keys(index).length;
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Докачка линий: гарантируем не меньше minPerLine задач на каждую линию КИМ
+// ───────────────────────────────────────────────────────────────────────────
+function countLineTasks(db, exam, line) {
+  return db.filter(t => t.exam === exam && Number(t.kim_line) === Number(line)).length;
+}
+
+async function runCoverage(state, exam, minPerLine, linesFilter = null) {
+  const maxLine = MAX_LINE[exam] || 26;
+  const startedAt = Date.now();
+  const importedAtStart = state.imported;
+  const stats = [];
+
+  console.log(`\n🚀 Покрытие ${exam}: минимум ${minPerLine} задач на линию (1–${maxLine})`);
+
+  for (let line = 1; line <= maxLine; line++) {
+    if (linesFilter && !linesFilter.includes(line)) continue;
+    let count = countLineTasks(state.db, exam, line);
+    if (count >= minPerLine) {
+      console.log(`✓ Линия ${line}: ${count} задач — достаточно`);
+      stats.push({ line, before: count, after: count, target: minPerLine, ok: true });
+      continue;
+    }
+
+    console.log(`\n━━━ Линия ${line}: ${count}/${minPerLine} — докачиваем ━━━`);
+    const before = count;
+    let cats = [];
+    try {
+      cats = await resolveCategoriesForExamLine(exam, line);
+    } catch (e) {
+      console.warn(`  ⚠️  Линия ${line}: каталог недоступен (${e.message})`);
+    }
+
+    for (const cat of cats) {
+      count = countLineTasks(state.db, exam, line);
+      if (count >= minPerLine) break;
+      if (!cat.count) continue;
+      const remaining = minPerLine - count;
+      console.log(`  📥 theme_${cat.id} | ${cat.topicTitle} (нужно ещё ${remaining})`);
+      try {
+        const html = await fetchHtml(`${DOMAINS[exam]}/test?theme=${cat.id}&print=true`);
+        await processPageHtml(html, { line, category: cat }, state, remaining);
+      } catch (e) {
+        console.error(`  ❌ theme_${cat.id}: ${e.message}`);
+        state.failed++;
+      }
+    }
+
+    count = countLineTasks(state.db, exam, line);
+    if (count < minPerLine) {
+      console.warn(`⚠️  Линия ${line}: ${count} задач (каталог исчерпан, цель ${minPerLine})`);
+    } else {
+      console.log(`✅ Линия ${line}: ${count} задач`);
+    }
+    stats.push({ line, before, after: count, target: minPerLine, ok: count >= minPerLine });
+  }
+
+  const seconds = Math.round((Date.now() - startedAt) / 1000);
+  const short = stats.filter(s => !s.ok);
+  console.log(`\n🏁 Покрытие ${exam} завершено: импортировано ${state.imported - importedAtStart}, ` +
+    `линий ниже цели ${short.length}${short.length ? ' (' + short.map(s => s.line + ': ' + s.after).join(', ') + ')' : ''}, ${seconds} с.`);
+  return stats;
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Гарантированное покрытие подтем: минимум N задач на каждый subtopic_id
+// ───────────────────────────────────────────────────────────────────────────
+function countSubtopicTasks(db, exam, subtopicId) {
+  const id = String(subtopicId);
+  return db.filter(t => t.exam === exam && String(t.subtopic_id || '') === id).length;
+}
+
+async function runEnsureSubtopics(state, exam, minPerSubtopic, linesFilter = null) {
+  const matrix = readMatrix();
+  const spec = matrix && matrix.exams && matrix.exams[exam];
+  if (!spec || !Array.isArray(spec.lines)) {
+    throw new Error(`Нет матрицы для ${exam}: проверьте tasks/kim_matrix.json`);
+  }
+
+  const startedAt = Date.now();
+  const importedAtStart = state.imported;
+  const stats = [];
+  const maxPages = 12;
+
+  console.log(`\n🚀 Покрытие подтем ${exam}: минимум ${minPerSubtopic} задач на каждый subtopic_id`);
+
+  for (const line of spec.lines) {
+    const lineNo = Number(line.line);
+    if (linesFilter && !linesFilter.includes(lineNo)) continue;
+
+    let cats = [];
+    try {
+      cats = await resolveCategoriesForExamLine(exam, lineNo);
+    } catch (e) {
+      console.warn(`  ⚠️  ${exam} линия ${lineNo}: каталог недоступен (${e.message})`);
+    }
+    const catById = new Map(cats.map(cat => [String(cat.id), cat]));
+
+    for (const sub of line.subtopics || []) {
+      const subtopicId = String(sub.id);
+      const before = countSubtopicTasks(state.db, exam, subtopicId);
+      if (before >= minPerSubtopic) {
+        console.log(`✓ ${exam} ${lineNo} | ${subtopicId} ${sub.title}: ${before} задач — достаточно`);
+        stats.push({ exam, line: lineNo, subtopicId, title: sub.title, before, after: before, target: minPerSubtopic, ok: true });
+        continue;
+      }
+
+      const catalogId = sub.catalog_id != null
+        ? Number(sub.catalog_id)
+        : Number(subtopicId.replace(/^theme_/, ''));
+      const cat = catById.get(String(catalogId)) || {
+        id: catalogId,
+        line: lineNo,
+        topicTitle: sub.title || subtopicId,
+        count: Number(sub.catalog_count) || 0,
+      };
+
+      console.log(`\n━━━ ${exam} ${lineNo} | ${subtopicId} ${sub.title}: ${before}/${minPerSubtopic} — докачиваем ━━━`);
+      state.currentCategory = { ...cat, line: lineNo };
+      state.progress = {
+        topic: `${exam} ${lineNo}: ${cat.topicTitle || sub.title}`,
+        line: lineNo,
+        start: state.imported,
+        target: Math.max(1, minPerSubtopic - before),
+      };
+
+      let page = 1;
+      let failed = false;
+      while (countSubtopicTasks(state.db, exam, subtopicId) < minPerSubtopic && page <= maxPages) {
+        const countBeforePage = countSubtopicTasks(state.db, exam, subtopicId);
+        const importedBeforePage = state.imported;
+        try {
+          const url = `${DOMAINS[exam]}/test?theme=${catalogId}&print=true&page=${page}`;
+          const html = await fetchHtml(url);
+          const result = await processPageHtml(
+            html,
+            { line: lineNo, category: state.currentCategory, page },
+            state,
+            minPerSubtopic - countBeforePage
+          );
+          const countAfterPage = countSubtopicTasks(state.db, exam, subtopicId);
+          const added = state.imported - importedBeforePage;
+          console.log(`  📄 page ${page}: ${countBeforePage} → ${countAfterPage} задач (новых ${added})`);
+          if (result === 'stop' || result === 'empty') break;
+          if (countAfterPage >= minPerSubtopic) break;
+          // Сайт отдаёт всю категорию одной страницей, поэтому повторная
+          // страница без новых задач означает, что каталог исчерпан.
+          if (added === 0) break;
+          page++;
+        } catch (e) {
+          failed = true;
+          console.error(`  ❌ ${subtopicId} page ${page}: ${e.message}`);
+          state.failed++;
+          break;
+        }
+      }
+
+      state.progress = null;
+      const after = countSubtopicTasks(state.db, exam, subtopicId);
+      if (after < minPerSubtopic) {
+        const reason = failed ? 'ошибка каталога' : 'каталог исчерпан';
+        console.warn(`⚠️  ${subtopicId}: ${after} задач (${reason}, цель ${minPerSubtopic})`);
+      } else {
+        console.log(`✅ ${subtopicId}: ${after} задач`);
+      }
+      stats.push({
+        exam,
+        line: lineNo,
+        subtopicId,
+        title: sub.title,
+        before,
+        after,
+        target: minPerSubtopic,
+        ok: after >= minPerSubtopic,
+      });
+      checkpoint(state, true);
+    }
+  }
+
+  const seconds = Math.round((Date.now() - startedAt) / 1000);
+  const short = stats.filter(row => !row.ok);
+  console.log(`\n🏁 Покрытие подтем ${exam} завершено: импортировано ${state.imported - importedAtStart}, ` +
+    `подтем ниже цели ${short.length}${short.length ? ' (' + short.map(row => `${row.subtopicId}:${row.after}`).join(', ') + ')' : ''}, ${seconds} с.`);
+  return stats;
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Заполнение subtopic_id/subtopic_title у уже скачанных задач
+// ───────────────────────────────────────────────────────────────────────────
+function pickSubtopic(topics, subtopics) {
+  if (!subtopics || !subtopics.length) return null;
+  const keys = (topics || []).filter(t => !PARENT_TOPICS.has(t))
+    .concat((topics || []).filter(t => PARENT_TOPICS.has(t)));
+  for (const key of keys) {
+    const pattern = TOPIC_PATTERNS[key];
+    if (!pattern) continue;
+    const hit = subtopics.find(sub => pattern.test(sub.title || ''));
+    if (hit) return hit;
+  }
+  return subtopics[0];
+}
+
+async function backfillSubtopics(db, exam) {
+  const matrix = readMatrix();
+  const index = catalogDoc().problem_index[exam] || {};
+  const subsCache = new Map();
+  let changed = 0;
+  let byIndex = 0;
+  let byTopic = 0;
+
+  const subtopicsForLine = async (line) => {
+    const key = String(line);
+    if (subsCache.has(key)) return subsCache.get(key);
+    let subs = matrixSubtopics(matrix, exam, line);
+    if (!subs) {
+      try {
+        const cats = await resolveCategoriesForExamLine(exam, line);
+        subs = cats.map(cat => ({ id: `theme_${cat.id}`, title: cat.topicTitle }));
+      } catch {
+        subs = [];
+      }
+    }
+    subsCache.set(key, subs);
+    return subs;
+  };
+
+  for (const task of db) {
+    if (task.exam !== exam) continue;
+    if (task.subtopic_id && task.subtopic_title) continue;
+
+    const hit = task.source_id ? index[String(task.source_id)] : null;
+    if (hit && hit.subtopic_id && hit.subtopic_title) {
+      task.subtopic_id = hit.subtopic_id;
+      task.subtopic_title = hit.subtopic_title;
+      changed++;
+      byIndex++;
+      continue;
+    }
+
+    const subs = await subtopicsForLine(task.kim_line);
+    let pick = null;
+    if (task.subtopic_title) {
+      pick = subs.find(sub => sub.title === task.subtopic_title) ||
+        subs.find(sub => (sub.id || '') === (task.subtopic_id || ''));
+    }
+    if (!pick) pick = pickSubtopic(task.topics, subs);
+    if (pick) {
+      task.subtopic_id = task.subtopic_id || pick.id;
+      task.subtopic_title = pick.title;
+      changed++;
+      byTopic++;
+    }
+  }
+
+  if (changed) writeDB(db);
+  console.log(`🧩 ${exam}: размечено задач ${changed} (по индексу каталога ${byIndex}, по теме ${byTopic})`);
+  return { changed, byIndex, byTopic };
+}
+
+async function backfillAll(db, exams) {
+  for (const exam of exams) await backfillSubtopics(db, exam);
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Сводный отчёт по покрытию линий КИМ
+// ───────────────────────────────────────────────────────────────────────────
+function buildCoverageReport(db, options = {}) {
+  const matrix = readMatrix();
+  const generatedAt = new Date().toLocaleString('ru-RU');
+  const lines = [];
+
+  for (const exam of ['EGE', 'OGE']) {
+    const specs = LINE_SPECS[exam] || [];
+    const rows = specs.map(spec => {
+      const tasks = db.filter(t => t.exam === exam && Number(t.kim_line) === Number(spec.line));
+      const subsById = new Map();
+      const titlesById = new Map();
+      for (const task of tasks) {
+        const id = String(task.subtopic_id || '');
+        if (!id) continue;
+        subsById.set(id, (subsById.get(id) || 0) + 1);
+        if (task.subtopic_title) titlesById.set(id, task.subtopic_title);
+      }
+      const matrixSubs = matrixSubtopics(matrix, exam, spec.line) ||
+        (spec.subtopics || []);
+      const matrixIds = new Set(matrixSubs.map(sub => String(sub.id || '')).filter(Boolean));
+      const filled = matrixIds.size
+        ? [...matrixIds].filter(id => (subsById.get(id) || 0) > 0).length
+        : subsById.size;
+      return {
+        line: spec.line,
+        part: defaultPart(exam, spec.line),
+        title: spec.title,
+        count: tasks.length,
+        subtopics: filled,
+        subtopicsMatrix: matrixSubs.length,
+        matrixSubtopics: matrixSubs,
+        subtopicList: [...subsById.entries()].map(([id, n]) => [id, n, titlesById.get(id) || id]),
+      };
+    });
+    lines.push({ exam, rows });
+  }
+
+  const md = [];
+  md.push('# Покрытие базы задач по линиям КИМ');
+  md.push('');
+  md.push(`Сформировано: ${generatedAt}. Матрица: \`tasks/kim_matrix.json\`, база: \`tasks/db.json\`.`);
+  md.push('');
+  for (const { exam, rows } of lines) {
+    const total = rows.reduce((sum, row) => sum + row.count, 0);
+    md.push(`## ${exam === 'EGE' ? 'ЕГЭ' : 'ОГЭ'} — линии 1–${rows.length}`);
+    md.push('');
+    md.push(`Всего задач: **${total}**.`);
+    md.push('');
+    md.push('| Линия | Часть | Название | Задач | Подтем (матрица / база) |');
+    md.push('|---:|:---:|---|---:|---:|');
+    for (const row of rows) {
+      md.push(`| ${row.line} | ${row.part} | ${row.title.replace(/\|/g, '\\|')} | ${row.count} | ${row.subtopicsMatrix} / ${row.subtopics} |`);
+    }
+    md.push('');
+  }
+
+  md.push('## Подтемы по линиям');
+  md.push('');
+  md.push('В скобках — количество задач в базе по подтеме; `—` означает, что подтема есть в матрице, но задач по ней пока нет.');
+  md.push('');
+  for (const { exam, rows } of lines) {
+    md.push(`### ${exam}`);
+    md.push('');
+    for (const row of rows) {
+      const used = new Map(row.subtopicList.map(([id, n, title]) => [String(id), { n, title }]));
+      const parts = row.matrixSubtopics.map(sub => {
+        const id = String(sub.id || '');
+        const hit = used.get(id);
+        const n = hit ? hit.n : 0;
+        used.delete(id);
+        return `${sub.title} (${n})`;
+      });
+      for (const [, { n, title }] of used) parts.push(`${title} (${n}, вне матрицы)`);
+      md.push(`- **${row.line}. ${row.title}** — задач ${row.count}, подтем ${row.subtopics}/${row.subtopicsMatrix}: ${parts.join('; ')}`);
+    }
+    md.push('');
+  }
+
+  md.push('## Узкие темы (16)');
+  md.push('');
+  md.push('| Тема | ЕГЭ | ОГЭ |');
+  md.push('|---|---:|---:|');
+  for (const key of NARROW_TOPIC_KEYS) {
+    const ege = db.filter(t => t.exam === 'EGE' && Array.isArray(t.topics) && t.topics.includes(key)).length;
+    const oge = db.filter(t => t.exam === 'OGE' && Array.isArray(t.topics) && t.topics.includes(key)).length;
+    md.push(`| ${key} | ${ege} | ${oge} |`);
+  }
+  md.push('');
+
+  const text = md.join('\n');
+  if (options.write !== false) {
+    const reportPath = path.join(ROOT, 'tasks', 'kim_coverage_report.md');
+    fs.writeFileSync(reportPath, text, 'utf8');
+    console.log(`\n📄 Отчёт сохранён: ${reportPath}`);
+  }
+
+  // Консольная таблица (то, что попадает в итоговый отчёт задачи).
+  for (const { exam, rows } of lines) {
+    console.log(`\n${exam === 'EGE' ? 'ЕГЭ' : 'ОГЭ'}: линия | название | задач | подтем (матрица/база)`);
+    for (const row of rows) {
+      console.log(`  ${String(row.line).padStart(2)} | ${row.title} | ${row.count} | ${row.subtopicsMatrix}/${row.subtopics}`);
+    }
+  }
+
+  console.log('\nУзкие темы (16):');
+  for (const exam of ['EGE', 'OGE']) {
+    const parts = NARROW_TOPIC_KEYS.map(key => {
+      const n = db.filter(t => t.exam === exam && Array.isArray(t.topics) && t.topics.includes(key)).length;
+      return `${key}=${n}`;
+    });
+    console.log(`  ${exam}: ${parts.join(', ')}`);
+  }
+  return { lines, text };
 }
 
 async function runPreset(state, preset, perTopic) {
@@ -1401,7 +2242,7 @@ async function runPreset(state, preset, perTopic) {
         console.log(`  📥 Категория ${cat.id}${cat.topicTitle ? ' | ' + cat.topicTitle : ''}`);
         try {
           const html = await fetchHtml(`${DOMAINS[exam]}/test?theme=${cat.id}&print=true`);
-          const res = await processPageHtml(html, { line }, state, remaining);
+          const res = await processPageHtml(html, { line, category: cat }, state, remaining);
           if (res === 'empty') console.warn('  ⚠️  На странице не найдено задач');
         } catch (e) {
           console.error(`  ❌ Категория ${cat.id}: ${e.message}`);
@@ -1428,7 +2269,9 @@ async function main() {
     process.exit(1);
   }
 
-  const exam = preset ? PRESETS[preset] : String(args.exam || 'EGE').toUpperCase();
+  const examArg = preset ? PRESETS[preset] : String(args.exam || 'EGE').toUpperCase();
+  const exams = examArg === 'ALL' ? ['EGE', 'OGE'] : [examArg];
+  const exam = exams[0];
   const topicArg = args.topic || args.topics || null;
   const lineArg = args.line != null ? Number(args.line) : null;
   const perTopic = preset
@@ -1442,22 +2285,45 @@ async function main() {
   const urlArg = args.url || null;
   const dryRun = !!(args['dry-run'] || args.dryRun);
 
+  const buildMatrixMode = !!(args['build-matrix'] || args.buildMatrix || args.matrix);
+  const indexMode = !!(args['index-catalog'] || args.indexCatalog);
+  const backfillMode = !!(args['backfill-subtopics'] || args.backfillSubtopics);
+  const coverageMode = !!(args['ensure-coverage'] || args.ensureCoverage || args.coverage);
+  const ensureSubtopicsMode = !!(args['ensure-subtopics'] || args.ensureSubtopics);
+  const reportMode = !!(args['coverage-report'] || args.coverageReport);
+  const hasServiceMode = buildMatrixMode || indexMode || backfillMode || coverageMode || ensureSubtopicsMode || reportMode;
+  const minPerLine = args['min-per-line'] != null ? Number(args['min-per-line']) : 25;
+  const minPerSubtopic = args['min-per-subtopic'] != null ? Number(args['min-per-subtopic']) : 35;
+  const linesFilter = args.lines
+    ? String(args.lines).split(',').map(Number).filter(n => Number.isInteger(n) && n > 0)
+    : null;
+
   if (preset && (!Number.isInteger(perTopic) || perTopic < 1)) {
     console.error('❌ --per-topic должен быть целым положительным числом, например --per-topic=50');
     process.exit(1);
   }
   if (!DOMAINS[exam]) {
-    console.error(`❌ Неизвестный экзамен: ${exam}. Используйте --exam=EGE или --exam=OGE`);
+    console.error(`❌ Неизвестный экзамен: ${examArg}. Используйте --exam=EGE, --exam=OGE или --exam=ALL`);
     process.exit(1);
   }
-  if (!preset && !idsArg && !catArg && !topicArg && !lineArg && !urlArg) {
+  if (hasServiceMode && (!Number.isInteger(minPerLine) || minPerLine < 1)) {
+    console.error('❌ --min-per-line должен быть целым положительным числом, например --min-per-line=25');
+    process.exit(1);
+  }
+  if (ensureSubtopicsMode && (!Number.isInteger(minPerSubtopic) || minPerSubtopic < 1)) {
+    console.error('❌ --min-per-subtopic должен быть целым положительным числом, например --min-per-subtopic=35');
+    process.exit(1);
+  }
+  if (!preset && !hasServiceMode && !idsArg && !catArg && !topicArg && !lineArg && !urlArg) {
     console.error('❌ Укажите один из аргументов: --preset, --ids, --topic, --category, --line, --url');
+    console.error('   Служебные режимы: --build-matrix, --index-catalog, --backfill-subtopics,');
+    console.error('   --ensure-coverage --min-per-line=25, --ensure-subtopics --min-per-subtopic=35, --coverage-report');
     console.error('   Пример: node bulk_import.js --preset=ege_full --per-topic=50');
     process.exit(1);
   }
 
   console.log('\n══════════════════════════════════════════════════');
-  console.log(`  BULK IMPORT — ${exam} | ${new Date().toLocaleString('ru-RU')}${preset ? ` | preset ${preset} (${perTopic}/тема-линия)` : ''}${dryRun ? ' | DRY RUN' : ''}`);
+  console.log(`  BULK IMPORT — ${examArg} | ${new Date().toLocaleString('ru-RU')}${preset ? ` | preset ${preset} (${perTopic}/тема-линия)` : ''}${dryRun ? ' | DRY RUN' : ''}`);
   console.log('══════════════════════════════════════════════════\n');
 
   ensureImagesDir();
@@ -1466,18 +2332,44 @@ async function main() {
     exam, topicArg, lineArg, limit, dryRun, db,
     seen: new Set(db.filter(t => t.source_id).map(t => `${t.exam}:${t.source_id}`)),
     imported: 0, skipped: 0, failed: 0,
-    pending: 0, dirty: false, progress: null,
+    pending: 0, dirty: false, progress: null, currentCategory: null,
+    checkpointEvery: ensureSubtopicsMode ? 20 : CHECKPOINT_EVERY,
   };
 
   const onSigint = () => {
     console.warn('\n⏹️  Получен SIGINT, сохраняю базу...');
     checkpoint(state, true);
+    saveCatalogDoc();
     process.exit(130);
   };
   process.once('SIGINT', onSigint);
 
   try {
-    if (preset) {
+    if (hasServiceMode) {
+      if (buildMatrixMode) await buildMatrixFile(exams);
+      if (indexMode) {
+        for (const ex of exams) await indexCatalog(ex);
+      }
+      if (backfillMode) await backfillAll(state.db, exams);
+      if (coverageMode) {
+        for (const ex of exams) {
+          state.exam = ex;
+          await runCoverage(state, ex, minPerLine, linesFilter);
+        }
+        // после докачки размечаем подтемы у всех новых задач
+        await backfillAll(state.db, exams);
+      }
+      if (ensureSubtopicsMode) {
+        for (const ex of exams) {
+          state.exam = ex;
+          await runEnsureSubtopics(state, ex, minPerSubtopic, linesFilter);
+        }
+        await backfillAll(state.db, exams);
+      }
+      if (reportMode || coverageMode || backfillMode || ensureSubtopicsMode) buildCoverageReport(state.db);
+      checkpoint(state, true);
+      saveCatalogDoc();
+    } else if (preset) {
       await runPreset(state, preset, perTopic);
     } else if (idsArg && idsArg.length) {
       console.log(`📋 Режим --ids: ${idsArg.length}`);
@@ -1507,7 +2399,7 @@ async function main() {
           if (limit && state.imported >= limit) break;
           console.log(`📚 Категория ${cat.id}${cat.groupTitle ? ' | ' + cat.groupTitle : ''}`);
           const html = await fetchHtml(`${DOMAINS[exam]}/test?theme=${cat.id}&print=true`);
-          const res = await processPageHtml(html, { line: lineArg || cat.line }, state);
+          const res = await processPageHtml(html, { line: lineArg || cat.line, category: cat }, state);
           if (res === 'empty') console.warn('  ⚠️  На странице не найдено задач');
         }
       } else {
@@ -1550,7 +2442,7 @@ async function main() {
         if (limit && state.imported >= limit) break;
         console.log(`\n📥 Категория ${cat.id}${cat.topicTitle ? ' | ' + cat.topicTitle : ''}${cat.line ? ' | линия ' + cat.line : ''}`);
         const html = await fetchHtml(`${DOMAINS[exam]}/test?theme=${cat.id}&print=true`);
-        const res = await processPageHtml(html, { line: lineArg || cat.line }, state);
+        const res = await processPageHtml(html, { line: lineArg || cat.line, category: cat }, state);
         if (res === 'empty') console.warn('  ⚠️  На странице не найдено задач');
       }
     }
@@ -1601,6 +2493,24 @@ module.exports = {
   resolveCategoriesForTopicLine,
   resolveCategoriesForPresetLine,
   runPreset,
+  // матрица КИМ, кэш каталога и покрытие линий
+  EGE_LINE_SPECS,
+  OGE_LINE_SPECS,
+  OGE_CATALOG_LINES,
+  SECTION_TITLES,
+  lineSpec,
+  lineToMeta,
+  resolveCategoriesForExamLine,
+  examLineForCatalogCategory,
+  buildMatrixFile,
+  indexCatalog,
+  backfillSubtopics,
+  runCoverage,
+  runEnsureSubtopics,
+  buildCoverageReport,
+  catalogDoc,
+  saveCatalogDoc,
+  lookupProblem,
 };
 
 

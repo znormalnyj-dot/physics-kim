@@ -361,6 +361,676 @@
       gap: 10px;
     }
 
+    /* ── Конструктор по линиям КИМ ─────────────────────────────────────── */
+    .preset-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 7px;
+      padding: 0 16px 14px;
+    }
+
+    .preset-btn {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink-soft);
+      border-radius: 9px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.2;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .preset-btn:hover {
+      background: var(--surface-soft);
+      border-color: var(--line-strong);
+    }
+
+    .preset-btn.is-active {
+      color: var(--blue-dark);
+      background: var(--blue-soft);
+      border-color: #bfdbfe;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.07);
+    }
+
+    .preset-btn.danger {
+      color: #b91c1c;
+      border-color: #fecaca;
+      background: #fff7f7;
+    }
+
+    .preset-btn.danger:hover { background: var(--red-soft); }
+
+    .preset-sep {
+      width: 1px;
+      align-self: stretch;
+      min-height: 24px;
+      background: var(--line);
+      margin: 0 3px;
+    }
+
+    /* ── Двухуровневый конструктор тем ─────────────────────────────────── */
+    .theme-builder {
+      margin: 0 16px 16px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: linear-gradient(180deg, #fbfdff, #f7faff);
+      overflow: hidden;
+    }
+
+    .theme-builder-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 13px 14px 10px;
+    }
+
+    .theme-builder-head h3 {
+      margin: 0 0 3px;
+      font-size: 13.5px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .theme-builder-head p {
+      margin: 0;
+      max-width: 660px;
+      font-size: 11.8px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .theme-mode-tag {
+      display: inline-block;
+      margin-left: 5px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: var(--violet-soft);
+      border: 1px solid #ddd6fe;
+      color: #6d28d9;
+      font-size: 10px;
+      font-weight: 800;
+      vertical-align: 1px;
+    }
+
+    .theme-builder-summary {
+      flex: none;
+      max-width: 290px;
+      padding: 5px 9px;
+      border-radius: 8px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      color: var(--ink-soft);
+      font-size: 11.2px;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .theme-sections {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+      gap: 9px;
+      padding: 0 13px 13px;
+    }
+
+    .theme-section {
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--surface);
+      overflow: hidden;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .theme-section.is-active {
+      border-color: #bfdbfe;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.05);
+    }
+
+    .theme-section-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 8px 9px;
+      border: 0;
+      border-bottom: 1px solid #eef2f7;
+      background: #f8fafc;
+      color: var(--ink-soft);
+      text-align: left;
+    }
+
+    .theme-section-head:hover { background: var(--blue-soft); }
+
+    .theme-section-check {
+      width: 15px;
+      height: 15px;
+      border: 1.5px solid var(--line-strong);
+      border-radius: 4px;
+      background: var(--surface);
+      flex: none;
+      position: relative;
+    }
+
+    .theme-section.is-active .theme-section-check {
+      border-color: var(--blue);
+      background: var(--blue);
+    }
+
+    .theme-section.is-active .theme-section-check::after {
+      content: "";
+      position: absolute;
+      left: 3.5px;
+      top: 1px;
+      width: 4px;
+      height: 8px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .theme-section.is-partial .theme-section-check {
+      border-color: var(--blue);
+      background: linear-gradient(135deg, var(--blue) 50%, #fff 50%);
+    }
+
+    .theme-section.is-partial .theme-section-check::after { display: none; }
+
+    .theme-section-name {
+      flex: 1;
+      min-width: 0;
+      font-size: 11.8px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .theme-section-count {
+      flex: none;
+      color: var(--muted);
+      font-size: 10.5px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .theme-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      padding: 8px;
+    }
+
+    .theme-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      max-width: 100%;
+      padding: 5px 7px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface-soft);
+      color: var(--ink-soft);
+      font-size: 10.8px;
+      font-weight: 700;
+      line-height: 1.2;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+
+    .theme-chip:hover {
+      border-color: var(--line-strong);
+      background: var(--surface);
+    }
+
+    .theme-chip.is-selected {
+      border-color: #bfdbfe;
+      background: var(--blue-soft);
+      color: var(--blue-dark);
+    }
+
+    .theme-chip.is-empty { opacity: 0.55; }
+
+    .theme-chip-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      border: 1.5px solid var(--line-strong);
+      background: var(--surface);
+      flex: none;
+    }
+
+    .theme-chip.is-selected .theme-chip-dot {
+      border-color: var(--blue);
+      background: var(--blue);
+    }
+
+    .theme-chip-count {
+      padding: 0 4px;
+      border-radius: 999px;
+      background: rgba(100, 116, 139, 0.11);
+      color: var(--muted);
+      font-size: 9.8px;
+      font-weight: 800;
+    }
+
+    .theme-chip.is-selected .theme-chip-count {
+      background: rgba(37, 99, 235, 0.12);
+      color: var(--blue-dark);
+    }
+
+    .auto-distribute {
+      border-top: 1px dashed #dbe4f0;
+      background: rgba(255, 255, 255, 0.72);
+      padding: 10px 13px 12px;
+    }
+
+    .auto-distribute-title {
+      margin-bottom: 7px;
+      font-size: 11.8px;
+      font-weight: 800;
+      color: var(--ink-soft);
+    }
+
+    .auto-distribute-row {
+      display: flex;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .auto-count-field {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 112px;
+      color: var(--muted);
+      font-size: 10.6px;
+      font-weight: 700;
+    }
+
+    .auto-count-field input {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 800;
+      outline: none;
+    }
+
+    .auto-count-field input:focus {
+      border-color: #93c5fd;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .auto-distribute-btn {
+      padding: 7px 11px;
+      border: 1px solid #bfdbfe;
+      border-radius: 9px;
+      background: var(--blue-soft);
+      color: var(--blue-dark);
+      font-size: 11.4px;
+      font-weight: 800;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .auto-distribute-btn:hover {
+      background: #dbeafe;
+      border-color: #93c5fd;
+    }
+
+    .auto-hint {
+      flex: 1 1 210px;
+      min-width: 160px;
+      color: var(--muted);
+      font-size: 10.9px;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    .auto-hint.is-warn { color: var(--amber); }
+    .auto-hint.is-ok { color: var(--green); }
+
+    .line-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .part-group {
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .part-group-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 13px;
+      background: linear-gradient(180deg, #f8fafc, #f4f7fc);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .part-group-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.8px;
+      font-weight: 800;
+      color: var(--ink-soft);
+      letter-spacing: -0.01em;
+    }
+
+    .part-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--blue);
+      flex: none;
+    }
+
+    .part-dot.part2 { background: var(--violet); }
+
+    .part-group-count {
+      font-size: 11.4px;
+      font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .line-item {
+      border-bottom: 1px solid #eef2f7;
+      background: var(--surface);
+      transition: background 0.15s ease;
+    }
+
+    .line-item:last-child { border-bottom: 0; }
+    .line-item.has-count { background: #fcfdff; }
+    .line-item.is-open { background: #fbfdff; }
+
+    .line-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 11px;
+      min-height: 54px;
+    }
+
+    .line-counter {
+      display: inline-flex;
+      align-items: stretch;
+      border: 1px solid var(--line-strong);
+      border-radius: 9px;
+      overflow: hidden;
+      background: var(--surface);
+      flex: none;
+    }
+
+    .counter-btn {
+      width: 29px;
+      border: 0;
+      background: #f8fafc;
+      color: var(--ink-soft);
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1;
+      display: grid;
+      place-items: center;
+      transition: background 0.13s ease, color 0.13s ease;
+    }
+
+    .counter-btn:hover { background: var(--blue-soft); color: var(--blue-dark); }
+    .counter-btn:active { background: #dbeafe; }
+
+    .line-count-input {
+      width: 43px;
+      border: 0;
+      border-left: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      outline: 0;
+      text-align: center;
+      padding: 7px 2px;
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--ink);
+      background: var(--surface);
+      font-variant-numeric: tabular-nums;
+      -moz-appearance: textfield;
+    }
+
+    .line-count-input::-webkit-outer-spin-button,
+    .line-count-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .line-count-input:focus {
+      background: #f8fbff;
+      box-shadow: inset 0 0 0 2px rgba(37, 99, 235, 0.18);
+    }
+
+    .line-title-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      border: 0;
+      background: transparent;
+      text-align: left;
+      padding: 5px 2px;
+      border-radius: 8px;
+    }
+
+    .line-title-btn:hover .line-name { color: var(--blue-dark); }
+
+    .line-index {
+      width: 27px;
+      height: 27px;
+      flex: none;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--blue-soft);
+      color: var(--blue-dark);
+      font-size: 12px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .line-index.part2 { background: var(--violet-soft); color: #6d28d9; }
+
+    .line-title-text { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+
+    .line-name {
+      font-size: 13.7px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.3;
+      transition: color 0.13s ease;
+    }
+
+    .line-meta {
+      font-size: 10.9px;
+      color: #94a3b8;
+      line-height: 1.35;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .line-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .line-total {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 7px;
+      border-radius: 6px;
+      background: #f1f5f9;
+      color: var(--ink-soft);
+      font-size: 10.8px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .line-total.is-empty { color: #b45309; background: var(--amber-soft); }
+
+    .line-subcount {
+      font-size: 10.8px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .line-chevron {
+      width: 8px;
+      height: 8px;
+      flex: none;
+      border-right: 2px solid #94a3b8;
+      border-bottom: 2px solid #94a3b8;
+      transform: rotate(45deg);
+      transition: transform 0.2s ease;
+      margin: 0 3px 3px 0;
+    }
+
+    .line-item.is-open .line-chevron { transform: rotate(-135deg); margin-bottom: 0; }
+
+    .line-body { display: none; }
+
+    .line-item.is-open .line-body {
+      display: block;
+      animation: line-body-in 0.16s ease;
+    }
+
+    @keyframes line-body-in {
+      from { opacity: 0; transform: translateY(-3px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .line-body-inner { overflow: hidden; }
+
+    .line-body-pad {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 2px 12px 12px 49px;
+      border-top: 1px solid #eef2f7;
+      margin-top: 1px;
+      background: #fbfdff;
+    }
+
+    .line-tools {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding-top: 5px;
+    }
+
+    .line-tools-label { font-size: 10.9px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.035em; }
+
+    .line-tool-btn {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--blue-dark);
+      border-radius: 7px;
+      padding: 4px 8px;
+      font-size: 10.9px;
+      font-weight: 700;
+    }
+
+    .line-tool-btn:hover { background: var(--blue-soft); border-color: #bfdbfe; }
+
+    .line-subtopics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .line-subtopic {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      padding: 7px 9px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      cursor: pointer;
+      transition: background 0.13s ease, border-color 0.13s ease;
+    }
+
+    .line-subtopic:hover { background: #f8fafc; border-color: var(--line-strong); }
+
+    .line-subtopic.is-checked {
+      background: #f6f9ff;
+      border-color: #dbe8ff;
+    }
+
+    .line-subtopic.is-zero { opacity: 0.62; }
+
+    .line-subtopic input {
+      width: 16px;
+      height: 16px;
+      flex: none;
+      accent-color: var(--blue);
+      cursor: pointer;
+      margin: 0;
+    }
+
+    .line-subtopic-name {
+      flex: 1;
+      min-width: 0;
+      font-size: 12.2px;
+      color: var(--ink-soft);
+      line-height: 1.3;
+    }
+
+    .line-subtopic.is-checked .line-subtopic-name { color: var(--ink); font-weight: 600; }
+
+    .line-sub-count {
+      flex: none;
+      font-size: 10.5px;
+      color: var(--muted);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .line-summary-lines {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    .line-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 20px;
+      padding: 0 5px;
+      border-radius: 6px;
+      background: var(--blue-soft);
+      color: var(--blue-dark);
+      font-size: 10.5px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .line-chip.part2 { background: var(--violet-soft); color: #6d28d9; }
+    .line-chip.zero { background: #f1f5f9; color: #94a3b8; }
+
     .topic-section {
       border: 1px solid var(--line);
       border-radius: 14px;
@@ -665,6 +1335,9 @@
 
     .summary-row span { color: var(--muted); }
     .summary-row b { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+    .summary-row.summary-total { border-top: 1px solid #e8eef7; padding-top: 6px; margin-top: 1px; }
+    .summary-row.summary-total span { color: var(--ink-soft); font-weight: 700; }
+    .summary-row.summary-total b { color: var(--ink); font-size: 14px; }
 
     .summary-warning {
       font-size: 11.7px;
@@ -1114,6 +1787,23 @@
       .subtopics { grid-template-columns: 1fr; }
       .card-head { flex-direction: column; padding-bottom: 12px; }
       .head-actions { justify-content: flex-start; }
+      .preset-bar { padding-left: 15px; padding-right: 15px; }
+      .preset-sep { display: none; }
+      .theme-builder { margin-left: 15px; margin-right: 15px; }
+      .theme-builder-head { flex-direction: column; gap: 7px; }
+      .theme-builder-summary { max-width: none; text-align: left; }
+      .theme-sections { grid-template-columns: 1fr; padding-left: 10px; padding-right: 10px; }
+      .auto-distribute-row { align-items: stretch; }
+      .auto-count-field { min-width: 96px; }
+      .auto-distribute-btn { min-height: 34px; }
+      .auto-hint { flex-basis: 100%; min-width: 0; }
+      .line-list { padding-left: 15px; padding-right: 15px; }
+      .line-row { grid-template-columns: auto minmax(0, 1fr); padding: 9px 10px; }
+      .line-right { grid-column: 1 / -1; justify-content: flex-start; padding-left: 1px; }
+      .line-body-pad { padding-left: 12px; padding-right: 10px; }
+      .line-subtopics { grid-template-columns: 1fr; }
+      .line-meta { white-space: normal; }
+      .line-name { font-size: 13.2px; }
       .archive-item { grid-template-columns: auto minmax(0, 1fr); }
       .archive-actions { grid-column: 1 / -1; justify-content: flex-start; padding-left: 55px; }
       .result-head, .result-actions, .result-foot, .result-log { padding-left: 16px; padding-right: 16px; }
@@ -1162,12 +1852,48 @@
       <section class="card" aria-labelledby="topicsTitle">
         <div class="card-head">
           <div>
-            <h2 id="topicsTitle"><span class="step-badge">1</span> Темы варианта</h2>
-            <p>Отметьте подтемы или выберите раздел целиком. Бейджи показывают, сколько задач есть в базе.</p>
+            <h2 id="topicsTitle"><span class="step-badge">1</span> Конструктор по линиям КИМ</h2>
+            <p>Задайте число задач для каждой линии экзамена и при необходимости сузьте выбор до отдельных подтем.</p>
           </div>
           <div class="head-actions">
-            <button type="button" class="link-btn accent" id="selectAllBtn">Выбрать все</button>
-            <button type="button" class="link-btn" id="resetAllBtn">Сбросить все</button>
+            <button type="button" class="link-btn" id="expandAllBtn">Развернуть все</button>
+            <button type="button" class="link-btn" id="collapseAllBtn">Свернуть все</button>
+          </div>
+        </div>
+
+        <div class="preset-bar" role="group" aria-label="Режим конструктора">
+          <button type="button" class="preset-btn is-active" data-preset="full" title="Полный вариант экзамена: по одной задаче каждого номера">Полный вариант экзамена (26 ЕГЭ / 22 ОГЭ)</button>
+          <button type="button" class="preset-btn danger" data-preset="zero">Обнулить все (0)</button>
+        </div>
+
+        <div class="theme-builder" id="themeBuilder">
+          <div class="theme-builder-head">
+            <div>
+              <h3>Конструктор по разделам и узким темам <span class="theme-mode-tag">мультивыбор</span></h3>
+              <p>Отметьте одну тему или соберите смешанный вариант из разных разделов. Подтемы линий и счётчики синхронизируются автоматически.</p>
+            </div>
+            <div class="theme-builder-summary" id="themeBuilderSummary">Фильтр не задан — полный вариант</div>
+          </div>
+          <div class="theme-sections" id="themeSections">
+            <div class="skeleton-wrap" aria-hidden="true">
+              <div class="skeleton"></div>
+              <div class="skeleton"></div>
+            </div>
+          </div>
+          <div class="auto-distribute">
+            <div class="auto-distribute-title">Автоподбор количества задач по выбранным темам</div>
+            <div class="auto-distribute-row">
+              <label class="auto-count-field" for="autoPart1Input">
+                <span>Задач Части 1</span>
+                <input id="autoPart1Input" type="number" min="0" max="200" step="1" value="8">
+              </label>
+              <label class="auto-count-field" for="autoPart2Input">
+                <span>Задач Части 2</span>
+                <input id="autoPart2Input" type="number" min="0" max="200" step="1" value="2">
+              </label>
+              <button type="button" class="auto-distribute-btn" id="autoDistributeBtn">Распределить по активным линиям</button>
+              <span class="auto-hint" id="autoDistributeHint">Сначала выберите узкие темы.</span>
+            </div>
           </div>
         </div>
 
@@ -1185,7 +1911,7 @@
           <div class="card-head">
             <div>
               <h2 id="paramsTitle"><span class="step-badge">2</span> Параметры варианта</h2>
-              <p>Номер, заголовок и количество задач.</p>
+              <p>Номер, заголовок и сводка по линиям КИМ.</p>
             </div>
           </div>
 
@@ -1218,27 +1944,6 @@
               </div>
             </div>
 
-            <div class="field">
-              <div class="field-head">
-                <span class="field-label">Количество задач</span>
-                <button type="button" class="link-btn tiny" id="standardCountsBtn"
-                        title="Вернуть стандартное число заданий выбранного экзамена">
-                  Стандарт экзамена (20+6 / 16+6)
-                </button>
-              </div>
-              <div class="field-row">
-                <div class="field">
-                  <label for="part1Input">Задач Части 1</label>
-                  <input id="part1Input" class="number-input" type="number" min="0" max="200" step="1" value="20">
-                </div>
-                <div class="field">
-                  <label for="part2Input">Задач Части 2</label>
-                  <input id="part2Input" class="number-input" type="number" min="0" max="200" step="1" value="6">
-                </div>
-              </div>
-              <p class="hint" id="countsHint">Стандарт ЕГЭ: 20 + 6 = 26 заданий.</p>
-            </div>
-
             <label class="switch-row" for="gasInput">
               <input id="gasInput" type="checkbox" checked>
               <span class="switch" aria-hidden="true"></span>
@@ -1250,13 +1955,22 @@
 
             <div class="summary-box">
               <div class="summary-row">
-                <span>Доступно в выбранных темах</span>
-                <b id="availableCounts">—</b>
+                <span>Краткий ответ (Часть 1)</span>
+                <b id="summaryPart1">0</b>
               </div>
               <div class="summary-row">
-                <span>Будет выбрано</span>
-                <b id="willPickCounts">20 + 6 = 26</b>
+                <span>Развернутый ответ (Часть 2)</span>
+                <b id="summaryPart2">0</b>
               </div>
+              <div class="summary-row summary-total">
+                <span>Всего задач</span>
+                <b id="summaryTotal">0</b>
+              </div>
+              <div class="summary-row">
+                <span>Включенные линии</span>
+                <b id="summaryLinesCount">—</b>
+              </div>
+              <div id="summaryLineNumbers" class="line-summary-lines"></div>
               <div class="summary-row">
                 <span>Выбрано подтем</span>
                 <b id="selectedTopicsCount">0</b>
@@ -1379,7 +2093,14 @@
       const state = {
         exam: 'EGE',
         stats: null,
-        selected: new Set(),
+        // Для каждого экзамена храним свой план: Map<line, {count, subtopics:Set}>.
+        plans: { EGE: null, OGE: null },
+        // Отдельный мультивыбор узких тем для ЕГЭ и ОГЭ.
+        selectedTopics: { EGE: new Set(), OGE: new Set() },
+        autoPart1: 8,
+        autoPart2: 2,
+        expanded: new Set(),
+        activePreset: 'full',
         busy: false,
         variantAuto: true,
         toastTimer: null,
@@ -1388,19 +2109,35 @@
         webBaseUrl: ''
       };
 
-      // Стандартное количество заданий реального экзамена (ФИПИ)
-      const EXAM_STANDARDS = {
-        EGE: { part1: 20, part2: 6 },
-        OGE: { part1: 16, part2: 6 }
+      const PART_LABELS = {
+        1: 'Краткий ответ (Часть 1)',
+        2: 'Развернутый ответ (Часть 2)'
       };
+
+      const KNOWN_SECTIONS = new Set(['mechanics', 'mkt_thermo', 'electrodynamics', 'quantum']);
+
+      // Начало слова важно для «динамики»: иначе «термодинамика» и
+      // «электродинамика» ошибочно попадают в механику.
+      const SECTION_PATTERNS = [
+        ['mechanics', /(^|[^а-яё])(механ|кинемат|динамик|статик|гидростат)/i],
+        ['mkt_thermo', /(мкт|молекуляр|термодинам|теплов|идеальн\w* газ|парообраз|влажност)/i],
+        ['electrodynamics', /(электр|магнит|(^|[^а-яё])ток|оптик|свет|линз|волнов)/i],
+        ['quantum', /(квант|атом|ядр|радиоактив|фотон|астрофизик)/i]
+      ];
 
       const els = {
         dbPill: document.getElementById('dbPill'),
         globalError: document.getElementById('globalError'),
         examTotals: document.getElementById('examTotals'),
         topicsList: document.getElementById('topicsList'),
-        selectAllBtn: document.getElementById('selectAllBtn'),
-        resetAllBtn: document.getElementById('resetAllBtn'),
+        themeSections: document.getElementById('themeSections'),
+        themeBuilderSummary: document.getElementById('themeBuilderSummary'),
+        autoPart1Input: document.getElementById('autoPart1Input'),
+        autoPart2Input: document.getElementById('autoPart2Input'),
+        autoDistributeBtn: document.getElementById('autoDistributeBtn'),
+        autoDistributeHint: document.getElementById('autoDistributeHint'),
+        expandAllBtn: document.getElementById('expandAllBtn'),
+        collapseAllBtn: document.getElementById('collapseAllBtn'),
         variantInput: document.getElementById('variantInput'),
         examPrefix: document.getElementById('examPrefix'),
         nextVariantHint: document.getElementById('nextVariantHint'),
@@ -1409,13 +2146,12 @@
         saveWebUrlBtn: document.getElementById('saveWebUrlBtn'),
         localWebUrlBtn: document.getElementById('localWebUrlBtn'),
         webUrlStatus: document.getElementById('webUrlStatus'),
-        part1Input: document.getElementById('part1Input'),
-        part2Input: document.getElementById('part2Input'),
-        standardCountsBtn: document.getElementById('standardCountsBtn'),
-        countsHint: document.getElementById('countsHint'),
         gasInput: document.getElementById('gasInput'),
-        availableCounts: document.getElementById('availableCounts'),
-        willPickCounts: document.getElementById('willPickCounts'),
+        summaryPart1: document.getElementById('summaryPart1'),
+        summaryPart2: document.getElementById('summaryPart2'),
+        summaryTotal: document.getElementById('summaryTotal'),
+        summaryLinesCount: document.getElementById('summaryLinesCount'),
+        summaryLineNumbers: document.getElementById('summaryLineNumbers'),
         selectedTopicsCount: document.getElementById('selectedTopicsCount'),
         selectionWarning: document.getElementById('selectionWarning'),
         selectionOk: document.getElementById('selectionOk'),
@@ -1450,22 +2186,6 @@
         });
       }
 
-      function zero() {
-        return { part1: 0, part2: 0, total: 0 };
-      }
-
-      function countsFor(obj) {
-        return (obj && obj[state.exam]) ? obj[state.exam] : zero();
-      }
-
-      function badgesHTML(counts) {
-        const c = counts || zero();
-        const part1Class = c.part1 === 0 ? 'badge part1 zero' : 'badge part1';
-        const part2Class = c.part2 === 0 ? 'badge part2 zero' : 'badge part2';
-        return '<span class="' + part1Class + '">Ч.1: ' + (c.part1 || 0) + '</span>' +
-               '<span class="' + part2Class + '">Ч.2: ' + (c.part2 || 0) + '</span>';
-      }
-
       function formatDate(iso) {
         if (!iso) return '—';
         const d = new Date(iso);
@@ -1494,11 +2214,510 @@
         }, 3800);
       }
 
-      function sectionByKey(key) {
-        return (state.stats && state.stats.topics || []).find(function (s) { return s.key === key; });
+      // ── Матрица линий КИМ ───────────────────────────────────────────────────
+
+      function examDefinition(exam) {
+        const matrix = state.stats && state.stats.kimMatrix;
+        return matrix && matrix.exams ? matrix.exams[exam] : null;
       }
 
-      // ── Отрисовка экзамена и тем ────────────────────────────────────────────
+      function lineDefs(exam) {
+        const def = examDefinition(exam || state.exam);
+        return def && Array.isArray(def.lines) ? def.lines : [];
+      }
+
+      function lineById(lineNumber, exam) {
+        return lineDefs(exam).find(function (line) {
+          return Number(line.line) === Number(lineNumber);
+        }) || null;
+      }
+
+      function selectedTopicSet(exam) {
+        const target = exam || state.exam;
+        if (!state.selectedTopics[target]) state.selectedTopics[target] = new Set();
+        return state.selectedTopics[target];
+      }
+
+      function topicKeysOf(value) {
+        return value && Array.isArray(value.topic_keys)
+          ? value.topic_keys.map(String)
+          : [];
+      }
+
+      function intersectsSelected(value, selected) {
+        if (!selected || selected.size === 0) return false;
+        return topicKeysOf(value).some(function (key) { return selected.has(key); });
+      }
+
+      function chosenSubtopics(line, spec) {
+        const subs = line.subtopics || [];
+        if (!spec) return [];
+        return subs.filter(function (sub) {
+          return spec.subtopics.has(String(sub.subtopic_id));
+        });
+      }
+
+      function sumTopicGroups(groups, selected, part) {
+        if (!Array.isArray(groups) || !groups.length) return null;
+        return groups.reduce(function (sum, group) {
+          const keys = Array.isArray(group.keys) ? group.keys : [];
+          if (!keys.some(function (key) { return selected.has(key); })) return sum;
+          if (part === 2) return sum + (Number(group.part2) || 0);
+          if (part === 1) return sum + (Number(group.part1) || 0);
+          return sum + (Number(group.total) || 0);
+        }, 0);
+      }
+
+      // Точное число задач линии с учётом выбранных узких тем и подтем.
+      // topic_groups приходят с сервера и позволяют не считать задачу дважды,
+      // если у неё несколько узких тегов.
+      function availableForLineTopics(line, spec, selected, part) {
+        if (!selected || selected.size === 0) return null;
+        const subs = line.subtopics || [];
+        if (subs.length === 0) {
+          const fromGroups = sumTopicGroups(line.topic_groups, selected, part);
+          return fromGroups == null ? 0 : fromGroups;
+        }
+
+        const chosen = chosenSubtopics(line, spec);
+        if (chosen.length === 0) return 0;
+
+        return chosen.reduce(function (sum, sub) {
+          const groups = sub.topic_groups;
+          const exact = sumTopicGroups(groups, selected, part);
+          if (exact != null) return sum + exact;
+          return sum + (intersectsSelected(sub, selected) ? (Number(sub.count) || 0) : 0);
+        }, 0);
+      }
+
+      function defaultPlanLine(line) {
+        return {
+          count: 1,
+          subtopics: new Set((line.subtopics || []).map(function (sub) {
+            return String(sub.subtopic_id);
+          }))
+        };
+      }
+
+      // Создаёт/синхронизирует план выбранного экзамена. По умолчанию —
+      // полный вариант: по одной задаче каждой линии и все подтемы отмечены.
+      function ensurePlan(exam) {
+        const target = exam || state.exam;
+        const lines = lineDefs(target);
+        if (!state.plans[target]) {
+          const created = new Map();
+          lines.forEach(function (line) {
+            created.set(Number(line.line), defaultPlanLine(line));
+          });
+          state.plans[target] = created;
+        }
+
+        const plan = state.plans[target];
+        const knownLines = new Set();
+        lines.forEach(function (line) {
+          const number = Number(line.line);
+          knownLines.add(number);
+          if (!plan.has(number)) {
+            plan.set(number, defaultPlanLine(line));
+            return;
+          }
+          const spec = plan.get(number);
+          const actualIds = new Set((line.subtopics || []).map(function (sub) {
+            return String(sub.subtopic_id);
+          }));
+          Array.from(spec.subtopics).forEach(function (id) {
+            if (!actualIds.has(id)) spec.subtopics.delete(id);
+          });
+        });
+        Array.from(plan.keys()).forEach(function (number) {
+          if (!knownLines.has(number)) plan.delete(number);
+        });
+        return plan;
+      }
+
+      function planLine(lineNumber) {
+        const plan = ensurePlan(state.exam);
+        return plan ? plan.get(Number(lineNumber)) : null;
+      }
+
+      function lineSubtopicIds(line) {
+        return (line.subtopics || []).map(function (sub) {
+          return String(sub.subtopic_id);
+        });
+      }
+
+      function allSubtopicsSelected(line, spec) {
+        const ids = lineSubtopicIds(line);
+        if (ids.length === 0) return true;
+        return ids.every(function (id) { return spec.subtopics.has(id); });
+      }
+
+      function availableForLine(line, spec, part) {
+        const selected = selectedTopicSet(state.exam);
+        if (selected.size > 0) {
+          const exact = availableForLineTopics(line, spec, selected, part);
+          return exact == null ? 0 : exact;
+        }
+
+        const subs = line.subtopics || [];
+        if (subs.length === 0) return Number(line.tasks_count) || 0;
+
+        const chosen = chosenSubtopics(line, spec);
+        if (chosen.length === 0) return 0;
+
+        const allChosen = chosen.length === subs.length;
+        if (allChosen && line.counts) {
+          if (part === 1) return Number(line.counts.part1) || 0;
+          if (part === 2) return Number(line.counts.part2) || 0;
+          return Number(line.counts.total) || 0;
+        }
+
+        return chosen.reduce(function (sum, sub) {
+          if (part === 1) return sum + (Number(sub.counts && sub.counts.part1) || 0);
+          if (part === 2) return sum + (Number(sub.counts && sub.counts.part2) || 0);
+          return sum + (Number(sub.count) || 0);
+        }, 0);
+      }
+
+      // Раздел линии: для ЕГЭ берём section матрицы; для ОГЭ (section = null)
+      // определяем по названию линии и подтем.
+      function lineSectionKeys(line) {
+        const section = line.section ? String(line.section) : '';
+
+        // Для ЕГЭ раздел обычно задан явно. Regex — запасной путь для ОГЭ
+        // (section = null) и для комбинированных линий (section = mixed).
+        if (section && KNOWN_SECTIONS.has(section)) {
+          return new Set([section]);
+        }
+        // Методические линии (приборы, эксперимент) не относятся ни к одному
+        // тематическому разделу и не должны попадать в тематические пресеты.
+        if (section && section !== 'mixed') {
+          return new Set();
+        }
+
+        const keys = new Set();
+        const text = [line.title || ''].concat((line.subtopics || []).map(function (sub) {
+          return sub.subtopic_title || '';
+        })).join(' ');
+
+        SECTION_PATTERNS.forEach(function (pair) {
+          if (pair[1].test(text)) keys.add(pair[0]);
+        });
+        return keys;
+      }
+
+      function setActivePreset(name) {
+        state.activePreset = name || null;
+        document.querySelectorAll('.preset-btn').forEach(function (btn) {
+          const active = !!name && btn.dataset.preset === name;
+          btn.classList.toggle('is-active', active);
+          btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+      }
+
+      // ── Двухуровневый конструктор разделов и узких тем ─────────────────────
+
+      function topicCount(sub, exam) {
+        const counts = sub && sub.counts && sub.counts[exam];
+        return Number(counts && counts.total) || 0;
+      }
+
+      function updateThemeBuilderSummary() {
+        if (!state.stats || !els.themeBuilderSummary) return;
+        const selected = selectedTopicSet();
+        const sections = Array.isArray(state.stats.topics) ? state.stats.topics : [];
+        const allKeys = sections.reduce(function (sum, section) {
+          return sum + (Array.isArray(section.subtopics) ? section.subtopics.length : 0);
+        }, 0);
+        const activeLines = lineDefs().filter(function (line) {
+          const plan = ensurePlan(state.exam);
+          const spec = plan.get(Number(line.line));
+          return spec && spec.count > 0;
+        }).length;
+
+        els.themeBuilderSummary.textContent = selected.size > 0
+          ? 'Выбрано тем: ' + selected.size + ' из ' + allKeys + ' · активных линий: ' + activeLines
+          : 'Фильтр не задан — полный вариант';
+        els.themeBuilderSummary.title = selected.size > 0
+          ? 'Отмеченные темы: ' + Array.from(selected).join(', ')
+          : 'Все линии включены, подтемы не ограничены.';
+      }
+
+      function renderThemeBuilder() {
+        if (!state.stats) {
+          els.themeSections.innerHTML = '<div class="empty-state"><b>Темы загружаются</b>Дождитесь загрузки базы задач.</div>';
+          els.themeBuilderSummary.textContent = 'Загрузка…';
+          return;
+        }
+
+        const sections = Array.isArray(state.stats.topics) ? state.stats.topics : [];
+        const selected = selectedTopicSet();
+        const exam = state.exam;
+
+        if (sections.length === 0) {
+          els.themeSections.innerHTML = '<div class="empty-state"><b>Узкие темы недоступны</b>' +
+            'Сервер не вернул дерево <code>topics</code>.</div>';
+          els.themeBuilderSummary.textContent = 'Нет данных';
+          return;
+        }
+
+        els.themeSections.innerHTML = sections.map(function (section) {
+          const subs = Array.isArray(section.subtopics) ? section.subtopics : [];
+          const selectedSubs = subs.filter(function (sub) { return selected.has(String(sub.key)); });
+          const allSelected = subs.length > 0 && selectedSubs.length === subs.length;
+          const partial = selectedSubs.length > 0 && !allSelected;
+          const sectionCounts = section.counts && section.counts[exam];
+          const sectionCount = Number(sectionCounts && sectionCounts.total) || 0;
+
+          return '<div class="theme-section' +
+              (allSelected ? ' is-active' : '') +
+              (partial ? ' is-partial' : '') +
+            '" data-theme-section-wrap="' + esc(section.key) + '">' +
+            '<button type="button" class="theme-section-head" data-theme-section="' + esc(section.key) + '"' +
+              ' role="checkbox" aria-checked="' + (allSelected ? 'true' : (partial ? 'mixed' : 'false')) + '">' +
+              '<span class="theme-section-check" aria-hidden="true"></span>' +
+              '<span class="theme-section-name">' + esc(section.title) + '</span>' +
+              '<span class="theme-section-count">' + sectionCount + ' шт.</span>' +
+            '</button>' +
+            '<div class="theme-chips">' +
+              subs.map(function (sub) {
+                const key = String(sub.key);
+                const count = topicCount(sub, exam);
+                const active = selected.has(key);
+                return '<button type="button" class="theme-chip' +
+                    (active ? ' is-selected' : '') +
+                    (count === 0 ? ' is-empty' : '') +
+                  '" data-theme-key="' + esc(key) + '" role="checkbox" aria-checked="' + (active ? 'true' : 'false') + '"' +
+                  ' title="' + esc(sub.title + ' · ' + count + ' задач в ' + (exam === 'EGE' ? 'ЕГЭ' : 'ОГЭ')) + '">' +
+                  '<span class="theme-chip-dot" aria-hidden="true"></span>' +
+                  '<span>' + esc(sub.title) + '</span>' +
+                  '<span class="theme-chip-count">' + count + '</span>' +
+                '</button>';
+              }).join('') +
+            '</div>' +
+          '</div>';
+        }).join('');
+
+        updateThemeBuilderSummary();
+      }
+
+      function syncPlanToSelectedTopics() {
+        const selected = selectedTopicSet();
+        const plan = ensurePlan(state.exam);
+
+        lineDefs().forEach(function (line) {
+          const spec = plan.get(Number(line.line));
+          if (!spec) return;
+
+          if (selected.size === 0) {
+            spec.subtopics = new Set(lineSubtopicIds(line));
+            spec.count = 1;
+            return;
+          }
+
+          const subs = line.subtopics || [];
+          const matching = subs.filter(function (sub) {
+            return intersectsSelected(sub, selected);
+          });
+
+          if (matching.length > 0) {
+            spec.subtopics = new Set(matching.map(function (sub) {
+              return String(sub.subtopic_id);
+            }));
+            const available = availableForLineTopics(line, spec, selected);
+            if (available > 0) {
+              spec.count = 1;
+            } else {
+              spec.count = 0;
+              // Если в подтеме нет задач по выбранным темам, не оставляем
+              // визуально отмеченную, но пустую линию.
+              spec.subtopics = new Set();
+            }
+            return;
+          }
+
+          if (subs.length === 0 && intersectsSelected(line, selected)) {
+            spec.subtopics = new Set();
+            const available = availableForLineTopics(line, spec, selected);
+            spec.count = available > 0 ? 1 : 0;
+            return;
+          }
+
+          spec.subtopics = new Set();
+          spec.count = 0;
+        });
+      }
+
+      function setAutoHint(text, tone) {
+        els.autoDistributeHint.textContent = text || '';
+        els.autoDistributeHint.classList.toggle('is-warn', tone === 'warn');
+        els.autoDistributeHint.classList.toggle('is-ok', tone === 'ok');
+      }
+
+      function selectedTopicsChanged() {
+        const selected = selectedTopicSet();
+        syncPlanToSelectedTopics();
+        setActivePreset(selected.size > 0 ? null : 'full');
+        renderThemeBuilder();
+        renderLineConstructor();
+        updateSummary();
+
+        if (selected.size === 0) {
+          setAutoHint('Фильтр снят: включён полный вариант экзамена.', 'ok');
+        } else {
+          setAutoHint('Темы синхронизированы с линиями. Нажмите «Распределить», чтобы задать количество задач.', '');
+        }
+      }
+
+      function toggleThemeKey(key) {
+        const selected = selectedTopicSet();
+        const topic = String(key);
+        if (selected.has(topic)) selected.delete(topic);
+        else selected.add(topic);
+        selectedTopicsChanged();
+      }
+
+      function toggleThemeSection(sectionKey) {
+        const section = (state.stats.topics || []).find(function (item) {
+          return String(item.key) === String(sectionKey);
+        });
+        if (!section) return;
+
+        const selected = selectedTopicSet();
+        const subs = Array.isArray(section.subtopics) ? section.subtopics : [];
+        const allSelected = subs.length > 0 && subs.every(function (sub) {
+          return selected.has(String(sub.key));
+        });
+
+        subs.forEach(function (sub) {
+          const key = String(sub.key);
+          if (allSelected) selected.delete(key);
+          else selected.add(key);
+        });
+        selectedTopicsChanged();
+      }
+
+      // ── Автоподбор количества задач по активным линиям ─────────────────────
+
+      function distributeInteger(total, items) {
+        if (total <= 0 || items.length === 0) return items.map(function () { return 0; });
+        const available = items.reduce(function (sum, item) { return sum + item.available; }, 0);
+        if (available === 0) return items.map(function () { return 0; });
+
+        const target = Math.min(total, available);
+        const exact = items.map(function (item) {
+          return target * item.available / available;
+        });
+        const counts = exact.map(function (value) { return Math.floor(value); });
+        let assigned = counts.reduce(function (sum, value) { return sum + value; }, 0);
+        let remaining = target - assigned;
+
+        const order = items.map(function (item, index) {
+          return { index: index, fraction: exact[index] - counts[index] };
+        }).sort(function (a, b) {
+          return b.fraction - a.fraction || items[a.index].lineNumber - items[b.index].lineNumber;
+        });
+
+        let cursor = 0;
+        while (remaining > 0 && order.length > 0) {
+          let advanced = false;
+          for (let i = 0; i < order.length && remaining > 0; i++) {
+            const index = order[(cursor + i) % order.length].index;
+            if (counts[index] < items[index].available) {
+              counts[index] += 1;
+              remaining -= 1;
+              advanced = true;
+            }
+          }
+          if (!advanced) break;
+          cursor = (cursor + 1) % order.length;
+        }
+
+        return counts;
+      }
+
+      function autoDistribute() {
+        const selected = selectedTopicSet();
+        if (selected.size === 0) {
+          setAutoHint('Сначала выберите хотя бы одну узкую тему.', 'warn');
+          showToast('Выберите узкие темы для автораспределения.', 'error');
+          return;
+        }
+
+        const requested1 = Math.max(0, Math.min(200, Math.round(Number(els.autoPart1Input.value) || 0)));
+        const requested2 = Math.max(0, Math.min(200, Math.round(Number(els.autoPart2Input.value) || 0)));
+        state.autoPart1 = requested1;
+        state.autoPart2 = requested2;
+        els.autoPart1Input.value = String(requested1);
+        els.autoPart2Input.value = String(requested2);
+
+        if (requested1 + requested2 === 0) {
+          setAutoHint('Укажите хотя бы одну задачу Части 1 или Части 2.', 'warn');
+          return;
+        }
+
+        const plan = ensurePlan(state.exam);
+        const active = lineDefs().map(function (line) {
+          const spec = plan.get(Number(line.line));
+          if (!spec) return null;
+          const part = Number(line.part) === 2 ? 2 : 1;
+          const available = availableForLineTopics(line, spec, selected, part);
+          if (!available || !intersectsSelected(line, selected)) return null;
+          return {
+            lineNumber: Number(line.line),
+            part: part,
+            available: available,
+            spec: spec
+          };
+        }).filter(Boolean);
+
+        const part1 = active.filter(function (item) { return item.part === 1; });
+        const part2 = active.filter(function (item) { return item.part === 2; });
+        const counts1 = distributeInteger(requested1, part1);
+        const counts2 = distributeInteger(requested2, part2);
+
+        active.forEach(function (item) {
+          const index = item.part === 1
+            ? part1.indexOf(item)
+            : part2.indexOf(item);
+          const counts = item.part === 1 ? counts1 : counts2;
+          item.spec.count = counts[index] || 0;
+        });
+
+        // Линии вне активного набора явно обнуляем, чтобы старые счётчики
+        // не попали в смешанный вариант.
+        lineDefs().forEach(function (line) {
+          const spec = plan.get(Number(line.line));
+          if (!spec) return;
+          if (!active.some(function (item) { return item.lineNumber === Number(line.line); })) {
+            spec.count = 0;
+          }
+        });
+
+        const got1 = counts1.reduce(function (sum, value) { return sum + value; }, 0);
+        const got2 = counts2.reduce(function (sum, value) { return sum + value; }, 0);
+        const available1 = part1.reduce(function (sum, item) { return sum + item.available; }, 0);
+        const available2 = part2.reduce(function (sum, item) { return sum + item.available; }, 0);
+
+        setActivePreset(null);
+        renderLineConstructor();
+        renderThemeBuilder();
+        updateSummary();
+
+        const shortage = got1 < requested1 || got2 < requested2;
+        setAutoHint(
+          'Распределено: Часть 1 — ' + got1 + ' из ' + requested1 +
+          ', Часть 2 — ' + got2 + ' из ' + requested2 +
+          '. Активных линий: ' + active.length +
+          ' (доступно ' + available1 + ' + ' + available2 + ').',
+          shortage ? 'warn' : 'ok'
+        );
+        if (shortage) {
+          showToast('Задач в выбранных темах меньше, чем запрошено. Счётчики заполнены по доступным задачам.', 'error');
+        }
+      }
+
+      // ── Отрисовка экзамена и линий ──────────────────────────────────────────
 
       function renderExamButtons() {
         document.querySelectorAll('.exam-btn').forEach(function (btn) {
@@ -1523,139 +2742,231 @@
         }).join(' ');
       }
 
-      function renderTopics() {
-        if (!state.stats) return;
+      function lineItemHTML(line) {
+        const number = Number(line.line);
+        const spec = planLine(number) || defaultPlanLine(line);
+        const subs = line.subtopics || [];
+        const selectedSubs = subs.filter(function (sub) {
+          return spec.subtopics.has(String(sub.subtopic_id));
+        }).length;
+        const allSelected = allSubtopicsSelected(line, spec);
+        const isOpen = state.expanded.has(number);
+        const part = Number(line.part) === 2 ? 2 : 1;
+        const points = Number(line.max_points) || 0;
+        const tasksCount = Number(line.tasks_count) || 0;
+        const baseBadge = tasksCount > 0
+          ? tasksCount + ' шт.'
+          : '0 шт.';
+        const subCountLabel = subs.length > 0
+          ? selectedSubs + '/' + subs.length + ' подтем'
+          : 'подтем нет';
+        const pointsLabel = points > 0
+          ? points + ' ' + plural(points, 'балл', 'балла', 'баллов')
+          : 'балл не указан';
 
-        els.topicsList.innerHTML = state.stats.topics.map(function (section) {
-          const sectionCounts = countsFor(section.counts);
-          const subtopicsHTML = section.subtopics.map(function (sub) {
-            const c = countsFor(sub.counts);
-            const checked = state.selected.has(sub.key);
-            const classes = 'subtopic' +
-              (checked ? ' is-checked' : '') +
-              (c.total === 0 ? ' is-zero' : '');
-            return '<label class="' + classes + '">' +
-              '<input type="checkbox" data-topic="' + esc(sub.key) + '"' + (checked ? ' checked' : '') + '>' +
-              '<span class="subtopic-name">' + esc(sub.title) + '</span>' +
-              '<span class="badges">' + badgesHTML(c) + '</span>' +
-              '</label>';
-          }).join('');
+        const subtopicsHTML = subs.length > 0
+          ? subs.map(function (sub) {
+              const id = String(sub.subtopic_id);
+              const checked = spec.subtopics.has(id);
+              const count = Number(sub.count) || 0;
+              const classes = 'line-subtopic' +
+                (checked ? ' is-checked' : '') +
+                (count === 0 ? ' is-zero' : '');
+              return '<label class="' + classes + '" title="' + esc(sub.subtopic_title) + '">' +
+                '<input type="checkbox" data-line-sub="' + number + '" data-subtopic="' + esc(id) + '"' +
+                  (checked ? ' checked' : '') + '>' +
+                '<span class="line-subtopic-name">' + esc(sub.subtopic_title) + '</span>' +
+                '<span class="line-sub-count">' + count + ' шт.</span>' +
+                '</label>';
+            }).join('')
+          : '<div class="line-subtopic is-zero"><span class="line-subtopic-name">Для этой линии подтемы не заданы.</span></div>';
 
-          const allChecked = section.subtopics.length > 0 &&
-            section.subtopics.every(function (sub) { return state.selected.has(sub.key); });
-          const anyChecked = section.subtopics.some(function (sub) { return state.selected.has(sub.key); });
-
-          return '<section class="topic-section' + (anyChecked ? ' has-selection' : '') +
-            '" data-section="' + esc(section.key) + '">' +
-            '<div class="topic-section-head">' +
-              '<label class="section-check" title="Выбрать весь раздел">' +
-                '<input type="checkbox" data-section="' + esc(section.key) + '"' +
-                  (allChecked ? ' checked' : '') + '>' +
-              '</label>' +
-              '<div class="section-info">' +
-                '<h3>' + esc(section.title) + '</h3>' +
-                '<div class="section-badges">' + badgesHTML(sectionCounts) + '</div>' +
-              '</div>' +
-              '<button type="button" class="section-pick" data-section-pick="' + esc(section.key) + '">' +
-                (allChecked ? 'Снять раздел' : 'Выбрать раздел') +
-              '</button>' +
+        return '<article class="line-item' +
+            (spec.count > 0 ? ' has-count' : '') +
+            (isOpen ? ' is-open' : '') +
+            (tasksCount === 0 ? ' is-empty' : '') +
+          '" data-line="' + number + '">' +
+          '<div class="line-row">' +
+            '<div class="line-counter" aria-label="Количество задач линии ' + number + '">' +
+              '<button type="button" class="counter-btn" data-line="' + number + '" data-step="-1" aria-label="Уменьшить количество задач линии ' + number + '">−</button>' +
+              '<input class="line-count-input" type="number" min="0" max="50" step="1" value="' + spec.count + '" data-line-count="' + number + '" aria-label="Задач из линии ' + number + '">' +
+              '<button type="button" class="counter-btn" data-line="' + number + '" data-step="1" aria-label="Увеличить количество задач линии ' + number + '">+</button>' +
             '</div>' +
-            '<div class="subtopics">' + subtopicsHTML + '</div>' +
-          '</section>';
-        }).join('');
-
-        els.topicsList.querySelectorAll('.topic-section').forEach(function (sectionEl) {
-          syncSectionCheckbox(sectionEl.dataset.section);
-        });
+            '<button type="button" class="line-title-btn" data-line-toggle="' + number + '" aria-expanded="' + (isOpen ? 'true' : 'false') + '" aria-controls="line-body-' + number + '">' +
+              '<span class="line-index' + (part === 2 ? ' part2' : '') + '">' + number + '</span>' +
+              '<span class="line-title-text">' +
+                '<span class="line-name">' + esc(line.title) + '</span>' +
+                '<span class="line-meta">Часть ' + part + ' · ' + esc(pointsLabel) + '</span>' +
+              '</span>' +
+              '<span class="line-chevron" aria-hidden="true"></span>' +
+            '</button>' +
+            '<div class="line-right">' +
+              '<span class="line-total' + (tasksCount === 0 ? ' is-empty' : '') + '" title="Всего задач этой линии в базе">' + baseBadge + '</span>' +
+              '<span class="line-subcount">' + subCountLabel + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="line-body" id="line-body-' + number + '">' +
+            '<div class="line-body-inner">' +
+              '<div class="line-body-pad">' +
+                '<div class="line-tools">' +
+                  '<span class="line-tools-label">Подтемы линии</span>' +
+                  (subs.length > 0
+                    ? '<button type="button" class="line-tool-btn" data-line-all="' + number + '">' +
+                        (allSelected ? 'Снять все' : 'Выбрать все') +
+                      '</button>'
+                    : '') +
+                '</div>' +
+                '<div class="line-subtopics">' + subtopicsHTML + '</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</article>';
       }
 
-      function syncSectionCheckbox(sectionKey) {
-        const el = els.topicsList.querySelector('.topic-section[data-section="' + sectionKey + '"]');
-        const section = sectionByKey(sectionKey);
-        if (!el || !section) return;
+      function renderLineConstructor() {
+        if (!state.stats) return;
 
-        const boxes = Array.prototype.slice.call(el.querySelectorAll('input[data-topic]'));
-        const checked = boxes.filter(function (box) { return box.checked; }).length;
-        const sectionBox = el.querySelector('input[data-section]');
-        const pick = el.querySelector('[data-section-pick]');
-
-        if (sectionBox) {
-          sectionBox.checked = boxes.length > 0 && checked === boxes.length;
-          sectionBox.indeterminate = checked > 0 && checked < boxes.length;
+        const def = examDefinition(state.exam);
+        if (!def || !Array.isArray(def.lines) || def.lines.length === 0) {
+          els.topicsList.innerHTML = '<div class="empty-state"><b>Матрица линий недоступна</b>' +
+            'Сервер не вернул <code>kimMatrix</code>. Перезапустите <code>node server.js</code> и обновите страницу.</div>';
+          return;
         }
-        if (pick) {
-          pick.textContent = checked === boxes.length && boxes.length > 0 ? 'Снять раздел' : 'Выбрать раздел';
-        }
-        el.classList.toggle('has-selection', checked > 0);
 
-        boxes.forEach(function (box) {
-          const label = box.closest('.subtopic');
-          if (label) label.classList.toggle('is-checked', box.checked);
-        });
+        const plan = ensurePlan(state.exam);
+        const parts = Array.isArray(def.parts) && def.parts.length > 0
+          ? def.parts
+          : [{ part: 1, title: PART_LABELS[1] }, { part: 2, title: PART_LABELS[2] }];
+
+        els.topicsList.innerHTML = parts.map(function (partDef) {
+          const part = Number(partDef.part) === 2 ? 2 : 1;
+          const lines = def.lines.filter(function (line) {
+            return (Number(line.part) === 2 ? 2 : 1) === part;
+          });
+          if (lines.length === 0) return '';
+
+          let requested = 0;
+          let inBase = 0;
+          lines.forEach(function (line) {
+            const spec = plan.get(Number(line.line));
+            requested += spec ? spec.count : 0;
+            inBase += Number(line.tasks_count) || 0;
+          });
+
+          return '<section class="part-group">' +
+            '<div class="part-group-head">' +
+              '<div class="part-group-title">' +
+                '<span class="part-dot' + (part === 2 ? ' part2' : '') + '"></span>' +
+                esc(PART_LABELS[part] || partDef.title || ('Часть ' + part)) +
+              '</div>' +
+              '<span class="part-group-count">' + requested + ' в варианте · ' + inBase + ' в базе</span>' +
+            '</div>' +
+            lines.map(lineItemHTML).join('') +
+          '</section>';
+        }).join('');
       }
 
       // ── Подсчёт выбранного ──────────────────────────────────────────────────
 
-      function selectionSummary() {
-        const available = { part1: 0, part2: 0, total: 0 };
+      function computeSummary() {
+        const plan = ensurePlan(state.exam);
+        let part1 = 0;
+        let part2 = 0;
+        let will1 = 0;
+        let will2 = 0;
         let selectedSubtopics = 0;
+        const included = [];
+        const noSubtopics = [];
+        const zeroAvailable = [];
+        const notEnough = [];
 
-        if (state.stats) {
-          state.stats.topics.forEach(function (section) {
-            const subs = section.subtopics || [];
-            const chosen = subs.filter(function (sub) { return state.selected.has(sub.key); });
-            selectedSubtopics += chosen.length;
+        lineDefs().forEach(function (line) {
+          const spec = plan.get(Number(line.line));
+          if (!spec) return;
 
-            if (subs.length > 0 && chosen.length === subs.length) {
-              const c = countsFor(section.counts);
-              available.part1 += c.part1;
-              available.part2 += c.part2;
-              available.total += c.total;
-            } else {
-              chosen.forEach(function (sub) {
-                const c = countsFor(sub.counts);
-                available.part1 += c.part1;
-                available.part2 += c.part2;
-                available.total += c.total;
-              });
-            }
+          const subs = line.subtopics || [];
+          const chosen = subs.filter(function (sub) {
+            return spec.subtopics.has(String(sub.subtopic_id));
           });
-        }
+          selectedSubtopics += chosen.length;
 
-        return { available: available, selectedSubtopics: selectedSubtopics };
+          if (spec.count <= 0) return;
+
+          included.push(line);
+          const part = Number(line.part) === 2 ? 2 : 1;
+          if (part === 2) part2 += spec.count;
+          else part1 += spec.count;
+
+          if (subs.length > 0 && chosen.length === 0) {
+            noSubtopics.push(line.line);
+            return;
+          }
+
+          const available = availableForLine(line, spec, part);
+          if (available === 0) {
+            zeroAvailable.push(line.line);
+            return;
+          }
+          if (available < spec.count) {
+            notEnough.push(line.line + ': ' + available + ' из ' + spec.count);
+          }
+
+          const willTake = Math.min(available, spec.count);
+          if (part === 2) will2 += willTake;
+          else will1 += willTake;
+        });
+
+        return {
+          part1: part1,
+          part2: part2,
+          total: part1 + part2,
+          will1: will1,
+          will2: will2,
+          willTotal: will1 + will2,
+          selectedSubtopics: selectedSubtopics,
+          included: included,
+          noSubtopics: noSubtopics,
+          zeroAvailable: zeroAvailable,
+          notEnough: notEnough
+        };
       }
 
       function updateSummary() {
-        const part1 = Math.max(0, Number(els.part1Input.value) || 0);
-        const part2 = Math.max(0, Number(els.part2Input.value) || 0);
-        const summary = selectionSummary();
-        const available = summary.available;
-        const willPick1 = part1 > 0 ? Math.min(part1, available.part1) : 0;
-        const willPick2 = part2 > 0 ? Math.min(part2, available.part2) : 0;
-        const willPickTotal = willPick1 + willPick2;
+        const summary = computeSummary();
 
-        els.availableCounts.textContent = 'Ч.1 — ' + available.part1 + ' · Ч.2 — ' + available.part2;
-        els.willPickCounts.textContent = part1 + ' + ' + part2 + ' = ' + (part1 + part2);
+        els.summaryPart1.textContent = String(summary.part1);
+        els.summaryPart2.textContent = String(summary.part2);
+        els.summaryTotal.textContent = String(summary.total);
         els.selectedTopicsCount.textContent = String(summary.selectedSubtopics);
+
+        els.summaryLinesCount.textContent = summary.included.length > 0
+          ? summary.included.length + ' из ' + lineDefs().length
+          : '—';
+
+        els.summaryLineNumbers.innerHTML = summary.included.map(function (line) {
+          return '<span class="line-chip' + (Number(line.part) === 2 ? ' part2' : '') + '">' +
+            line.line + '</span>';
+        }).join('');
 
         const warnings = [];
         if (!state.stats) {
           warnings.push('База задач ещё загружается.');
-        } else if (state.selected.size === 0) {
-          warnings.push('Выберите хотя бы одну тему.');
-        } else if (part1 + part2 === 0) {
-          warnings.push('Укажите хотя бы одну задачу.');
-        } else if (willPickTotal === 0) {
-          warnings.push('В выбранных темах нет задач для указанных частей. ' +
-            'Измените темы или количество задач.');
+        } else if (!examDefinition(state.exam)) {
+          warnings.push('Матрица линий КИМ недоступна. Перезапустите сервер.');
+        } else if (summary.total === 0) {
+          warnings.push('Поставьте хотя бы одну задачу в счётчиках линий.');
         } else {
-          if (part1 > available.part1) {
-            warnings.push('В выбранных темах только ' + available.part1 + ' ' +
-              plural(available.part1, 'задача', 'задачи', 'задач') + ' Части 1 — будут взяты все доступные.');
+          if (summary.noSubtopics.length > 0) {
+            warnings.push('В линиях ' + summary.noSubtopics.join(', ') +
+              ' не выбрано ни одной подтемы — отметьте хотя бы одну.');
           }
-          if (part2 > available.part2) {
-            warnings.push('В выбранных темах только ' + available.part2 + ' ' +
-              plural(available.part2, 'задача', 'задачи', 'задач') + ' Части 2 — будут взяты все доступные.');
+          if (summary.zeroAvailable.length > 0) {
+            warnings.push('В линиях ' + summary.zeroAvailable.join(', ') +
+              ' в выбранных подтемах нет задач — эти линии будут пропущены.');
+          }
+          if (summary.notEnough.length > 0) {
+            warnings.push('Не хватает задач (линия: доступно из запрошенных) — ' +
+              summary.notEnough.join('; ') + '. Будут взяты все доступные.');
           }
         }
 
@@ -1666,31 +2977,95 @@
         } else {
           els.selectionWarning.hidden = true;
           els.selectionOk.hidden = false;
-          els.selectionOk.textContent = 'Можно собирать: задач хватает.';
+          els.selectionOk.textContent = 'К сборке: ' + summary.will1 + ' + ' + summary.will2 +
+            ' = ' + summary.willTotal + ' ' +
+            plural(summary.willTotal, 'задача', 'задачи', 'задач') + '.';
         }
 
-        const canBuild = !state.busy && !!state.stats && state.selected.size > 0 &&
-          (part1 + part2) > 0 && willPickTotal > 0;
+        const canBuild = !state.busy && !!state.stats &&
+          !!examDefinition(state.exam) &&
+          summary.total > 0 &&
+          summary.noSubtopics.length === 0 &&
+          summary.willTotal > 0;
         els.buildBtn.disabled = !canBuild;
+        updateThemeBuilderSummary();
       }
 
-      function collectTopics() {
-        const result = [];
-        if (!state.stats) return result;
+      function buildLinePlan() {
+        const plan = ensurePlan(state.exam);
+        const result = {};
 
-        state.stats.topics.forEach(function (section) {
-          const subKeys = (section.subtopics || []).map(function (sub) { return sub.key; });
-          const chosen = subKeys.filter(function (key) { return state.selected.has(key); });
+        lineDefs().forEach(function (line) {
+          const spec = plan.get(Number(line.line));
+          if (!spec || spec.count <= 0) return;
 
-          if (subKeys.length > 0 && chosen.length === subKeys.length) {
-            result.push(section.key);
-            result.push.apply(result, subKeys);
-          } else {
-            result.push.apply(result, chosen);
-          }
+          const ids = lineSubtopicIds(line);
+          const chosen = ids.filter(function (id) { return spec.subtopics.has(id); });
+          const allSelected = ids.length === 0 || chosen.length === ids.length;
+
+          result[String(line.line)] = {
+            count: spec.count,
+            // Пустой массив для build.js означает «все подтемы линии».
+            subtopics: allSelected ? [] : chosen
+          };
         });
 
-        return Array.from(new Set(result));
+        return result;
+      }
+
+      function updateLineVisual(lineNumber) {
+        const article = els.topicsList.querySelector('.line-item[data-line="' + lineNumber + '"]');
+        const line = lineById(lineNumber);
+        const spec = planLine(lineNumber);
+        if (!article || !line || !spec) return;
+
+        article.classList.toggle('has-count', spec.count > 0);
+
+        const input = article.querySelector('[data-line-count]');
+        if (input && document.activeElement !== input) {
+          input.value = String(spec.count);
+        }
+
+        const subs = line.subtopics || [];
+        const selectedSubs = subs.filter(function (sub) {
+          return spec.subtopics.has(String(sub.subtopic_id));
+        }).length;
+        const subcount = article.querySelector('.line-subcount');
+        if (subcount) {
+          subcount.textContent = subs.length > 0
+            ? selectedSubs + '/' + subs.length + ' подтем'
+            : 'подтем нет';
+        }
+
+        const tool = article.querySelector('[data-line-all]');
+        if (tool) {
+          tool.textContent = allSubtopicsSelected(line, spec) ? 'Снять все' : 'Выбрать все';
+        }
+
+        article.querySelectorAll('.line-subtopic').forEach(function (label) {
+          const box = label.querySelector('input[data-subtopic]');
+          if (!box) return;
+          const checked = spec.subtopics.has(String(box.dataset.subtopic));
+          box.checked = checked;
+          label.classList.toggle('is-checked', checked);
+        });
+
+        const group = article.closest('.part-group');
+        if (group) {
+          let requested = 0;
+          let inBase = 0;
+          group.querySelectorAll('.line-item').forEach(function (item) {
+            const number = Number(item.dataset.line);
+            const itemLine = lineById(number);
+            const itemSpec = planLine(number);
+            requested += itemSpec ? itemSpec.count : 0;
+            inBase += itemLine ? (Number(itemLine.tasks_count) || 0) : 0;
+          });
+          const countEl = group.querySelector('.part-group-count');
+          if (countEl) {
+            countEl.textContent = requested + ' в варианте · ' + inBase + ' в базе';
+          }
+        }
       }
 
       function updateVariantHint() {
@@ -1708,29 +3083,53 @@
         updateVariantHint();
       }
 
-      // ── Стандартное количество заданий экзамена ─────────────────────────────
+      // ── Пресеты и изменение счётчиков ───────────────────────────────────────
 
-      function examStandard(exam) {
-        return EXAM_STANDARDS[exam] || EXAM_STANDARDS.EGE;
-      }
-
-      function renderCountsHint() {
-        const standard = examStandard(state.exam);
-        const total = standard.part1 + standard.part2;
-        const label = state.exam === 'EGE' ? 'ЕГЭ' : 'ОГЭ';
-        els.countsHint.textContent = 'Стандарт ' + label + ': ' +
-          standard.part1 + ' + ' + standard.part2 + ' = ' + total + ' ' +
-          plural(total, 'задание', 'задания', 'заданий') + '.';
-      }
-
-      // Подставляет стандарт выбранного экзамена. Преподаватель может
-      // после этого вручную изменить числа в полях на любые другие.
-      function applyExamDefaults(exam) {
-        const standard = examStandard(exam);
-        els.part1Input.value = String(standard.part1);
-        els.part2Input.value = String(standard.part2);
-        renderCountsHint();
+      function setLineCount(lineNumber, next) {
+        const spec = planLine(lineNumber);
+        if (!spec) return;
+        const value = Math.max(0, Math.min(50, Math.round(Number(next) || 0)));
+        spec.count = value;
+        setActivePreset(null);
+        updateLineVisual(lineNumber);
         updateSummary();
+      }
+
+      function applyPreset(name) {
+        if (!state.stats) return;
+        const plan = ensurePlan(state.exam);
+
+        if (name === 'full') {
+          selectedTopicSet().clear();
+          lineDefs().forEach(function (line) {
+            const spec = plan.get(Number(line.line));
+            if (!spec) return;
+            spec.count = 1;
+            spec.subtopics = new Set(lineSubtopicIds(line));
+          });
+          setAutoHint('Фильтр снят: включён полный вариант экзамена.', 'ok');
+        } else if (name === 'zero') {
+          lineDefs().forEach(function (line) {
+            const spec = plan.get(Number(line.line));
+            if (spec) spec.count = 0;
+          });
+          setAutoHint('Все счётчики обнулены. Выбранные темы сохранены.', '');
+        }
+
+        setActivePreset(name);
+        renderThemeBuilder();
+        renderLineConstructor();
+        updateSummary();
+      }
+
+      function reflectPresetFromPlan() {
+        const plan = ensurePlan(state.exam);
+        const selected = selectedTopicSet();
+        const full = selected.size === 0 && lineDefs().length > 0 && lineDefs().every(function (line) {
+          const spec = plan.get(Number(line.line));
+          return spec && spec.count === 1 && allSubtopicsSelected(line, spec);
+        });
+        setActivePreset(full ? 'full' : null);
       }
 
       // ── Архив ───────────────────────────────────────────────────────────────
@@ -1879,20 +3278,18 @@
           if (!response.ok || !data || !data.ok) {
             throw new Error((data && data.error) || ('HTTP ' + response.status));
           }
+          if (!data.kimMatrix || !data.kimMatrix.exams ||
+              !data.kimMatrix.exams.EGE || !data.kimMatrix.exams.OGE) {
+            throw new Error('сервер не вернул матрицу линий КИМ (kimMatrix)');
+          }
 
           state.stats = data;
-
-          const allowed = new Set();
-          data.topics.forEach(function (section) {
-            allowed.add(section.key);
-            section.subtopics.forEach(function (sub) { allowed.add(sub.key); });
-          });
-          state.selected = new Set(Array.from(state.selected).filter(function (key) {
-            return allowed.has(key);
-          }));
+          ensurePlan('EGE');
+          ensurePlan('OGE');
 
           if (opts.initial) {
             state.variantAuto = true;
+            setActivePreset('full');
             setNextVariant(state.exam);
           }
 
@@ -1904,10 +3301,13 @@
 
           renderExamButtons();
           renderExamTotals();
-          renderTopics();
+          renderThemeBuilder();
+          renderLineConstructor();
           renderArchive();
           updateSummary();
           updateVariantHint();
+          els.autoPart1Input.value = String(state.autoPart1);
+          els.autoPart2Input.value = String(state.autoPart2);
           els.globalError.hidden = true;
         } catch (error) {
           els.dbPill.textContent = 'База недоступна';
@@ -1994,34 +3394,31 @@
           return;
         }
 
-        const topics = collectTopics();
-        if (topics.length === 0) {
-          showToast('Выберите хотя бы одну тему.', 'error');
+        const summary = computeSummary();
+        if (summary.total === 0) {
+          showToast('Поставьте хотя бы одну задачу в счётчиках линий.', 'error');
+          return;
+        }
+        if (summary.noSubtopics.length > 0) {
+          showToast('В линиях ' + summary.noSubtopics.join(', ') + ' не выбрано ни одной подтемы.', 'error');
           els.selectionWarning.hidden = false;
           return;
         }
-
-        if (els.part1Input.value.trim() === '' || els.part2Input.value.trim() === '') {
-          showToast('Укажите количество задач Части 1 и Части 2 (можно 0).', 'error');
+        if (summary.willTotal === 0) {
+          showToast('В выбранных подтемах нет задач. Измените выбор.', 'error');
           return;
         }
 
-        const part1 = Number(els.part1Input.value);
-        const part2 = Number(els.part2Input.value);
-        if (!Number.isInteger(part1) || part1 < 0 || !Number.isInteger(part2) || part2 < 0) {
-          showToast('Количество задач должно быть целым неотрицательным числом.', 'error');
-          return;
-        }
-        if (part1 + part2 === 0) {
-          showToast('Нужна хотя бы одна задача.', 'error');
+        const linePlan = buildLinePlan();
+        if (Object.keys(linePlan).length === 0) {
+          showToast('Не выбрано ни одной линии с задачами.', 'error');
           return;
         }
 
         const payload = {
           exam: state.exam,
-          topics: topics,
-          part1: part1,
-          part2: part2,
+          linePlan: linePlan,
+          selectedTopics: Array.from(selectedTopicSet()),
           variant: els.variantInput.value.trim(),
           title: els.titleInput.value.trim(),
           webBaseUrl: els.webBaseUrlInput.value.trim(),
@@ -2116,90 +3513,157 @@
             const exam = btn.dataset.exam;
             if (exam === state.exam) return;
             state.exam = exam;
+            state.expanded.clear();
             if (state.variantAuto) setNextVariant(exam);
-            applyExamDefaults(exam);
+            ensurePlan(exam);
+            reflectPresetFromPlan();
             renderExamButtons();
             renderExamTotals();
-            renderTopics();
+            renderThemeBuilder();
+            renderLineConstructor();
             updateSummary();
             updateVariantHint();
+            setAutoHint(selectedTopicSet().size > 0
+              ? 'Выбрано тем: ' + selectedTopicSet().size + '. Задайте количество задач и нажмите «Распределить».'
+              : 'Сначала выберите узкие темы.', '');
           });
+        });
+
+        els.themeSections.addEventListener('click', function (event) {
+          const chip = event.target.closest('[data-theme-key]');
+          if (chip) {
+            toggleThemeKey(chip.dataset.themeKey);
+            return;
+          }
+
+          const section = event.target.closest('[data-theme-section]');
+          if (section) toggleThemeSection(section.dataset.themeSection);
+        });
+
+        els.autoDistributeBtn.addEventListener('click', autoDistribute);
+        els.autoPart1Input.addEventListener('input', function () {
+          state.autoPart1 = Math.max(0, Math.min(200, Math.round(Number(els.autoPart1Input.value) || 0)));
+        });
+        els.autoPart2Input.addEventListener('input', function () {
+          state.autoPart2 = Math.max(0, Math.min(200, Math.round(Number(els.autoPart2Input.value) || 0)));
+        });
+
+        // Счётчики линий: ввод с клавиатуры.
+        els.topicsList.addEventListener('input', function (event) {
+          const target = event.target;
+          if (!target.matches('input[data-line-count]')) return;
+
+          const lineNumber = Number(target.dataset.lineCount);
+          const spec = planLine(lineNumber);
+          if (!spec) return;
+
+          if (target.value === '') {
+            spec.count = 0;
+          } else {
+            let value = Number(target.value);
+            if (!Number.isFinite(value)) value = 0;
+            value = Math.max(0, Math.min(50, Math.round(value)));
+            spec.count = value;
+            if (String(value) !== target.value) target.value = String(value);
+          }
+
+          setActivePreset(null);
+          updateLineVisual(lineNumber);
+          updateSummary();
         });
 
         els.topicsList.addEventListener('change', function (event) {
           const target = event.target;
 
-          if (target.matches('input[data-topic]')) {
-            const key = target.dataset.topic;
-            if (target.checked) state.selected.add(key);
-            else state.selected.delete(key);
-
-            const sectionEl = target.closest('.topic-section');
-            if (sectionEl) syncSectionCheckbox(sectionEl.dataset.section);
+          if (target.matches('input[data-line-count]')) {
+            const lineNumber = Number(target.dataset.lineCount);
+            const spec = planLine(lineNumber);
+            if (!spec) return;
+            const value = Math.max(0, Math.min(50, Math.round(Number(target.value) || 0)));
+            spec.count = value;
+            target.value = String(value);
+            setActivePreset(null);
+            updateLineVisual(lineNumber);
             updateSummary();
             return;
           }
 
-          if (target.matches('input[data-section]')) {
-            const section = sectionByKey(target.dataset.section);
-            if (!section) return;
+          if (target.matches('input[data-line-sub]')) {
+            const lineNumber = Number(target.dataset.lineSub);
+            const subtopicId = String(target.dataset.subtopic);
+            const spec = planLine(lineNumber);
+            if (!spec) return;
 
-            section.subtopics.forEach(function (sub) {
-              if (target.checked) state.selected.add(sub.key);
-              else state.selected.delete(sub.key);
-            });
+            if (target.checked) spec.subtopics.add(subtopicId);
+            else spec.subtopics.delete(subtopicId);
 
-            renderTopics();
+            setActivePreset(null);
+            updateLineVisual(lineNumber);
             updateSummary();
           }
         });
 
         els.topicsList.addEventListener('click', function (event) {
-          const button = event.target.closest('[data-section-pick]');
-          if (!button) return;
+          const stepBtn = event.target.closest('[data-step]');
+          if (stepBtn) {
+            const lineNumber = Number(stepBtn.dataset.line);
+            const spec = planLine(lineNumber);
+            if (!spec) return;
+            setLineCount(lineNumber, spec.count + Number(stepBtn.dataset.step));
+            return;
+          }
 
-          const section = sectionByKey(button.dataset.sectionPick);
-          if (!section) return;
+          const titleBtn = event.target.closest('[data-line-toggle]');
+          if (titleBtn) {
+            const lineNumber = Number(titleBtn.dataset.lineToggle);
+            if (state.expanded.has(lineNumber)) state.expanded.delete(lineNumber);
+            else state.expanded.add(lineNumber);
 
-          const allSelected = section.subtopics.length > 0 &&
-            section.subtopics.every(function (sub) { return state.selected.has(sub.key); });
+            const item = titleBtn.closest('.line-item');
+            if (item) item.classList.toggle('is-open', state.expanded.has(lineNumber));
+            titleBtn.setAttribute('aria-expanded', state.expanded.has(lineNumber) ? 'true' : 'false');
+            return;
+          }
 
-          section.subtopics.forEach(function (sub) {
-            if (allSelected) state.selected.delete(sub.key);
-            else state.selected.add(sub.key);
-          });
+          const allBtn = event.target.closest('[data-line-all]');
+          if (allBtn) {
+            const lineNumber = Number(allBtn.dataset.lineAll);
+            const line = lineById(lineNumber);
+            const spec = planLine(lineNumber);
+            if (!line || !spec) return;
 
-          renderTopics();
-          updateSummary();
+            if (allSubtopicsSelected(line, spec)) {
+              spec.subtopics = new Set();
+            } else {
+              spec.subtopics = new Set(lineSubtopicIds(line));
+            }
+
+            setActivePreset(null);
+            renderLineConstructor();
+            updateSummary();
+          }
         });
 
-        els.selectAllBtn.addEventListener('click', function () {
-          if (!state.stats) return;
-          state.stats.topics.forEach(function (section) {
-            section.subtopics.forEach(function (sub) { state.selected.add(sub.key); });
+        document.querySelectorAll('.preset-btn').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            applyPreset(btn.dataset.preset);
           });
-          renderTopics();
-          updateSummary();
         });
 
-        els.resetAllBtn.addEventListener('click', function () {
-          state.selected.clear();
-          renderTopics();
-          updateSummary();
+        els.expandAllBtn.addEventListener('click', function () {
+          lineDefs().forEach(function (line) {
+            state.expanded.add(Number(line.line));
+          });
+          renderLineConstructor();
+        });
+
+        els.collapseAllBtn.addEventListener('click', function () {
+          state.expanded.clear();
+          renderLineConstructor();
         });
 
         els.variantInput.addEventListener('input', function () {
           state.variantAuto = false;
-        });
-
-        els.part1Input.addEventListener('input', updateSummary);
-        els.part2Input.addEventListener('input', updateSummary);
-
-        els.standardCountsBtn.addEventListener('click', function () {
-          applyExamDefaults(state.exam);
-          const standard = examStandard(state.exam);
-          showToast('Стандарт ' + state.exam + ': ' + standard.part1 + ' + ' + standard.part2 +
-            ' = ' + (standard.part1 + standard.part2) + ' заданий.', 'success');
         });
 
         els.saveWebUrlBtn.addEventListener('click', saveWebBaseUrl);
@@ -2234,7 +3698,7 @@
       function init() {
         els.serverAddress.textContent = location.origin;
         els.webBaseUrlInput.placeholder = location.origin + '/';
-        applyExamDefaults(state.exam);
+        setActivePreset('full');
         bindEvents();
         loadStats({ initial: true });
         loadWebConfig();

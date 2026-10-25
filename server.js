@@ -68,10 +68,14 @@ const state = {
   tasksDir: null,
   dbPath: null,
   topicsPath: null,
+  matrixPath: null,
   db: [],
   topicsRaw: {},
+  kimMatrix: null,
   allowedTopicKeys: new Set(),
+  narrowTopicKeys: new Set(),
   topicStats: null,
+  kimStats: null,
   loadedAt: null,
   dbMtime: null
 };
@@ -247,6 +251,11 @@ function resolveTasksDir() {
     );
   }
 
+  // Матричная сборка требует kim_matrix.json и полного покрытия линий.
+  // Поэтому локальная база с матрицей имеет приоритет над «просто большей» базой.
+  const withMatrix = candidates.filter((dir) => fs.existsSync(path.join(dir, 'kim_matrix.json')));
+  if (withMatrix.length > 0) return withMatrix[0];
+
   candidates.sort((a, b) => fileSize(path.join(b, 'db.json')) - fileSize(path.join(a, 'db.json')));
   return candidates[0];
 }
@@ -255,6 +264,16 @@ function collectAllowedTopicKeys(topicsRaw) {
   const keys = new Set();
   for (const [sectionKey, section] of Object.entries(topicsRaw || {})) {
     keys.add(sectionKey);
+    for (const subKey of Object.keys(section.subtopics || {})) {
+      keys.add(subKey);
+    }
+  }
+  return keys;
+}
+
+function collectNarrowTopicKeys(topicsRaw) {
+  const keys = new Set();
+  for (const section of Object.values(topicsRaw || {})) {
     for (const subKey of Object.keys(section.subtopics || {})) {
       keys.add(subKey);
     }
@@ -277,18 +296,41 @@ function loadData() {
     throw new Error(`Файл ${topicsPath} должен содержать объект разделов.`);
   }
 
+  // Эталонная матрица линий КИМ (tasks/kim_matrix.json).
+  const matrixPath = path.join(tasksDir, 'kim_matrix.json');
+  let kimMatrix = null;
+  if (fs.existsSync(matrixPath)) {
+    try {
+      kimMatrix = JSON.parse(fs.readFileSync(matrixPath, 'utf8'));
+      if (!kimMatrix || typeof kimMatrix !== 'object' || !kimMatrix.exams) {
+        throw new Error('ожидался объект с полем exams');
+      }
+    } catch (e) {
+      throw new Error(`Не удалось прочитать kim_matrix.json: ${e.message}`);
+    }
+  } else {
+    console.warn(`[БАЗА] Файл матрицы не найден: ${matrixPath}. Статистика по линиям будет недоступна.`);
+  }
+
   state.tasksDir = tasksDir;
   state.dbPath = dbPath;
   state.topicsPath = topicsPath;
+  state.matrixPath = kimMatrix ? matrixPath : null;
   state.db = db;
   state.topicsRaw = topicsRaw;
+  state.kimMatrix = kimMatrix;
   state.allowedTopicKeys = collectAllowedTopicKeys(topicsRaw);
+  state.narrowTopicKeys = collectNarrowTopicKeys(topicsRaw);
   state.loadedAt = new Date().toISOString();
   state.dbMtime = isoOrNull(fs.statSync(dbPath).mtime);
   state.topicStats = buildTopicStats();
+  state.kimStats = buildKimStats();
 
   console.log(`[БАЗА] ${dbPath}`);
   console.log(`[БАЗА] Задач: ${db.length}. Разделов: ${Object.keys(topicsRaw).length}.`);
+  if (kimMatrix) {
+    console.log(`[БАЗА] Матрица линий: ${state.matrixPath}`);
+  }
   if (path.resolve(tasksDir) !== path.resolve(LOCAL_TASKS_DIR)) {
     console.log(`[БАЗА] Используется внешняя база. Чтобы зафиксировать её, задайте TASKS_DIR.`);
   }
@@ -361,6 +403,191 @@ function buildTopicStats() {
       OGE: { label: EXAM_LABELS.OGE, ...copyCounts(totals.OGE) }
     },
     sections
+  };
+}
+
+// ─── Статистика по линиям КИМ (kim_matrix.json + db.json) ────────────────────
+
+function narrowTagsOf(task) {
+  const tags = Array.isArray(task.topics) ? task.topics.map(String) : [];
+  return [...new Set(tags.filter((key) => state.narrowTopicKeys.has(key)))].sort();
+}
+
+function addTopicGroup(groups, keys, part) {
+  if (!Array.isArray(keys) || keys.length === 0) return;
+  const sorted = [...new Set(keys)].sort();
+  const groupKey = sorted.join('|');
+  if (!groups.has(groupKey)) {
+    groups.set(groupKey, { keys: sorted, part1: 0, part2: 0, total: 0 });
+  }
+  const group = groups.get(groupKey);
+  group.total += 1;
+  if (part === 2) group.part2 += 1;
+  else group.part1 += 1;
+}
+
+function serializeTopicGroups(groups) {
+  return [...groups.values()]
+    .sort((a, b) => b.total - a.total || a.keys.join('|').localeCompare(b.keys.join('|')))
+    .map((group) => ({
+      keys: group.keys.slice(),
+      part1: group.part1,
+      part2: group.part2,
+      total: group.total
+    }));
+}
+
+function keysFromTopicGroups(groups) {
+  const keys = new Set();
+  for (const group of groups.values()) {
+    for (const key of group.keys) keys.add(key);
+  }
+  return [...keys].sort();
+}
+
+function buildKimStats() {
+  const matrix = state.kimMatrix;
+  if (!matrix) return null;
+
+  // Названия подтем из матрицы — резерв для старых задач без subtopic_title.
+  const titleById = new Map();
+  for (const examDef of Object.values(matrix.exams || {})) {
+    for (const line of examDef.lines || []) {
+      for (const sub of line.subtopics || []) {
+        if (sub && sub.id) titleById.set(String(sub.id), String(sub.title || sub.id));
+      }
+    }
+  }
+
+  // "EXAM|line" → агрегаты по базе
+  const perLine = new Map();
+  for (const task of state.db) {
+    const exam = String(task.exam || '').toUpperCase();
+    if (!matrix.exams || !matrix.exams[exam]) continue;
+
+    const line = Number(task.kim_line);
+    if (!Number.isInteger(line) || line < 1) continue;
+
+    const key = `${exam}|${line}`;
+    if (!perLine.has(key)) {
+      perLine.set(key, {
+        total: 0,
+        part1: 0,
+        part2: 0,
+        topicGroups: new Map(),
+        subtopics: new Map()
+      });
+    }
+    const entry = perLine.get(key);
+    const part = Number(task.part) === 2 ? 2 : 1;
+    const narrowKeys = narrowTagsOf(task);
+    entry.total += 1;
+    if (part === 2) entry.part2 += 1;
+    else entry.part1 += 1;
+    addTopicGroup(entry.topicGroups, narrowKeys, part);
+
+    if (task.subtopic_id) {
+      const id = String(task.subtopic_id);
+      if (!entry.subtopics.has(id)) {
+        entry.subtopics.set(id, {
+          subtopic_id: id,
+          subtopic_title: String(task.subtopic_title || titleById.get(id) || id),
+          count: 0,
+          part1: 0,
+          part2: 0,
+          topicGroups: new Map()
+        });
+      }
+      const sub = entry.subtopics.get(id);
+      sub.count += 1;
+      if (part === 2) sub.part2 += 1;
+      else sub.part1 += 1;
+      addTopicGroup(sub.topicGroups, narrowKeys, part);
+      if (task.subtopic_title) sub.subtopic_title = String(task.subtopic_title);
+    }
+  }
+
+  const exams = {};
+  for (const [examKey, examDef] of Object.entries(matrix.exams || {})) {
+    const lines = (examDef.lines || []).map((line) => {
+      const entry = perLine.get(`${examKey}|${line.line}`) || {
+        total: 0,
+        part1: 0,
+        part2: 0,
+        topicGroups: new Map(),
+        subtopics: new Map()
+      };
+
+      const matrixSubtopics = Array.isArray(line.subtopics) ? line.subtopics : [];
+      const bySubtopic = new Map();
+      for (const sub of matrixSubtopics) {
+        if (!sub || !sub.id) continue;
+        bySubtopic.set(String(sub.id), {
+          subtopic_id: String(sub.id),
+          subtopic_title: String(sub.title || sub.id),
+          topic_keys: Array.isArray(sub.topic_keys) ? sub.topic_keys.map(String) : [],
+          count: 0,
+          counts: { part1: 0, part2: 0, total: 0 },
+          topic_groups: []
+        });
+      }
+      for (const [id, sub] of entry.subtopics) {
+        const payload = {
+          subtopic_id: id,
+          subtopic_title: sub.subtopic_title || titleById.get(id) || id,
+          count: sub.count,
+          counts: { part1: sub.part1, part2: sub.part2, total: sub.count },
+          topic_groups: serializeTopicGroups(sub.topicGroups)
+        };
+        if (bySubtopic.has(id)) {
+          const target = bySubtopic.get(id);
+          Object.assign(target, payload);
+        } else {
+          bySubtopic.set(id, {
+            ...payload,
+            topic_keys: keysFromTopicGroups(sub.topicGroups)
+          });
+        }
+      }
+
+      const subtopics = [...bySubtopic.values()];
+      const availableSubtopics = subtopics.filter((sub) => sub.count > 0);
+      const matrixTopicKeys = Array.isArray(line.topic_keys) ? line.topic_keys.map(String) : [];
+      const topicKeys = [...new Set(
+        matrixTopicKeys.length > 0
+          ? matrixTopicKeys
+          : subtopics.flatMap((sub) => sub.topic_keys || [])
+      )];
+
+      return {
+        ...line,
+        // Исходный перечень подтем матрицы (ФИПИ/каталог).
+        matrix_subtopics: matrixSubtopics,
+        // Все подтемы линии с фактическим количеством задач (0 — пока нет задач).
+        subtopics,
+        // Только подтемы, по которым в базе есть задачи.
+        available_subtopics: availableSubtopics,
+        topic_keys: topicKeys,
+        topic_groups: serializeTopicGroups(entry.topicGroups),
+        tasks_count: entry.total,
+        total: entry.total,
+        counts: { part1: entry.part1, part2: entry.part2, total: entry.total }
+      };
+    });
+
+    exams[examKey] = {
+      ...examDef,
+      label: EXAM_LABELS[examKey] || examDef.title || examKey,
+      lines
+    };
+  }
+
+  return {
+    version: matrix.version,
+    generated_at: matrix.generated_at,
+    description: matrix.description,
+    source: matrix.source,
+    exams
   };
 }
 
@@ -494,12 +721,15 @@ function buildStatsPayload() {
       tasksDirAbsolute: state.tasksDir,
       dbPath: displayPath(state.dbPath),
       topicsPath: displayPath(state.topicsPath),
+      matrixPath: state.matrixPath ? displayPath(state.matrixPath) : null,
       loadedAt: state.loadedAt,
       dbMtime: state.dbMtime
     },
     totalTasks: state.db.length,
     exams: stats.exams,
     topics: stats.sections,
+    // Эталонная матрица линий + фактическое покрытие из db.json.
+    kimMatrix: state.kimStats,
     variants,
     nextVariant
   };
@@ -675,17 +905,102 @@ function parseCount(value, fallback) {
   return n;
 }
 
-function runBuild(exam, topics, variant, title, part1, part2, skipGas, webBaseUrl) {
+function normalizeSelectedTopics(raw) {
+  if (raw === undefined || raw === null) return { selectedTopics: [] };
+  if (!Array.isArray(raw)) {
+    return { error: 'selectedTopics должен быть массивом ключей узких тем.' };
+  }
+
+  const cleaned = [...new Set(
+    raw.map((value) => String(value == null ? '' : value).trim()).filter(Boolean)
+  )];
+  const unknown = cleaned.filter((key) => !state.narrowTopicKeys.has(key));
+  if (unknown.length > 0) {
+    return { error: `Неизвестные узкие темы: ${unknown.join(', ')}.` };
+  }
+  return { selectedTopics: cleaned };
+}
+
+function normalizeLinePlan(raw, maxLine) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    return { error: 'linePlan должен быть объектом вида {"1":{"count":1,"subtopics":["theme_1"]}}.' };
+  }
+
+  const plan = {};
+  for (const [key, value] of Object.entries(raw)) {
+    const line = Number(key);
+    if (!Number.isInteger(line) || line < 1 || line > maxLine) {
+      return { error: `Линия «${key}» вне диапазона 1–${maxLine}.` };
+    }
+
+    let count;
+    let subtopics = [];
+    if (typeof value === 'number' || typeof value === 'string') {
+      count = Number(value);
+    } else if (value && typeof value === 'object') {
+      count = value.count === undefined ? 1 : Number(value.count);
+      subtopics = value.subtopics ?? value.topics ?? value.subtopic_ids ?? [];
+    } else {
+      return { error: `Некорректное значение для линии ${line}.` };
+    }
+
+    if (!Number.isInteger(count) || count < 0 || count > 50) {
+      return { error: `Количество задач для линии ${line} должно быть целым числом от 0 до 50.` };
+    }
+    if (!Array.isArray(subtopics)) {
+      return { error: `subtopics для линии ${line} должен быть массивом.` };
+    }
+
+    const cleaned = [];
+    for (const rawSub of subtopics) {
+      const id = String(rawSub == null ? '' : rawSub).trim();
+      if (!id) continue;
+      if (!/^[A-Za-z0-9_.:-]{1,80}$/.test(id)) {
+        return { error: `Некорректный идентификатор подтемы «${id}» в линии ${line}.` };
+      }
+      cleaned.push(id);
+    }
+
+    plan[String(line)] = { count, subtopics: [...new Set(cleaned)] };
+  }
+
+  if (Object.keys(plan).length === 0) {
+    return { error: 'План линий пуст: укажите хотя бы одну линию.' };
+  }
+  return { plan };
+}
+
+function runBuild(options) {
+  const {
+    exam,
+    topics,
+    variant,
+    title,
+    skipGas,
+    webBaseUrl,
+    linePlan,
+    legacyCounts,
+    selectedTopics
+  } = options;
+
   return new Promise((resolve, reject) => {
     const args = [
       BUILD_SCRIPT,
       `--exam=${exam}`,
-      `--topics=${topics.join(',')}`,
       `--variant=${variant}`,
-      `--part1=${part1}`,
-      `--part2=${part2}`,
       `--web-url=${webBaseUrl}`
     ];
+
+    if (topics.length > 0) args.push(`--topics=${topics.join(',')}`);
+    if (selectedTopics.length > 0) {
+      args.push(`--selected-topics=${selectedTopics.join(',')}`);
+    }
+    if (linePlan) {
+      args.push(`--line-plan=${JSON.stringify(linePlan)}`);
+    } else if (legacyCounts) {
+      args.push(`--part1=${legacyCounts.part1}`);
+      args.push(`--part2=${legacyCounts.part2}`);
+    }
 
     if (title) args.push(`--title=${title}`);
     if (skipGas) args.push('--skip-gas');
@@ -693,6 +1008,10 @@ function runBuild(exam, topics, variant, title, part1, part2, skipGas, webBaseUr
     if (path.resolve(state.tasksDir) !== path.resolve(LOCAL_TASKS_DIR)) {
       args.push(`--tasks-dir=${state.tasksDir}`);
     }
+
+    const requestedCount = linePlan
+      ? Object.values(linePlan).reduce((sum, spec) => sum + (Number(spec.count) || 0), 0)
+      : (legacyCounts ? legacyCounts.part1 + legacyCounts.part2 : (exam === 'EGE' ? 26 : 22));
 
     const startedAt = Date.now();
     const child = spawn(process.execPath, args, {
@@ -784,7 +1103,8 @@ function runBuild(exam, topics, variant, title, part1, part2, skipGas, webBaseUr
         code: `${exam}-${variant}`,
         title: finalTitle || `Тренировочный вариант №${variant}`,
         tasksCount,
-        requestedCount: part1 + part2,
+        requestedCount,
+        buildMode: linePlan ? 'line-plan' : (legacyCounts ? 'legacy-counts' : 'standard'),
         studentPdfUrl: `/output/${baseName}_Student.pdf`,
         teacherPdfUrl: `/output/${baseName}_Teacher.pdf`,
         blankUrl: `/?v=${encodeURIComponent(`${exam}-${variant}`)}`,
@@ -906,20 +1226,46 @@ async function handleApi(req, res, url) {
 
     const rawTopics = Array.isArray(body.topics) ? body.topics : [];
     const topics = [...new Set(rawTopics.map((v) => String(v).trim()).filter((key) => state.allowedTopicKeys.has(key)))];
-    if (topics.length === 0) {
+    if (rawTopics.length > 0 && topics.length === 0) {
       sendJson(res, 400, { ok: false, error: 'Выберите хотя бы одну тему (раздел или подтему).' });
       return;
     }
 
-    const part1 = parseCount(body.part1, exam === 'OGE' ? 16 : 20);
-    const part2 = parseCount(body.part2, 6);
-    if (part1 === null || part2 === null) {
-      sendJson(res, 400, { ok: false, error: 'Количество задач должно быть целым числом от 0 до 200.' });
+    const normalizedSelectedTopics = normalizeSelectedTopics(body.selectedTopics);
+    if (normalizedSelectedTopics.error) {
+      sendJson(res, 400, { ok: false, error: normalizedSelectedTopics.error });
       return;
     }
-    if (part1 + part2 === 0) {
-      sendJson(res, 400, { ok: false, error: 'Нужно запросить хотя бы одну задачу.' });
-      return;
+    const selectedTopics = normalizedSelectedTopics.selectedTopics;
+
+    // Матричный план линий (необязателен). Если не задан — build.js соберёт
+    // стандартный вариант строго по спецификации: 26 линий ЕГЭ / 22 линии ОГЭ.
+    const maxLine = exam === 'EGE' ? 26 : 22;
+    let linePlan = null;
+    if (body.linePlan !== undefined && body.linePlan !== null) {
+      const normalized = normalizeLinePlan(body.linePlan, maxLine);
+      if (normalized.error) {
+        sendJson(res, 400, { ok: false, error: normalized.error });
+        return;
+      }
+      linePlan = normalized.plan;
+    }
+
+    // Ручная выборка по частям — только по явному запросу (совместимость со старым API).
+    const legacyRequested = body.legacyCounts === true || body.legacy === true || body.mode === 'counts';
+    let legacyCounts = null;
+    if (!linePlan && legacyRequested) {
+      const part1 = parseCount(body.part1, exam === 'OGE' ? 16 : 20);
+      const part2 = parseCount(body.part2, exam === 'OGE' ? 6 : 6);
+      if (part1 === null || part2 === null) {
+        sendJson(res, 400, { ok: false, error: 'Количество задач должно быть целым числом от 0 до 200.' });
+        return;
+      }
+      if (part1 + part2 === 0) {
+        sendJson(res, 400, { ok: false, error: 'Нужно запросить хотя бы одну задачу.' });
+        return;
+      }
+      legacyCounts = { part1, part2 };
     }
 
     const variants = scanVariants();
@@ -963,10 +1309,24 @@ async function handleApi(req, res, url) {
     }
 
     buildInProgress = true;
-    console.log(`[СБОРКА] ${exam}-${variant} · ${part1}+${part2} задач · тем: ${topics.length}`);
+    const modeLabel = linePlan ? 'матрица линий' : (legacyCounts ? `по частям ${legacyCounts.part1}+${legacyCounts.part2}` : 'стандарт по линиям');
+    const requestedTotal = linePlan
+      ? Object.values(linePlan).reduce((sum, spec) => sum + (Number(spec.count) || 0), 0)
+      : (legacyCounts ? legacyCounts.part1 + legacyCounts.part2 : maxLine);
+    console.log(`[СБОРКА] ${exam}-${variant} · режим: ${modeLabel} · задач: ${requestedTotal} · тем: ${topics.length} · узких тем: ${selectedTopics.length}`);
 
     try {
-      const result = await runBuild(exam, topics, variant, title, part1, part2, skipGas, webBaseUrl);
+      const result = await runBuild({
+        exam,
+        topics,
+        variant,
+        title,
+        skipGas,
+        webBaseUrl,
+        linePlan,
+        legacyCounts,
+        selectedTopics
+      });
       console.log(`[СБОРКА] Готово за ${Math.round(result.durationMs / 1000)} с: ${result.code}, задач: ${result.tasksCount}.`);
       sendJson(res, 200, result);
     } catch (e) {

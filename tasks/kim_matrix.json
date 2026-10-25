@@ -1,0 +1,2573 @@
+{
+  "version": 1,
+  "generated_at": "2026-10-23T15:32:12.230Z",
+  "description": "Эталонная матрица линий КИМ ЕГЭ (1–26) и ОГЭ (1–22) по физике. Названия линий, формат ответа и баллы — по спецификации ФИПИ; подтемы — категории каталога заданий (/prob_catalog).",
+  "source": {
+    "catalog_ege": "https://phys-ege.sdamgia.ru/prob_catalog",
+    "catalog_oge": "https://phys-oge.sdamgia.ru/prob_catalog",
+    "catalog_api": "https://phys-ege.sdamgia.ru/newapi/catalog/types"
+  },
+  "exams": {
+    "EGE": {
+      "title": "ЕГЭ по физике",
+      "max_line": 26,
+      "parts": [
+        {
+          "part": 1,
+          "title": "Часть 1. Задания с кратким ответом",
+          "lines": [
+            1,
+            20
+          ]
+        },
+        {
+          "part": 2,
+          "title": "Часть 2. Задания с развёрнутым ответом",
+          "lines": [
+            21,
+            26
+          ]
+        }
+      ],
+      "sections": {
+        "mechanics": "Механика",
+        "mkt_thermo": "Молекулярная физика и термодинамика",
+        "electrodynamics": "Электродинамика",
+        "quantum": "Квантовая физика и элементы астрофизики",
+        "methods": "Методы научного познания",
+        "mixed": "Комплексное задание (несколько разделов)"
+      },
+      "lines": [
+        {
+          "line": 1,
+          "part": 1,
+          "title": "Кинематика",
+          "grading_rule": "numeric",
+          "max_points": 1,
+          "section": "mechanics",
+          "section_title": "Механика",
+          "catalog_groups": [
+            1
+          ],
+          "subtopics": [
+            {
+              "id": "theme_204",
+              "catalog_id": 204,
+              "title": "Координаты, анализ графиков",
+              "catalog_count": 63,
+              "topic_keys": [
+                "kinematics"
+              ]
+            },
+            {
+              "id": "theme_202",
+              "catalog_id": 202,
+              "title": "Равномерное движение, относительность движения",
+              "catalog_count": 22,
+              "topic_keys": [
+                "kinematics"
+              ]
+            },
+            {
+              "id": "theme_203",
+              "catalog_id": 203,
+              "title": "Равнопеременное движение, ускорение тела",
+              "catalog_count": 66,
+              "topic_keys": [
+                "kinematics"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "kinematics"
+          ]
+        },
+        {
+          "line": 2,
+          "part": 1,
+          "title": "Динамика",
+          "grading_rule": "numeric",
+          "max_points": 1,
+          "section": "mechanics",
+          "section_title": "Механика",
+          "catalog_groups": [
+            2
+          ],
+          "subtopics": [
+            {
+              "id": "theme_208",
+              "catalog_id": 208,
+              "title": "Второй закон Ньютона",
+              "catalog_count": 33,
+              "topic_keys": [
+                "dynamics"
+              ]
+            },
+            {
+              "id": "theme_206",
+              "catalog_id": 206,
+              "title": "Равнодействующая",
+              "catalog_count": 22,
+              "topic_keys": [
+                "dynamics"
+              ]
+            },
+            {
+              "id": "theme_213",
+              "catalog_id": 213,
+              "title": "Сила трения",
+              "catalog_count": 42,
+              "topic_keys": [
+                "dynamics"
+              ]
+            },
+            {
+              "id": "theme_214",
+              "catalog_id": 214,
+              "title": "Сила упругости",
+              "catalog_count": 38,
+              "topic_keys": [
+                "dynamics"
+              ]
+            },
+            {
+              "id": "theme_215",
+              "catalog_id": 215,
+              "title": "Закон всемирного тяготения",
+              "catalog_count": 29,
+              "topic_keys": [
+                "dynamics"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "dynamics"
+          ]
+        },
+        {
+          "line": 3,
+          "part": 1,
+          "title": "Законы сохранения в механике",
+          "grading_rule": "numeric",
+          "max_points": 1,
+          "section": "mechanics",
+          "section_title": "Механика",
+          "catalog_groups": [
+            3
+          ],
+          "subtopics": [
+            {
+              "id": "theme_217",
+              "catalog_id": 217,
+              "title": "Механическая энергия, закон сохранения энергии",
+              "catalog_count": 73,
+              "topic_keys": [
+                "conservation_laws"
+              ]
+            },
+            {
+              "id": "theme_218",
+              "catalog_id": 218,
+              "title": "Механическая работа, мощность",
+              "catalog_count": 39,
+              "topic_keys": [
+                "conservation_laws"
+              ]
+            },
+            {
+              "id": "theme_219",
+              "catalog_id": 219,
+              "title": "Импульс",
+              "catalog_count": 41,
+              "topic_keys": [
+                "conservation_laws"
+              ]
+            },
+            {
+              "id": "theme_216",
+              "catalog_id": 216,
+              "title": "Закон сохранения импульса, второй закон Ньютона в импульсной форме",
+              "catalog_count": 50,
+              "topic_keys": [
+                "conservation_laws"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "conservation_laws"
+          ]
+        },
+        {
+          "line": 4,
+          "part": 1,
+          "title": "Статика. Механические колебания и волны",
+          "grading_rule": "numeric",
+          "max_points": 1,
+          "section": "mechanics",
+          "section_title": "Механика",
+          "catalog_groups": [
+            4
+          ],
+          "subtopics": [
+            {
+              "id": "theme_380",
+              "catalog_id": 380,
+              "title": "Сила Архимеда, закон Паскаля",
+              "catalog_count": 40,
+              "topic_keys": [
+                "statics"
+              ]
+            },
+            {
+              "id": "theme_222",
+              "catalog_id": 222,
+              "title": "Волны",
+              "catalog_count": 34,
+              "topic_keys": [
+                "oscillations"
+              ]
+            },
+            {
+              "id": "theme_220",
+              "catalog_id": 220,
+              "title": "Пружинный и математический маятники, колебания",
+              "catalog_count": 53,
+              "topic_keys": [
+                "oscillations"
+              ]
+            },
+            {
+              "id": "theme_221",
+              "catalog_id": 221,
+              "title": "Механическое равновесие",
+              "catalog_count": 39,
+              "topic_keys": [
+                "statics"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "statics",
+            "oscillations"
+          ]
+        },
+        {
+          "line": 5,
+          "part": 1,
+          "title": "Механика. Анализ физических процессов",
+          "grading_rule": "unordered_set",
+          "max_points": 2,
+          "section": "mechanics",
+          "section_title": "Механика",
+          "catalog_groups": [
+            5
+          ],
+          "subtopics": [
+            {
+              "id": "theme_322",
+              "catalog_id": 322,
+              "title": "Анализ физических процессов. Кинематика, динамика, законы сохранения",
+              "catalog_count": 95,
+              "topic_keys": [
+                "kinematics",
+                "dynamics",
+                "conservation_laws"
+              ]
+            },
+            {
+              "id": "theme_366",
+              "catalog_id": 366,
+              "title": "Анализ физических процессов. Статика. Гидростатика. Механические колебания",
+              "catalog_count": 39,
+              "topic_keys": [
+                "statics",
+                "oscillations"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "kinematics",
+            "dynamics",
+            "conservation_laws",
+            "statics",
+            "oscillations"
+          ]
+        },
+        {
+          "line": 6,
+          "part": 1,
+          "title": "Механика. Изменение физических величин и соответствие",
+          "grading_rule": "ordered_sequence",
+          "max_points": 2,
+          "section": "mechanics",
+          "section_title": "Механика",
+          "catalog_groups": [
+            6
+          ],
+          "subtopics": [
+            {
+              "id": "theme_281",
+              "catalog_id": 281,
+              "title": "Изменение физических величин, часть 1",
+              "catalog_count": 67,
+              "topic_keys": [
+                "kinematics",
+                "dynamics",
+                "statics",
+                "conservation_laws",
+                "oscillations"
+              ]
+            },
+            {
+              "id": "theme_285",
+              "catalog_id": 285,
+              "title": "Изменение физических величин, часть 2",
+              "catalog_count": 33,
+              "topic_keys": [
+                "kinematics",
+                "dynamics",
+                "statics",
+                "conservation_laws",
+                "oscillations"
+              ]
+            },
+            {
+              "id": "theme_289",
+              "catalog_id": 289,
+              "title": "Установление соответствия, часть 1",
+              "catalog_count": 65,
+              "topic_keys": [
+                "kinematics",
+                "dynamics",
+                "statics",
+                "conservation_laws",
+                "oscillations"
+              ]
+            },
+            {
+              "id": "theme_294",
+              "catalog_id": 294,
+              "title": "Установление соответствия, часть 2",
+              "catalog_count": 44,
+              "topic_keys": [
+                "kinematics",
+                "dynamics",
+                "statics",
+                "conservation_laws",
+                "oscillations"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "kinematics",
+            "dynamics",
+            "statics",
+            "conservation_laws",
+            "oscillations"
+          ]
+        },
+        {
+          "line": 7,
+          "part": 1,
+          "title": "Молекулярная физика",
+          "grading_rule": "numeric",
+          "max_points": 1,
+          "section": "mkt_thermo",
+          "section_title": "Молекулярная физика и термодинамика",
+          "catalog_groups": [
+            7
+          ],
+          "subtopics": [
+            {
+              "id": "theme_381",
+              "catalog_id": 381,
+              "title": "Основное уравнение МКТ",
+              "catalog_count": 68,
+              "topic_keys": [
+                "mkt"
+              ]
+            },
+            {
+              "id": "theme_353",
+              "catalog_id": 353,
+              "title": "Уравнение Клапейрона — Менделеева",
+              "catalog_count": 60,
+              "topic_keys": [
+                "mkt"
+              ]
+            },
+            {
+              "id": "theme_393",
+              "catalog_id": 393,
+              "title": "Изопроцессы",
+              "catalog_count": 17,
+              "topic_keys": [
+                "mkt"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "mkt"
+          ]
+        },
+        {
+          "line": 8,
+          "part": 1,
+          "title": "МКТ и термодинамика",
+          "grading_rule": "numeric",
+          "max_points": 1,
+          "section": "mkt_thermo",
+          "section_title": "Молекулярная физика и термодинамика",
+          "catalog_groups": [
+            8
+          ],
+          "subtopics": [
+            {
+              "id": "theme_397",
+              "catalog_id": 397,
+              "title": "Работа, количество теплоты, внутренняя энергия",
+              "catalog_count": 39,
+              "topic_keys": [
+                "thermodynamics"
+              ]
+            },
+            {
+              "id": "theme_235",
+              "catalog_id": 235,
+              "title": "Теплоёмкость, теплота плавления, теплота парообразования",
+              "catalog_count": 49,
+              "topic_keys": [
+                "thermodynamics",
+                "vapors"
+              ]
+            },
+            {
+              "id": "theme_237",
+              "catalog_id": 237,
+              "title": "КПД тепловых машин, циклы",
+              "catalog_count": 49,
+              "topic_keys": [
+                "thermodynamics"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "thermodynamics",
+            "vapors"
+          ]
+        },
+        {
+          "line": 9,
+          "part": 1,
+          "title": "Молекулярная физика и термодинамика. Анализ процессов",
+          "grading_rule": "unordered_set",
+          "max_points": 2,
+          "section": "mkt_thermo",
+          "section_title": "Молекулярная физика и термодинамика",
+          "catalog_groups": [
+            9
+          ],
+          "subtopics": [
+            {
+              "id": "theme_335",
+              "catalog_id": 335,
+              "title": "Анализ физических процессов. Молекулярная физика",
+              "catalog_count": 55,
+              "topic_keys": [
+                "mkt"
+              ]
+            },
+            {
+              "id": "theme_395",
+              "catalog_id": 395,
+              "title": "Анализ физических процессов. Термодинамика",
+              "catalog_count": 73,
+              "topic_keys": [
+                "thermodynamics"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "mkt",
+            "thermodynamics"
+          ]
+        },
+        {
+          "line": 10,
+          "part": 1,
+          "title": "Молекулярная физика и термодинамика. Изменение величин",
+          "grading_rule": "ordered_sequence",
+          "max_points": 2,
+          "section": "mkt_thermo",
+          "section_title": "Молекулярная физика и термодинамика",
+          "catalog_groups": [
+            10
+          ],
+          "subtopics": [
+            {
+              "id": "theme_389",
+              "catalog_id": 389,
+              "title": "Установление соответствия",
+              "catalog_count": 73,
+              "topic_keys": [
+                "mkt",
+                "thermodynamics"
+              ]
+            },
+            {
+              "id": "theme_282",
+              "catalog_id": 282,
+              "title": "Изменение величин, часть 1",
+              "catalog_count": 46,
+              "topic_keys": [
+                "mkt",
+                "thermodynamics"
+              ]
+            },
+            {
+              "id": "theme_287",
+              "catalog_id": 287,
+              "title": "Изменение величин, часть 2",
+              "catalog_count": 21,
+              "topic_keys": [
+                "mkt",
+                "thermodynamics"
+              ]
+            },
+            {
+              "id": "theme_290",
+              "catalog_id": 290,
+              "title": "Изменение величин, часть 3",
+              "catalog_count": 18,
+              "topic_keys": [
+                "mkt",
+                "thermodynamics"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "mkt",
+            "thermodynamics"
+          ]
+        },
+        {
+          "line": 11,
+          "part": 1,
+          "title": "Электрическое поле. Законы постоянного тока",
+          "grading_rule": "numeric",
+          "max_points": 1,
+          "section": "electrodynamics",
+          "section_title": "Электродинамика",
+          "catalog_groups": [
+            11
+          ],
+          "subtopics": [
+            {
+              "id": "theme_386",
+              "catalog_id": 386,
+              "title": "Закон Кулона, закон сохранения заряда",
+              "catalog_count": 33,
+              "topic_keys": [
+                "electrostatics"
+              ]
+            },
+            {
+              "id": "theme_241",
+              "catalog_id": 241,
+              "title": "Сила тока, закон Ома",
+              "catalog_count": 40,
+              "topic_keys": [
+                "direct_current"
+              ]
+            },
+            {
+              "id": "theme_243",
+              "catalog_id": 243,
+              "title": "Работа электрического тока, мощность, закон Джоуля — Ленца",
+              "catalog_count": 33,
+              "topic_keys": [
+                "direct_current"
+              ]
+            },
+            {
+              "id": "theme_242",
+              "catalog_id": 242,
+              "title": "Электрические схемы",
+              "catalog_count": 60,
+              "topic_keys": [
+                "direct_current"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "electrostatics",
+            "direct_current"
+          ]
+        },
+        {
+          "line": 12,
+          "part": 1,
+          "title": "Магнитное поле. Электромагнитная индукция",
+          "grading_rule": "numeric",
+          "max_points": 1,
+          "section": "electrodynamics",
+          "section_title": "Электродинамика",
+          "catalog_groups": [
+            12
+          ],
+          "subtopics": [
+            {
+              "id": "theme_364",
+              "catalog_id": 364,
+              "title": "Закон ЭДС индукции",
+              "catalog_count": 34,
+              "topic_keys": [
+                "magnetism"
+              ]
+            },
+            {
+              "id": "theme_410",
+              "catalog_id": 410,
+              "title": "Сила Ампера, сила Лоренца",
+              "catalog_count": 24,
+              "topic_keys": [
+                "magnetism"
+              ]
+            },
+            {
+              "id": "theme_404",
+              "catalog_id": 404,
+              "title": "Самоиндукция",
+              "catalog_count": 26,
+              "topic_keys": [
+                "magnetism"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "magnetism"
+          ]
+        },
+        {
+          "line": 13,
+          "part": 1,
+          "title": "Электромагнитные колебания и волны. Оптика",
+          "grading_rule": "numeric",
+          "max_points": 1,
+          "section": "electrodynamics",
+          "section_title": "Электродинамика",
+          "catalog_groups": [
+            13
+          ],
+          "subtopics": [
+            {
+              "id": "theme_367",
+              "catalog_id": 367,
+              "title": "Зеркала",
+              "catalog_count": 36,
+              "topic_keys": [
+                "optics"
+              ]
+            },
+            {
+              "id": "theme_368",
+              "catalog_id": 368,
+              "title": "Линзы",
+              "catalog_count": 20,
+              "topic_keys": [
+                "optics"
+              ]
+            },
+            {
+              "id": "theme_253",
+              "catalog_id": 253,
+              "title": "Закон преломления Снеллиуса",
+              "catalog_count": 17,
+              "topic_keys": [
+                "optics"
+              ]
+            },
+            {
+              "id": "theme_248",
+              "catalog_id": 248,
+              "title": "Колебательный контур",
+              "catalog_count": 49,
+              "topic_keys": [
+                "em_oscillations"
+              ]
+            },
+            {
+              "id": "theme_255",
+              "catalog_id": 255,
+              "title": "Тень",
+              "catalog_count": 4,
+              "topic_keys": [
+                "optics"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "optics",
+            "em_oscillations"
+          ]
+        },
+        {
+          "line": 14,
+          "part": 1,
+          "title": "Электродинамика. Анализ физических процессов",
+          "grading_rule": "unordered_set",
+          "max_points": 2,
+          "section": "electrodynamics",
+          "section_title": "Электродинамика",
+          "catalog_groups": [
+            14
+          ],
+          "subtopics": [
+            {
+              "id": "theme_336",
+              "catalog_id": 336,
+              "title": "Электричество",
+              "catalog_count": 36,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current"
+              ]
+            },
+            {
+              "id": "theme_408",
+              "catalog_id": 408,
+              "title": "Магнетизм. Электромагнетизм",
+              "catalog_count": 64,
+              "topic_keys": [
+                "magnetism"
+              ]
+            },
+            {
+              "id": "theme_411",
+              "catalog_id": 411,
+              "title": "Оптика",
+              "catalog_count": 13,
+              "topic_keys": [
+                "optics"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "electrostatics",
+            "direct_current",
+            "magnetism",
+            "optics"
+          ]
+        },
+        {
+          "line": 15,
+          "part": 1,
+          "title": "Электродинамика. Изменение величин и соответствие",
+          "grading_rule": "ordered_sequence",
+          "max_points": 2,
+          "section": "electrodynamics",
+          "section_title": "Электродинамика",
+          "catalog_groups": [
+            15
+          ],
+          "subtopics": [
+            {
+              "id": "theme_292",
+              "catalog_id": 292,
+              "title": "Оптика",
+              "catalog_count": 24,
+              "topic_keys": [
+                "optics"
+              ]
+            },
+            {
+              "id": "theme_283",
+              "catalog_id": 283,
+              "title": "Электродинамика",
+              "catalog_count": 27,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current",
+                "magnetism",
+                "em_oscillations",
+                "optics"
+              ]
+            },
+            {
+              "id": "theme_288",
+              "catalog_id": 288,
+              "title": "Волновая оптика",
+              "catalog_count": 7,
+              "topic_keys": [
+                "optics"
+              ]
+            },
+            {
+              "id": "theme_286",
+              "catalog_id": 286,
+              "title": "Электричество и магнетизм, часть 1",
+              "catalog_count": 74,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current",
+                "magnetism"
+              ]
+            },
+            {
+              "id": "theme_400",
+              "catalog_id": 400,
+              "title": "Электричество и магнетизм, часть 2",
+              "catalog_count": 55,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current",
+                "magnetism"
+              ]
+            },
+            {
+              "id": "theme_401",
+              "catalog_id": 401,
+              "title": "Электричество и магнетизм, часть 3",
+              "catalog_count": 35,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current",
+                "magnetism"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "optics",
+            "electrostatics",
+            "direct_current",
+            "magnetism",
+            "em_oscillations"
+          ]
+        },
+        {
+          "line": 16,
+          "part": 1,
+          "title": "Ядерная физика",
+          "grading_rule": "numeric",
+          "max_points": 1,
+          "section": "quantum",
+          "section_title": "Квантовая физика и элементы астрофизики",
+          "catalog_groups": [
+            16
+          ],
+          "subtopics": [
+            {
+              "id": "theme_370",
+              "catalog_id": 370,
+              "title": "Периодическая система Менделеева, химические элементы",
+              "catalog_count": 50,
+              "topic_keys": [
+                "nuclear"
+              ]
+            },
+            {
+              "id": "theme_372",
+              "catalog_id": 372,
+              "title": "Ядерные реакции",
+              "catalog_count": 43,
+              "topic_keys": [
+                "nuclear"
+              ]
+            },
+            {
+              "id": "theme_371",
+              "catalog_id": 371,
+              "title": "Закон радиоактивного распада",
+              "catalog_count": 67,
+              "topic_keys": [
+                "nuclear"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "nuclear"
+          ]
+        },
+        {
+          "line": 17,
+          "part": 1,
+          "title": "Квантовая физика. Изменение величин и соответствие",
+          "grading_rule": "ordered_sequence",
+          "max_points": 2,
+          "section": "quantum",
+          "section_title": "Квантовая физика и элементы астрофизики",
+          "catalog_groups": [
+            17
+          ],
+          "subtopics": [
+            {
+              "id": "theme_396",
+              "catalog_id": 396,
+              "title": "Квантовая физика, ядерная физика",
+              "catalog_count": 110,
+              "topic_keys": [
+                "quantum_physics",
+                "nuclear"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "quantum_physics",
+            "nuclear"
+          ]
+        },
+        {
+          "line": 18,
+          "part": 1,
+          "title": "Физический смысл величин, законов и закономерностей",
+          "grading_rule": "unordered_set",
+          "max_points": 2,
+          "section": "methods",
+          "section_title": "Методы научного познания",
+          "catalog_groups": [
+            18
+          ],
+          "subtopics": [
+            {
+              "id": "theme_403",
+              "catalog_id": 403,
+              "title": "Задания для подготовки",
+              "catalog_count": 116,
+              "topic_keys": [
+                "measurements"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "measurements"
+          ]
+        },
+        {
+          "line": 19,
+          "part": 1,
+          "title": "Показания измерительных приборов с погрешностью",
+          "grading_rule": "measurement",
+          "max_points": 1,
+          "section": "methods",
+          "section_title": "Методы научного познания",
+          "catalog_groups": [
+            19
+          ],
+          "subtopics": [
+            {
+              "id": "theme_337",
+              "catalog_id": 337,
+              "title": "Погрешность прямых измерений",
+              "catalog_count": 102,
+              "topic_keys": [
+                "measurements"
+              ]
+            },
+            {
+              "id": "theme_268",
+              "catalog_id": 268,
+              "title": "Погрешность косвенных измерений",
+              "catalog_count": 38,
+              "topic_keys": [
+                "measurements"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "measurements"
+          ]
+        },
+        {
+          "line": 20,
+          "part": 1,
+          "title": "Планирование эксперимента",
+          "grading_rule": "unordered_set",
+          "max_points": 1,
+          "section": "methods",
+          "section_title": "Методы научного познания",
+          "catalog_groups": [
+            20
+          ],
+          "subtopics": [
+            {
+              "id": "theme_378",
+              "catalog_id": 378,
+              "title": "Экспериментальное исследование",
+              "catalog_count": 95,
+              "topic_keys": [
+                "measurements"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "measurements"
+          ]
+        },
+        {
+          "line": 21,
+          "part": 2,
+          "title": "Качественная задача (МКТ, термодинамика, электродинамика)",
+          "grading_rule": "manual",
+          "max_points": 3,
+          "section": "mixed",
+          "section_title": "Комплексное задание (несколько разделов)",
+          "catalog_groups": [
+            21
+          ],
+          "subtopics": [
+            {
+              "id": "theme_392",
+              "catalog_id": 392,
+              "title": "МКТ",
+              "catalog_count": 29,
+              "topic_keys": [
+                "mkt"
+              ]
+            },
+            {
+              "id": "theme_391",
+              "catalog_id": 391,
+              "title": "Тепловые явления",
+              "catalog_count": 20,
+              "topic_keys": [
+                "thermodynamics"
+              ]
+            },
+            {
+              "id": "theme_302",
+              "catalog_id": 302,
+              "title": "Термодинамика",
+              "catalog_count": 41,
+              "topic_keys": [
+                "thermodynamics"
+              ]
+            },
+            {
+              "id": "theme_300",
+              "catalog_id": 300,
+              "title": "Электричество и магнетизм",
+              "catalog_count": 79,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current",
+                "magnetism"
+              ]
+            },
+            {
+              "id": "theme_299",
+              "catalog_id": 299,
+              "title": "Механика",
+              "catalog_count": 22,
+              "topic_keys": [
+                "kinematics",
+                "dynamics",
+                "statics",
+                "conservation_laws",
+                "oscillations"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "mkt",
+            "thermodynamics",
+            "electrostatics",
+            "direct_current",
+            "magnetism",
+            "kinematics",
+            "dynamics",
+            "statics",
+            "conservation_laws",
+            "oscillations"
+          ]
+        },
+        {
+          "line": 22,
+          "part": 2,
+          "title": "Расчетная задача. Механика",
+          "grading_rule": "manual",
+          "max_points": 2,
+          "section": "mechanics",
+          "section_title": "Механика",
+          "catalog_groups": [
+            22
+          ],
+          "subtopics": [
+            {
+              "id": "theme_275",
+              "catalog_id": 275,
+              "title": "Механика",
+              "catalog_count": 95,
+              "topic_keys": [
+                "kinematics",
+                "dynamics",
+                "statics",
+                "conservation_laws",
+                "oscillations"
+              ]
+            },
+            {
+              "id": "theme_398",
+              "catalog_id": 398,
+              "title": "МКТ и термодинамика",
+              "catalog_count": 10,
+              "topic_keys": [
+                "mkt",
+                "thermodynamics"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "kinematics",
+            "dynamics",
+            "statics",
+            "conservation_laws",
+            "oscillations",
+            "mkt",
+            "thermodynamics"
+          ]
+        },
+        {
+          "line": 23,
+          "part": 2,
+          "title": "Расчетная задача. МКТ и электродинамика",
+          "grading_rule": "manual",
+          "max_points": 2,
+          "section": "mixed",
+          "section_title": "Комплексное задание (несколько разделов)",
+          "catalog_groups": [
+            23
+          ],
+          "subtopics": [
+            {
+              "id": "theme_276",
+              "catalog_id": 276,
+              "title": "Термодинамика и молекулярная физика, часть 1",
+              "catalog_count": 64,
+              "topic_keys": [
+                "mkt",
+                "thermodynamics"
+              ]
+            },
+            {
+              "id": "theme_278",
+              "catalog_id": 278,
+              "title": "Термодинамика и молекулярная физика, часть 2",
+              "catalog_count": 48,
+              "topic_keys": [
+                "mkt",
+                "thermodynamics"
+              ]
+            },
+            {
+              "id": "theme_277",
+              "catalog_id": 277,
+              "title": "Электродинамика",
+              "catalog_count": 83,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current",
+                "magnetism",
+                "em_oscillations",
+                "optics"
+              ]
+            },
+            {
+              "id": "theme_320",
+              "catalog_id": 320,
+              "title": "Оптика",
+              "catalog_count": 58,
+              "topic_keys": [
+                "optics"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "mkt",
+            "thermodynamics",
+            "electrostatics",
+            "direct_current",
+            "magnetism",
+            "em_oscillations",
+            "optics"
+          ]
+        },
+        {
+          "line": 24,
+          "part": 2,
+          "title": "Расчетная задача высокого уровня. МКТ и термодинамика",
+          "grading_rule": "manual",
+          "max_points": 3,
+          "section": "mkt_thermo",
+          "section_title": "Молекулярная физика и термодинамика",
+          "catalog_groups": [
+            24
+          ],
+          "subtopics": [
+            {
+              "id": "theme_308",
+              "catalog_id": 308,
+              "title": "МКТ, механическое равновесие",
+              "catalog_count": 56,
+              "topic_keys": [
+                "mkt",
+                "statics"
+              ]
+            },
+            {
+              "id": "theme_309",
+              "catalog_id": 309,
+              "title": "Первое начало термодинамики",
+              "catalog_count": 42,
+              "topic_keys": [
+                "thermodynamics"
+              ]
+            },
+            {
+              "id": "theme_307",
+              "catalog_id": 307,
+              "title": "Тепловой баланс, тепловое равновесие",
+              "catalog_count": 45,
+              "topic_keys": [
+                "thermodynamics"
+              ]
+            },
+            {
+              "id": "theme_306",
+              "catalog_id": 306,
+              "title": "Термодинамические процессы, вычисление работы, количества теплоты, КПД",
+              "catalog_count": 47,
+              "topic_keys": [
+                "thermodynamics"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "mkt",
+            "statics",
+            "thermodynamics"
+          ]
+        },
+        {
+          "line": 25,
+          "part": 2,
+          "title": "Расчетная задача высокого уровня. Электродинамика",
+          "grading_rule": "manual",
+          "max_points": 3,
+          "section": "electrodynamics",
+          "section_title": "Электродинамика",
+          "catalog_groups": [
+            25
+          ],
+          "subtopics": [
+            {
+              "id": "theme_311",
+              "catalog_id": 311,
+              "title": "Магнетизм",
+              "catalog_count": 34,
+              "topic_keys": [
+                "magnetism"
+              ]
+            },
+            {
+              "id": "theme_310",
+              "catalog_id": 310,
+              "title": "Электричество",
+              "catalog_count": 113,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current"
+              ]
+            },
+            {
+              "id": "theme_318",
+              "catalog_id": 318,
+              "title": "Магнитное поле",
+              "catalog_count": 17,
+              "topic_keys": [
+                "magnetism"
+              ]
+            },
+            {
+              "id": "theme_313",
+              "catalog_id": 313,
+              "title": "Электродинамика",
+              "catalog_count": 55,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current",
+                "magnetism",
+                "em_oscillations",
+                "optics"
+              ]
+            },
+            {
+              "id": "theme_279",
+              "catalog_id": 279,
+              "title": "Оптика",
+              "catalog_count": 66,
+              "topic_keys": [
+                "optics"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "magnetism",
+            "electrostatics",
+            "direct_current",
+            "em_oscillations",
+            "optics"
+          ]
+        },
+        {
+          "line": 26,
+          "part": 2,
+          "title": "Расчетная задача высокого уровня с обоснованием. Механика",
+          "grading_rule": "manual",
+          "max_points": 4,
+          "section": "mechanics",
+          "section_title": "Механика",
+          "catalog_groups": [
+            26
+          ],
+          "subtopics": [
+            {
+              "id": "theme_402",
+              "catalog_id": 402,
+              "title": "Динамика",
+              "catalog_count": 49,
+              "topic_keys": [
+                "dynamics"
+              ]
+            },
+            {
+              "id": "theme_332",
+              "catalog_id": 332,
+              "title": "Законы сохранения",
+              "catalog_count": 72,
+              "topic_keys": [
+                "conservation_laws"
+              ]
+            },
+            {
+              "id": "theme_409",
+              "catalog_id": 409,
+              "title": "Статика",
+              "catalog_count": 34,
+              "topic_keys": [
+                "statics"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "dynamics",
+            "conservation_laws",
+            "statics"
+          ]
+        }
+      ]
+    },
+    "OGE": {
+      "title": "ОГЭ по физике",
+      "max_line": 22,
+      "parts": [
+        {
+          "part": 1,
+          "title": "Часть 1. Задания с кратким ответом",
+          "lines": [
+            1,
+            16
+          ]
+        },
+        {
+          "part": 2,
+          "title": "Часть 2. Задания с развёрнутым ответом",
+          "lines": [
+            17,
+            22
+          ]
+        }
+      ],
+      "sections": {
+        "mechanics": "Механика",
+        "mkt_thermo": "Молекулярная физика и термодинамика",
+        "electrodynamics": "Электродинамика",
+        "quantum": "Квантовая физика и элементы астрофизики",
+        "methods": "Методы научного познания",
+        "mixed": "Комплексное задание (несколько разделов)"
+      },
+      "lines": [
+        {
+          "line": 1,
+          "part": 1,
+          "title": "Физические понятия, величины и приборы",
+          "grading_rule": "ordered_sequence",
+          "max_points": 2,
+          "section": null,
+          "section_title": null,
+          "catalog_groups": [
+            1
+          ],
+          "subtopics": [
+            {
+              "id": "theme_19",
+              "catalog_id": 19,
+              "title": "Задания для подготовки",
+              "catalog_count": 61,
+              "topic_keys": [
+                "measurements"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "measurements",
+            "mkt",
+            "vapors",
+            "em_oscillations"
+          ]
+        },
+        {
+          "line": 2,
+          "part": 1,
+          "title": "Принцип действия приборов и формулы",
+          "grading_rule": "ordered_sequence",
+          "max_points": 2,
+          "section": null,
+          "section_title": null,
+          "catalog_groups": [
+            2
+          ],
+          "subtopics": [
+            {
+              "id": "theme_114",
+              "catalog_id": 114,
+              "title": "Технические устройства",
+              "catalog_count": 37,
+              "topic_keys": [
+                "measurements"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "measurements",
+            "mkt",
+            "vapors",
+            "em_oscillations"
+          ]
+        },
+        {
+          "line": 3,
+          "part": 1,
+          "title": "Распознавание физических явлений",
+          "grading_rule": "numeric",
+          "max_points": 1,
+          "section": null,
+          "section_title": null,
+          "catalog_groups": [
+            3
+          ],
+          "subtopics": [
+            {
+              "id": "theme_7",
+              "catalog_id": 7,
+              "title": "Тепловые явления",
+              "catalog_count": 24,
+              "topic_keys": [
+                "thermodynamics",
+                "mkt",
+                "vapors"
+              ]
+            },
+            {
+              "id": "theme_3",
+              "catalog_id": 3,
+              "title": "Механические явления",
+              "catalog_count": 18,
+              "topic_keys": [
+                "kinematics",
+                "dynamics",
+                "statics",
+                "conservation_laws",
+                "oscillations"
+              ]
+            },
+            {
+              "id": "theme_99",
+              "catalog_id": 99,
+              "title": "Электромагнитные явления",
+              "catalog_count": 18,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current",
+                "magnetism",
+                "em_oscillations"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "thermodynamics",
+            "kinematics",
+            "dynamics",
+            "statics",
+            "conservation_laws",
+            "oscillations",
+            "electrostatics",
+            "direct_current",
+            "magnetism",
+            "mkt",
+            "vapors",
+            "em_oscillations"
+          ]
+        },
+        {
+          "line": 4,
+          "part": 1,
+          "title": "Описание свойств физических явлений (текст с пропусками)",
+          "grading_rule": "ordered_sequence",
+          "max_points": 2,
+          "section": null,
+          "section_title": null,
+          "catalog_groups": [
+            4
+          ],
+          "subtopics": [
+            {
+              "id": "theme_51",
+              "catalog_id": 51,
+              "title": "Механические явления",
+              "catalog_count": 26,
+              "topic_keys": [
+                "kinematics",
+                "dynamics",
+                "statics",
+                "conservation_laws",
+                "oscillations"
+              ]
+            },
+            {
+              "id": "theme_39",
+              "catalog_id": 39,
+              "title": "Оптические явления",
+              "catalog_count": 9,
+              "topic_keys": [
+                "optics"
+              ]
+            },
+            {
+              "id": "theme_53",
+              "catalog_id": 53,
+              "title": "Тепловые явления",
+              "catalog_count": 20,
+              "topic_keys": [
+                "thermodynamics",
+                "mkt",
+                "vapors"
+              ]
+            },
+            {
+              "id": "theme_52",
+              "catalog_id": 52,
+              "title": "Электромагнитные явления",
+              "catalog_count": 19,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current",
+                "magnetism",
+                "em_oscillations"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "kinematics",
+            "dynamics",
+            "statics",
+            "conservation_laws",
+            "oscillations",
+            "optics",
+            "thermodynamics",
+            "electrostatics",
+            "direct_current",
+            "magnetism",
+            "mkt",
+            "vapors",
+            "em_oscillations"
+          ]
+        },
+        {
+          "line": 5,
+          "part": 1,
+          "title": "Вычислительные задачи. Механические явления",
+          "grading_rule": "numeric",
+          "max_points": 1,
+          "section": "mechanics",
+          "section_title": "Механика",
+          "catalog_groups": [
+            6
+          ],
+          "subtopics": [
+            {
+              "id": "theme_36",
+              "catalog_id": 36,
+              "title": "Динамика",
+              "catalog_count": 43,
+              "topic_keys": [
+                "dynamics"
+              ]
+            },
+            {
+              "id": "theme_54",
+              "catalog_id": 54,
+              "title": "Кинематика",
+              "catalog_count": 27,
+              "topic_keys": [
+                "kinematics"
+              ]
+            },
+            {
+              "id": "theme_108",
+              "catalog_id": 108,
+              "title": "Гидростатика",
+              "catalog_count": 13,
+              "topic_keys": [
+                "statics"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "dynamics",
+            "kinematics",
+            "statics"
+          ]
+        },
+        {
+          "line": 6,
+          "part": 1,
+          "title": "Вычислительные задачи. Механические явления",
+          "grading_rule": "numeric",
+          "max_points": 1,
+          "section": "mechanics",
+          "section_title": "Механика",
+          "catalog_groups": [
+            7
+          ],
+          "subtopics": [
+            {
+              "id": "theme_55",
+              "catalog_id": 55,
+              "title": "Анализ графика или рисунка",
+              "catalog_count": 38,
+              "topic_keys": [
+                "kinematics",
+                "dynamics",
+                "statics",
+                "conservation_laws",
+                "oscillations"
+              ]
+            },
+            {
+              "id": "theme_46",
+              "catalog_id": 46,
+              "title": "Текстовые задачи",
+              "catalog_count": 12,
+              "topic_keys": [
+                "kinematics",
+                "dynamics",
+                "statics",
+                "conservation_laws",
+                "oscillations"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "kinematics",
+            "dynamics",
+            "statics",
+            "conservation_laws",
+            "oscillations"
+          ]
+        },
+        {
+          "line": 7,
+          "part": 1,
+          "title": "Вычислительные задачи. Тепловые явления",
+          "grading_rule": "numeric",
+          "max_points": 1,
+          "section": "mkt_thermo",
+          "section_title": "Молекулярная физика и термодинамика",
+          "catalog_groups": [
+            8
+          ],
+          "subtopics": [
+            {
+              "id": "theme_56",
+              "catalog_id": 56,
+              "title": "Анализ графика",
+              "catalog_count": 28,
+              "topic_keys": [
+                "thermodynamics",
+                "mkt",
+                "vapors"
+              ]
+            },
+            {
+              "id": "theme_37",
+              "catalog_id": 37,
+              "title": "Текстовые задачи",
+              "catalog_count": 28,
+              "topic_keys": [
+                "thermodynamics",
+                "mkt",
+                "vapors"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "thermodynamics",
+            "mkt",
+            "vapors"
+          ]
+        },
+        {
+          "line": 8,
+          "part": 1,
+          "title": "Вычислительные задачи. Электромагнитные явления",
+          "grading_rule": "numeric",
+          "max_points": 1,
+          "section": "electrodynamics",
+          "section_title": "Электродинамика",
+          "catalog_groups": [
+            9
+          ],
+          "subtopics": [
+            {
+              "id": "theme_57",
+              "catalog_id": 57,
+              "title": "Анализ рисунка",
+              "catalog_count": 32,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current",
+                "magnetism",
+                "em_oscillations"
+              ]
+            },
+            {
+              "id": "theme_44",
+              "catalog_id": 44,
+              "title": "Текстовые задачи",
+              "catalog_count": 25,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current",
+                "magnetism",
+                "em_oscillations"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "electrostatics",
+            "direct_current",
+            "magnetism",
+            "em_oscillations"
+          ]
+        },
+        {
+          "line": 9,
+          "part": 1,
+          "title": "Вычислительные задачи. Оптика и электромагнитные явления",
+          "grading_rule": "numeric",
+          "max_points": 1,
+          "section": "electrodynamics",
+          "section_title": "Электродинамика",
+          "catalog_groups": [
+            10
+          ],
+          "subtopics": [
+            {
+              "id": "theme_58",
+              "catalog_id": 58,
+              "title": "Анализ рисунка или таблицы",
+              "catalog_count": 51,
+              "topic_keys": [
+                "optics",
+                "electrostatics",
+                "direct_current",
+                "magnetism",
+                "em_oscillations"
+              ]
+            },
+            {
+              "id": "theme_41",
+              "catalog_id": 41,
+              "title": "Текстовые задачи",
+              "catalog_count": 20,
+              "topic_keys": [
+                "optics",
+                "electrostatics",
+                "direct_current",
+                "magnetism",
+                "em_oscillations"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "optics",
+            "electrostatics",
+            "direct_current",
+            "magnetism",
+            "em_oscillations"
+          ]
+        },
+        {
+          "line": 10,
+          "part": 1,
+          "title": "Вычислительные задачи. Квантовая и ядерная физика",
+          "grading_rule": "numeric",
+          "max_points": 1,
+          "section": "quantum",
+          "section_title": "Квантовая физика и элементы астрофизики",
+          "catalog_groups": [
+            11
+          ],
+          "subtopics": [
+            {
+              "id": "theme_45",
+              "catalog_id": 45,
+              "title": "Задания для подготовки",
+              "catalog_count": 58,
+              "topic_keys": [
+                "quantum_physics",
+                "nuclear"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "quantum_physics",
+            "nuclear"
+          ]
+        },
+        {
+          "line": 11,
+          "part": 1,
+          "title": "Описание изменения физических величин (Механика / Тепловые явления)",
+          "grading_rule": "ordered_sequence",
+          "max_points": 2,
+          "section": null,
+          "section_title": null,
+          "catalog_groups": [
+            12
+          ],
+          "subtopics": [
+            {
+              "id": "theme_34",
+              "catalog_id": 34,
+              "title": "Механические явления",
+              "catalog_count": 47,
+              "topic_keys": [
+                "kinematics",
+                "dynamics",
+                "statics",
+                "conservation_laws",
+                "oscillations",
+                "thermodynamics"
+              ]
+            },
+            {
+              "id": "theme_59",
+              "catalog_id": 59,
+              "title": "Тепловые явления",
+              "catalog_count": 23,
+              "topic_keys": [
+                "thermodynamics",
+                "mkt",
+                "vapors"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "kinematics",
+            "dynamics",
+            "statics",
+            "conservation_laws",
+            "oscillations",
+            "thermodynamics",
+            "mkt",
+            "vapors"
+          ]
+        },
+        {
+          "line": 12,
+          "part": 1,
+          "title": "Описание изменения физических величин (Электродинамика / Кванты)",
+          "grading_rule": "ordered_sequence",
+          "max_points": 2,
+          "section": null,
+          "section_title": null,
+          "catalog_groups": [
+            13
+          ],
+          "subtopics": [
+            {
+              "id": "theme_60",
+              "catalog_id": 60,
+              "title": "Оптика",
+              "catalog_count": 24,
+              "topic_keys": [
+                "optics",
+                "em_oscillations"
+              ]
+            },
+            {
+              "id": "theme_61",
+              "catalog_id": 61,
+              "title": "Квантовые явления",
+              "catalog_count": 3,
+              "topic_keys": [
+                "quantum_physics"
+              ]
+            },
+            {
+              "id": "theme_35",
+              "catalog_id": 35,
+              "title": "Электромагнитные явления",
+              "catalog_count": 31,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current",
+                "magnetism",
+                "em_oscillations"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "optics",
+            "quantum_physics",
+            "electrostatics",
+            "direct_current",
+            "magnetism",
+            "em_oscillations"
+          ]
+        },
+        {
+          "line": 13,
+          "part": 1,
+          "title": "Анализ графиков, таблиц и схем",
+          "grading_rule": "unordered_set",
+          "max_points": 2,
+          "section": null,
+          "section_title": null,
+          "catalog_groups": [
+            14
+          ],
+          "subtopics": [
+            {
+              "id": "theme_65",
+              "catalog_id": 65,
+              "title": "Механика",
+              "catalog_count": 28,
+              "topic_keys": [
+                "kinematics",
+                "dynamics",
+                "statics",
+                "conservation_laws",
+                "oscillations"
+              ]
+            },
+            {
+              "id": "theme_66",
+              "catalog_id": 66,
+              "title": "Оптика",
+              "catalog_count": 0,
+              "topic_keys": [
+                "optics",
+                "em_oscillations"
+              ]
+            },
+            {
+              "id": "theme_64",
+              "catalog_id": 64,
+              "title": "Термодинамика",
+              "catalog_count": 28,
+              "topic_keys": [
+                "thermodynamics",
+                "mkt",
+                "vapors"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "kinematics",
+            "dynamics",
+            "statics",
+            "conservation_laws",
+            "oscillations",
+            "optics",
+            "thermodynamics",
+            "mkt",
+            "vapors",
+            "em_oscillations"
+          ]
+        },
+        {
+          "line": 14,
+          "part": 1,
+          "title": "Верные утверждения на основе текста/схем",
+          "grading_rule": "unordered_set",
+          "max_points": 2,
+          "section": null,
+          "section_title": null,
+          "catalog_groups": [
+            14
+          ],
+          "subtopics": [
+            {
+              "id": "theme_42",
+              "catalog_id": 42,
+              "title": "Квантовая физика",
+              "catalog_count": 14,
+              "topic_keys": [
+                "quantum_physics"
+              ]
+            },
+            {
+              "id": "theme_63",
+              "catalog_id": 63,
+              "title": "Электромагнитные явления",
+              "catalog_count": 21,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current",
+                "magnetism",
+                "optics",
+                "em_oscillations"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "quantum_physics",
+            "electrostatics",
+            "direct_current",
+            "magnetism",
+            "optics",
+            "mkt",
+            "vapors",
+            "em_oscillations"
+          ]
+        },
+        {
+          "line": 15,
+          "part": 1,
+          "title": "Прямые измерения физических величин",
+          "grading_rule": "numeric",
+          "max_points": 1,
+          "section": "methods",
+          "section_title": "Методы научного познания",
+          "catalog_groups": [
+            15
+          ],
+          "subtopics": [
+            {
+              "id": "theme_16",
+              "catalog_id": 16,
+              "title": "Механика",
+              "catalog_count": 30,
+              "topic_keys": [
+                "kinematics",
+                "dynamics",
+                "statics",
+                "conservation_laws",
+                "oscillations",
+                "measurements"
+              ]
+            },
+            {
+              "id": "theme_69",
+              "catalog_id": 69,
+              "title": "Оптика",
+              "catalog_count": 8,
+              "topic_keys": [
+                "optics"
+              ]
+            },
+            {
+              "id": "theme_68",
+              "catalog_id": 68,
+              "title": "Термодинамика",
+              "catalog_count": 11,
+              "topic_keys": [
+                "thermodynamics"
+              ]
+            },
+            {
+              "id": "theme_67",
+              "catalog_id": 67,
+              "title": "Электричество",
+              "catalog_count": 27,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "kinematics",
+            "dynamics",
+            "statics",
+            "conservation_laws",
+            "oscillations",
+            "optics",
+            "thermodynamics",
+            "electrostatics",
+            "direct_current",
+            "measurements"
+          ]
+        },
+        {
+          "line": 16,
+          "part": 1,
+          "title": "Интерпретация результатов опытов",
+          "grading_rule": "unordered_set",
+          "max_points": 2,
+          "section": "methods",
+          "section_title": "Методы научного познания",
+          "catalog_groups": [
+            16
+          ],
+          "subtopics": [
+            {
+              "id": "theme_72",
+              "catalog_id": 72,
+              "title": "Квантовые явления и законы",
+              "catalog_count": 13,
+              "topic_keys": [
+                "quantum_physics"
+              ]
+            },
+            {
+              "id": "theme_22",
+              "catalog_id": 22,
+              "title": "Механические явления и законы",
+              "catalog_count": 31,
+              "topic_keys": [
+                "kinematics",
+                "dynamics",
+                "statics",
+                "conservation_laws",
+                "oscillations"
+              ]
+            },
+            {
+              "id": "theme_73",
+              "catalog_id": 73,
+              "title": "Оптические явления и законы",
+              "catalog_count": 2,
+              "topic_keys": [
+                "optics"
+              ]
+            },
+            {
+              "id": "theme_70",
+              "catalog_id": 70,
+              "title": "Тепловые явления и законы",
+              "catalog_count": 24,
+              "topic_keys": [
+                "thermodynamics",
+                "mkt",
+                "vapors"
+              ]
+            },
+            {
+              "id": "theme_71",
+              "catalog_id": 71,
+              "title": "Электромагнитные явления и законы",
+              "catalog_count": 27,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current",
+                "magnetism"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "quantum_physics",
+            "kinematics",
+            "dynamics",
+            "statics",
+            "conservation_laws",
+            "oscillations",
+            "optics",
+            "thermodynamics",
+            "electrostatics",
+            "direct_current",
+            "magnetism",
+            "mkt",
+            "vapors"
+          ]
+        },
+        {
+          "line": 17,
+          "part": 2,
+          "title": "Экспериментальные задания",
+          "grading_rule": "manual",
+          "max_points": 3,
+          "section": null,
+          "section_title": null,
+          "catalog_groups": [
+            17
+          ],
+          "subtopics": [
+            {
+              "id": "theme_102",
+              "catalog_id": 102,
+              "title": "Механика",
+              "catalog_count": 45,
+              "topic_keys": [
+                "kinematics",
+                "dynamics",
+                "statics",
+                "conservation_laws",
+                "oscillations",
+                "measurements"
+              ]
+            },
+            {
+              "id": "theme_103",
+              "catalog_id": 103,
+              "title": "Оптика",
+              "catalog_count": 12,
+              "topic_keys": [
+                "optics"
+              ]
+            },
+            {
+              "id": "theme_104",
+              "catalog_id": 104,
+              "title": "Электричество",
+              "catalog_count": 27,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "kinematics",
+            "dynamics",
+            "statics",
+            "conservation_laws",
+            "oscillations",
+            "optics",
+            "electrostatics",
+            "direct_current",
+            "measurements"
+          ]
+        },
+        {
+          "line": 18,
+          "part": 2,
+          "title": "Установление соответствия / текст физического содержания",
+          "grading_rule": "manual",
+          "max_points": 2,
+          "section": null,
+          "section_title": null,
+          "catalog_groups": [
+            18
+          ],
+          "subtopics": [
+            {
+              "id": "theme_86",
+              "catalog_id": 86,
+              "title": "Вопросы о звуковых явлениях",
+              "catalog_count": 10,
+              "topic_keys": [
+                "oscillations"
+              ]
+            },
+            {
+              "id": "theme_89",
+              "catalog_id": 89,
+              "title": "Вопросы о квантовых явлениях",
+              "catalog_count": 7,
+              "topic_keys": [
+                "quantum_physics"
+              ]
+            },
+            {
+              "id": "theme_23",
+              "catalog_id": 23,
+              "title": "Вопросы о механических явлениях",
+              "catalog_count": 32,
+              "topic_keys": [
+                "kinematics",
+                "dynamics",
+                "statics",
+                "conservation_laws",
+                "oscillations"
+              ]
+            },
+            {
+              "id": "theme_88",
+              "catalog_id": 88,
+              "title": "Вопросы о тепловых явлениях",
+              "catalog_count": 40,
+              "topic_keys": [
+                "thermodynamics",
+                "mkt",
+                "vapors"
+              ]
+            },
+            {
+              "id": "theme_87",
+              "catalog_id": 87,
+              "title": "Вопросы об оптических явлениях",
+              "catalog_count": 9,
+              "topic_keys": [
+                "optics"
+              ]
+            },
+            {
+              "id": "theme_85",
+              "catalog_id": 85,
+              "title": "Вопросы об электромагнитных явлениях",
+              "catalog_count": 42,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current",
+                "magnetism",
+                "em_oscillations"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "oscillations",
+            "quantum_physics",
+            "kinematics",
+            "dynamics",
+            "statics",
+            "conservation_laws",
+            "thermodynamics",
+            "optics",
+            "electrostatics",
+            "direct_current",
+            "magnetism",
+            "mkt",
+            "vapors",
+            "em_oscillations"
+          ]
+        },
+        {
+          "line": 19,
+          "part": 2,
+          "title": "Качественная задача (по тексту и явлениям)",
+          "grading_rule": "manual",
+          "max_points": 2,
+          "section": null,
+          "section_title": null,
+          "catalog_groups": [
+            19
+          ],
+          "subtopics": [
+            {
+              "id": "theme_47",
+              "catalog_id": 47,
+              "title": "Механические явления",
+              "catalog_count": 58,
+              "topic_keys": [
+                "kinematics",
+                "dynamics",
+                "statics",
+                "conservation_laws",
+                "oscillations"
+              ]
+            },
+            {
+              "id": "theme_83",
+              "catalog_id": 83,
+              "title": "Тепловые явления",
+              "catalog_count": 34,
+              "topic_keys": [
+                "thermodynamics",
+                "mkt",
+                "vapors"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "kinematics",
+            "dynamics",
+            "statics",
+            "conservation_laws",
+            "oscillations",
+            "thermodynamics",
+            "mkt",
+            "vapors",
+            "em_oscillations"
+          ]
+        },
+        {
+          "line": 20,
+          "part": 2,
+          "title": "Качественная задача",
+          "grading_rule": "manual",
+          "max_points": 2,
+          "section": null,
+          "section_title": null,
+          "catalog_groups": [
+            19
+          ],
+          "subtopics": [
+            {
+              "id": "theme_82",
+              "catalog_id": 82,
+              "title": "Электромагнитные явления",
+              "catalog_count": 32,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current",
+                "magnetism",
+                "optics",
+                "em_oscillations"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "electrostatics",
+            "direct_current",
+            "magnetism",
+            "optics",
+            "mkt",
+            "vapors",
+            "em_oscillations"
+          ]
+        },
+        {
+          "line": 21,
+          "part": 2,
+          "title": "Расчетная задача высокого уровня",
+          "grading_rule": "manual",
+          "max_points": 3,
+          "section": null,
+          "section_title": null,
+          "catalog_groups": [
+            21
+          ],
+          "subtopics": [
+            {
+              "id": "theme_94",
+              "catalog_id": 94,
+              "title": "Электромагнитные явления",
+              "catalog_count": 3,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current",
+                "magnetism"
+              ]
+            },
+            {
+              "id": "theme_98",
+              "catalog_id": 98,
+              "title": "Тепловые явления",
+              "catalog_count": 20,
+              "topic_keys": [
+                "thermodynamics",
+                "mkt",
+                "vapors"
+              ]
+            },
+            {
+              "id": "theme_26",
+              "catalog_id": 26,
+              "title": "Механические явления",
+              "catalog_count": 56,
+              "topic_keys": [
+                "kinematics",
+                "dynamics",
+                "statics",
+                "conservation_laws",
+                "oscillations"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "electrostatics",
+            "direct_current",
+            "magnetism",
+            "thermodynamics",
+            "kinematics",
+            "dynamics",
+            "statics",
+            "conservation_laws",
+            "oscillations",
+            "mkt",
+            "vapors"
+          ]
+        },
+        {
+          "line": 22,
+          "part": 2,
+          "title": "Комбинированная расчетная задача",
+          "grading_rule": "manual",
+          "max_points": 3,
+          "section": null,
+          "section_title": null,
+          "catalog_groups": [
+            22
+          ],
+          "subtopics": [
+            {
+              "id": "theme_100",
+              "catalog_id": 100,
+              "title": "Механика",
+              "catalog_count": 15,
+              "topic_keys": [
+                "kinematics",
+                "dynamics",
+                "statics",
+                "conservation_laws",
+                "oscillations"
+              ]
+            },
+            {
+              "id": "theme_101",
+              "catalog_id": 101,
+              "title": "Термодинамика",
+              "catalog_count": 11,
+              "topic_keys": [
+                "thermodynamics",
+                "mkt",
+                "vapors"
+              ]
+            },
+            {
+              "id": "theme_27",
+              "catalog_id": 27,
+              "title": "Электродинамика",
+              "catalog_count": 62,
+              "topic_keys": [
+                "electrostatics",
+                "direct_current",
+                "magnetism",
+                "em_oscillations",
+                "optics"
+              ]
+            }
+          ],
+          "topic_keys": [
+            "kinematics",
+            "dynamics",
+            "statics",
+            "conservation_laws",
+            "oscillations",
+            "thermodynamics",
+            "electrostatics",
+            "direct_current",
+            "magnetism",
+            "em_oscillations",
+            "optics",
+            "mkt",
+            "vapors"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -42,7 +42,9 @@ const { execSync } = require('child_process');
   );
 
   const EXAM             = (args.exam || 'EGE').toUpperCase();
-  const TOPICS           = args.topics ? args.topics.split(',').map(s => s.trim()) : [];
+  const TOPICS           = args.topics ? args.topics.split(',').map(s => s.trim()).filter(Boolean) : [];
+  const SELECTED_TOPICS  = (args['selected-topics'] || args.selectedTopics || '')
+    .split(',').map(s => s.trim()).filter(Boolean);
   const VARIANT_ID       = args.variant || '101';
   const TITLE            = args.title || `Тренировочный вариант №${VARIANT_ID}`;
   const defaultDuration  = EXAM === 'EGE' ? 235 : 180;
@@ -81,6 +83,18 @@ const { execSync } = require('child_process');
   const PART2_COUNT  = args.part2 !== undefined ? Number(args.part2) : null;
   const LIMIT_COUNT  = args.limit !== undefined ? Number(args.limit) : null;
 
+  // Строгая спецификация экзамена (как на реальном КИМ).
+  // part1Lines — последняя линия части 1; все последующие линии относятся к части 2.
+  const EXAM_SPECS = {
+    EGE: { maxLine: 26, part1Lines: 20, title: 'ЕГЭ' },
+    OGE: { maxLine: 22, part1Lines: 16, title: 'ОГЭ' }
+  };
+  const EXAM_SPEC = EXAM_SPECS[EXAM] || EXAM_SPECS.EGE;
+  const MAX_LINE = EXAM_SPEC.maxLine;
+
+  // Кастомный план линий: --line-plan='{"1":{"count":2,...}}' или --matrix-json=plan.json
+  const LINE_PLAN_RAW = args['line-plan'] || args['matrix-json'] || '';
+
   // Каталог с базой задач и изображениями (по умолчанию — tasks/ рядом с build.js).
   // Необязательный --tasks-dir позволяет собрать вариант из внешней/полной базы,
   // не меняя поведение обычного запуска `node build.js`.
@@ -104,8 +118,207 @@ const { execSync } = require('child_process');
     return shuffled.slice(0, n);
   }
 
+  // ── Матричный отбор по линиям КИМ ───────────────────────────────────────────
+  // План линий: Map<number, { count: number, subtopics: Set<string> }>.
+  // Значение из JSON может быть числом ({"1": 2}) или объектом
+  // ({"1": {"count": 2, "subtopics": ["theme_1"]}}).
+  function normalizeLinePlan(raw) {
+    const plan = new Map();
+    const entries = Array.isArray(raw)
+      ? raw.map((item) => [item && (item.line ?? item.kim_line), item])
+      : Object.entries(raw || {});
+
+    for (const [rawLine, rawValue] of entries) {
+      const line = Number(rawLine);
+      if (!Number.isInteger(line) || line < 1 || line > MAX_LINE) {
+        console.warn(`[ВНИМАНИЕ] План линий: линия «${rawLine}» вне диапазона 1–${MAX_LINE}, пропущена.`);
+        continue;
+      }
+
+      let count;
+      let rawSubtopics;
+      if (rawValue === null || rawValue === undefined) {
+        count = 1;
+        rawSubtopics = [];
+      } else if (typeof rawValue === 'number' || typeof rawValue === 'string') {
+        count = Number(rawValue);
+        rawSubtopics = [];
+      } else if (typeof rawValue === 'object') {
+        count = rawValue.count === undefined ? 1 : Number(rawValue.count);
+        rawSubtopics = rawValue.subtopics ?? rawValue.topics ?? rawValue.subtopic_ids ?? [];
+      } else {
+        console.warn(`[ВНИМАНИЕ] План линий: некорректное значение для линии ${line}, пропущено.`);
+        continue;
+      }
+
+      if (!Number.isInteger(count) || count < 0) {
+        console.warn(`[ВНИМАНИЕ] План линий: count для линии ${line} должен быть целым неотрицательным числом, пропущено.`);
+        continue;
+      }
+      if (!Array.isArray(rawSubtopics)) {
+        console.warn(`[ВНИМАНИЕ] План линий: subtopics для линии ${line} должен быть массивом, пропущено.`);
+        continue;
+      }
+
+      plan.set(line, {
+        count,
+        subtopics: new Set(rawSubtopics.map((s) => String(s).trim()).filter(Boolean))
+      });
+    }
+
+    if (plan.size === 0) {
+      console.error('[ОШИБКА] План линий пуст: не удалось прочитать ни одной корректной линии.');
+      process.exit(1);
+    }
+    return plan;
+  }
+
+  function readLinePlan(rawValue) {
+    const raw = String(rawValue || '').trim();
+    let parsed;
+    if (raw.startsWith('{') || raw.startsWith('[')) {
+      try {
+        parsed = JSON.parse(raw);
+      } catch (e) {
+        console.error(`[ОШИБКА] Не удалось разобрать JSON плана линий: ${e.message}`);
+        process.exit(1);
+      }
+    } else {
+      const candidates = [
+        path.resolve(process.cwd(), raw),
+        path.resolve(__dirname, raw)
+      ];
+      const filePath = candidates.find((p) => fs.existsSync(p));
+      if (!filePath) {
+        console.error(`[ОШИБКА] Файл плана линий не найден: ${raw}`);
+        process.exit(1);
+      }
+      try {
+        parsed = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      } catch (e) {
+        console.error(`[ОШИБКА] Не удалось прочитать план линий ${filePath}: ${e.message}`);
+        process.exit(1);
+      }
+    }
+
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && parsed.linePlan) {
+      parsed = parsed.linePlan;
+    }
+    return normalizeLinePlan(parsed);
+  }
+
+  // Совпадает ли задача с выбранными подтемами плана.
+  // Поддерживаем и subtopic_id (theme_*), и ключи разделов/подразделов из topics.
+  function matchesPlanSubtopics(task, allowed) {
+    if (!allowed || allowed.size === 0) return true;
+    if (task.subtopic_id && allowed.has(String(task.subtopic_id))) return true;
+    return Array.isArray(task.topics) && task.topics.some((tag) => allowed.has(String(tag)));
+  }
+
+  // Узкая тема задачи должна пересекаться с выбранными в конструкторе темами.
+  function matchesSelectedTopics(task, selected) {
+    if (!selected || selected.size === 0) return true;
+    return Array.isArray(task.topics) && task.topics.some((tag) => selected.has(String(tag)));
+  }
+
+  // Отбор строго по линиям: для каждой линии по возрастанию номера — count задач.
+  // Задачи внутри линии идут подряд; итоговая сортировка по частям выполняется ниже.
+  function selectByLinePlan(pool, plan, selectedTopics) {
+    const selectedSet = selectedTopics instanceof Set
+      ? selectedTopics
+      : new Set(selectedTopics || []);
+    const byLine = new Map();
+    let withoutLine = 0;
+
+    for (const task of pool) {
+      const line = Number(task.kim_line);
+      if (!Number.isInteger(line) || line < 1) {
+        withoutLine += 1;
+        continue;
+      }
+      if (!byLine.has(line)) byLine.set(line, []);
+      byLine.get(line).push(task);
+    }
+
+    if (withoutLine > 0) {
+      console.warn(`[ВНИМАНИЕ] ${withoutLine} задач без корректного kim_line пропущено.`);
+    }
+
+    const selected = [];
+    const emptyLines = [];
+    const shortages = [];
+
+    for (const line of [...plan.keys()].sort((a, b) => a - b)) {
+      const spec = plan.get(line);
+      if (!spec || spec.count <= 0) continue;
+
+      let candidates = byLine.get(line) || [];
+
+      // Новый фильтр по узким темам — основной. Подтемы линии используются
+      // как дополнительное сужение, но не должны «терять» задачи выбранной
+      // темы из-за неполного совпадения subtopic_id.
+      if (selectedSet.size > 0) {
+        candidates = candidates.filter((task) => matchesSelectedTopics(task, selectedSet));
+        if (candidates.length > 0 && spec.subtopics.size > 0) {
+          const refined = candidates.filter((task) => matchesPlanSubtopics(task, spec.subtopics));
+          if (refined.length > 0) {
+            candidates = refined;
+          } else {
+            console.warn(`[ИНФО] Линия ${line}: подтемы не совпали с выбранными темами, использую только фильтр тем.`);
+          }
+        }
+      } else if (spec.subtopics.size > 0) {
+        candidates = candidates.filter((task) => matchesPlanSubtopics(task, spec.subtopics));
+      }
+
+      if (candidates.length === 0) {
+        emptyLines.push(line);
+        continue;
+      }
+      if (candidates.length < spec.count) {
+        shortages.push(`${line}: ${candidates.length}/${spec.count}`);
+      }
+
+      selected.push(...pickRandom(candidates, spec.count));
+      console.log(`[ИНФО] Линия ${line}: выбрано ${Math.min(spec.count, candidates.length)} из ${candidates.length} задач.`);
+    }
+
+    if (emptyLines.length > 0) {
+      console.warn(`[ВНИМАНИЕ] Нет подходящих задач для линий: ${emptyLines.join(', ')} — линии пропущены.`);
+    }
+    if (shortages.length > 0) {
+      console.warn(`[ВНИМАНИЕ] Недостаточно задач (доступно/запрошено): ${shortages.join('; ')}.`);
+    }
+
+    return selected;
+  }
+
+  // Строгий порядок варианта: часть 1 (линии 1…part1Lines), затем часть 2.
+  // Внутри каждой части — строго по возрастанию kim_line.
+  function sortByKimLine(tasks) {
+    const partOf = (task) => {
+      const line = Number(task.kim_line);
+      if (Number.isInteger(line) && line >= 1) return line <= EXAM_SPEC.part1Lines ? 1 : 2;
+      return Number(task.part) === 2 ? 2 : 1;
+    };
+    tasks.sort((a, b) => {
+      const partDiff = partOf(a) - partOf(b);
+      if (partDiff !== 0) return partDiff;
+      const lineDiff = (Number(a.kim_line) || 0) - (Number(b.kim_line) || 0);
+      if (lineDiff !== 0) return lineDiff;
+      return 0; // стабильная сортировка сохраняет порядок случайного выбора
+    });
+    return tasks;
+  }
+
   // Экранирование спецсимволов для вывода в LaTeX-тексте
   const escapeLatex = (str) => String(str ?? '').replace(/_/g, '\\_');
+
+  // Ответы попадают в таблицу и текст: символы & % # нельзя выводить как есть.
+  const escapeAnswerCell = (str) => sanitizeLatex(str)
+    .replace(/(^|[^\\])&/g, '$1\\&')
+    .replace(/(^|[^\\])%/g, '$1\\%')
+    .replace(/(^|[^\\])#/g, '$1\\#');
 
   // Невидимые символы, которые ломают pdflatex (в базе встречается U+2060
   // WORD JOINER, например «м/⁠с»). Удаляем их перед генерацией .tex.
@@ -139,6 +352,8 @@ const { execSync } = require('child_process');
   // Без этого pdflatex падает на \mathcalE, \ChemFormN, \circC и т.п.
   function fixKnownLatexTypos(value) {
     return value
+      // Пустые \newline{} после абзаца дают ошибку «There's no line here to end».
+      .replace(/(^|\n)[ \t]*\\newline\{\}(?:[ \t]*\\newline\{\})?[ \t]*(?=\n|$)/g, '$1')
       // OCR-разрывы команд: «\le ft|» вместо «\left|».
       // Просто убираем \le ft — оставшиеся |...| и <...> компилируются.
       .replace(/\\le\s+ft(?![A-Za-z])/g, '')
@@ -147,7 +362,9 @@ const { execSync } = require('child_process');
       .replace(/\\circC(?![A-Za-z])/g, '\\circ\\text{C}')
       .replace(/\\circR(?![A-Za-z])/g, '\\circ\\text{R}')
       .replace(/\\mathcalE(?![A-Za-z])/g, '\\mathcal{E}')
-      .replace(/\\overrightarrow([TFB])(?![A-Za-z])/g, '\\overrightarrow{$1}')
+      .replace(/\\cdor(?![A-Za-z])/g, '\\cdot')
+      .replace(/\\overrightarrow([A-Za-z0-9])(?![A-Za-z])/g, '\\overrightarrow{$1}')
+      .replace(/_\\sum(?![A-Za-z])/g, '_{\\Sigma}')
       .replace(/\\mx(?![A-Za-z])/g, '_{\\max}')
       .replace(/\\ctg(?![A-Za-z])/g, '\\cot')
       .replace(/\\toX(?![A-Za-z])/g, '\\to X')
@@ -156,6 +373,7 @@ const { execSync } = require('child_process');
       .replace(/\\epslon(?![A-Za-z])/g, '\\varepsilon')
       .replace(/\\beginmatrix(?![A-Za-z])/g, '\\begin{matrix}')
       .replace(/\\endmatrix(?![A-Za-z])/g, '\\end{matrix}')
+      .replace(/\\beginarray([lcr])(?![A-Za-z])/g, '\\begin{array}{$1}')
       .replace(/\\Rightarrowa(?![A-Za-z])/g, '\\Rightarrow a')
       .replace(/\\RightarrowF(?![A-Za-z])/g, '\\Rightarrow F')
       .replace(/\\ri(?![A-Za-z])/g, '\\pi')
@@ -167,6 +385,7 @@ const { execSync } = require('child_process');
       // Двойные индексы без скобок: q_m_2 → q_{m_2}, v_0_x → v_{0_x}
       // Сначала закрываем аргумент акцента: \vec_a_1 → \vec{a}_1
       .replace(/\\(vec|bar|hat|tilde|dot|ddot|overline|underline|overrightarrow|overleftarrow)_([A-Za-z0-9])/g, '\\$1{$2}')
+      .replace(/_\\text\{([^{}]*)\}_([A-Za-z0-9])/g, '_{\\text{$1}_{$2}}')
       .replace(/_([A-Za-z]+)_([A-Za-z0-9])/g, '_{$1_$2}')
       .replace(/_([0-9])_([A-Za-z0-9])/g, '_{$1_$2}')
       // \ChemFormN, \ChemForm Mg, \ChemForm^{A}_Z X и т.п.
@@ -219,9 +438,11 @@ const { execSync } = require('child_process');
   const db = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
 
   let selectedTasks;
+  let buildMode = 'standard';
 
   if (IDS_FILTER.length > 0) {
     // ── Режим --ids: выбираем задачи строго по указанным ID (--exam и --topics игнорируются)
+    buildMode = 'ids';
     console.log(`[ИНФО] Режим --ids: отбор задач по ID: ${IDS_FILTER.join(', ')}`);
     const idSet = new Set(IDS_FILTER);
     selectedTasks = db.filter(t => idSet.has(String(t.id)));
@@ -230,81 +451,121 @@ const { execSync } = require('child_process');
     if (missing.length > 0) {
       console.warn(`[ВНИМАНИЕ] Следующие ID не найдены в базе: ${missing.join(', ')}`);
     }
-    // Сортировка: сначала часть 1, затем часть 2, внутри — по kim_line
-    selectedTasks.sort((a, b) => (a.part - b.part) || (a.kim_line - b.kim_line));
   } else {
-    // ── Стандартный режим: фильтр по экзамену и темам
+    // ── Общий пул: фильтр по экзамену и (необязательно) темам/разделам
     let pool = db.filter(t => {
-      if (t.exam !== EXAM) return false;
+      if (String(t.exam || '').toUpperCase() !== EXAM) return false;
       if (TOPICS.length === 0) return true;
       return Array.isArray(t.topics) && t.topics.some(topic => TOPICS.includes(topic));
     });
 
+    if (SELECTED_TOPICS.length > 0) {
+      const selectedSet = new Set(SELECTED_TOPICS);
+      pool = pool.filter((task) => matchesSelectedTopics(task, selectedSet));
+      console.log(`[ИНФО] Узкие темы: ${SELECTED_TOPICS.join(', ')}. Задач в пуле: ${pool.length}.`);
+    }
+
     if (pool.length === 0) {
-      console.error(`[ВНИМАНИЕ] Не найдено задач по заданным критериям (экзамен: ${EXAM}, темы: ${TOPICS.join(', ') || 'все'})!`);
+      console.error(`[ВНИМАНИЕ] Не найдено задач по заданным критериям (экзамен: ${EXAM}, темы: ${TOPICS.join(', ') || 'все'}, узкие темы: ${SELECTED_TOPICS.join(', ') || 'все'})!`);
       process.exit(1);
     }
 
-    if (PART1_COUNT !== null || PART2_COUNT !== null) {
-      // ── Режим --part1=N / --part2=M: случайная выборка по частям
-      const pool1 = pool.filter(t => t.part === 1);
-      const pool2 = pool.filter(t => t.part === 2);
+    if (LINE_PLAN_RAW) {
+      // ── Кастомная матрица линий (--line-plan / --matrix-json)
+      buildMode = 'line-plan';
+      const plan = readLinePlan(LINE_PLAN_RAW);
+      const requested = [...plan.values()].reduce((sum, spec) => sum + spec.count, 0);
+      console.log(`[ИНФО] Режим матрицы линий: линий ${plan.size}, задач запрошено ${requested}.`);
+      selectedTasks = selectByLinePlan(pool, plan, SELECTED_TOPICS);
+    } else if (PART1_COUNT !== null || PART2_COUNT !== null || LIMIT_COUNT !== null) {
+      // ── Совместимость: ручная выборка по частям / общий лимит
+      buildMode = 'legacy-counts';
+      if (PART1_COUNT !== null || PART2_COUNT !== null) {
+        const pool1 = pool.filter(t => t.part === 1);
+        const pool2 = pool.filter(t => t.part === 2);
 
-      let picked1 = [];
-      let picked2 = [];
+        let picked1 = [];
+        let picked2 = [];
 
-      if (PART1_COUNT !== null) {
-        if (pool1.length < PART1_COUNT) {
-          console.warn(`[ВНИМАНИЕ] Запрошено ${PART1_COUNT} задач части 1, но в пуле только ${pool1.length}. Берём все доступные.`);
+        if (PART1_COUNT !== null) {
+          if (pool1.length < PART1_COUNT) {
+            console.warn(`[ВНИМАНИЕ] Запрошено ${PART1_COUNT} задач части 1, но в пуле только ${pool1.length}. Берём все доступные.`);
+          }
+          picked1 = pickRandom(pool1, PART1_COUNT);
+          console.log(`[ИНФО] Часть 1: выбрано ${picked1.length} из ${pool1.length} задач (запрошено ${PART1_COUNT}).`);
+        } else {
+          picked1 = pool1;
         }
-        picked1 = pickRandom(pool1, PART1_COUNT);
-        console.log(`[ИНФО] Часть 1: выбрано ${picked1.length} из ${pool1.length} задач (запрошено ${PART1_COUNT}).`);
-      } else {
-        picked1 = pool1;
-      }
 
-      if (PART2_COUNT !== null) {
-        if (pool2.length < PART2_COUNT) {
-          console.warn(`[ВНИМАНИЕ] Запрошено ${PART2_COUNT} задач части 2, но в пуле только ${pool2.length}. Берём все доступные.`);
+        if (PART2_COUNT !== null) {
+          if (pool2.length < PART2_COUNT) {
+            console.warn(`[ВНИМАНИЕ] Запрошено ${PART2_COUNT} задач части 2, но в пуле только ${pool2.length}. Берём все доступные.`);
+          }
+          picked2 = pickRandom(pool2, PART2_COUNT);
+          console.log(`[ИНФО] Часть 2: выбрано ${picked2.length} из ${pool2.length} задач (запрошено ${PART2_COUNT}).`);
+        } else {
+          picked2 = pool2;
         }
-        picked2 = pickRandom(pool2, PART2_COUNT);
-        console.log(`[ИНФО] Часть 2: выбрано ${picked2.length} из ${pool2.length} задач (запрошено ${PART2_COUNT}).`);
-      } else {
-        picked2 = pool2;
-      }
 
-      selectedTasks = [...picked1, ...picked2];
-    } else if (LIMIT_COUNT !== null) {
-      // ── Режим --limit=N: случайная выборка из общего пула
-      if (pool.length < LIMIT_COUNT) {
-        console.warn(`[ВНИМАНИЕ] Запрошено ${LIMIT_COUNT} задач, но в пуле только ${pool.length}. Берём все доступные.`);
+        selectedTasks = [...picked1, ...picked2];
+      } else {
+        // ── Режим --limit=N: случайная выборка из общего пула
+        if (pool.length < LIMIT_COUNT) {
+          console.warn(`[ВНИМАНИЕ] Запрошено ${LIMIT_COUNT} задач, но в пуле только ${pool.length}. Берём все доступные.`);
+        }
+        selectedTasks = pickRandom(pool, LIMIT_COUNT);
+        console.log(`[ИНФО] --limit: выбрано ${selectedTasks.length} из ${pool.length} задач (запрошено ${LIMIT_COUNT}).`);
       }
-      selectedTasks = pickRandom(pool, LIMIT_COUNT);
-      console.log(`[ИНФО] --limit: выбрано ${selectedTasks.length} из ${pool.length} задач (запрошено ${LIMIT_COUNT}).`);
     } else {
-      // ── Без флагов выборки: берём весь пул (исходное поведение)
-      selectedTasks = pool;
-    }
+      // ── Режим по умолчанию: строгая спецификация реального экзамена.
+      // ЕГЭ — ровно 1 задача для каждой линии 1…26, ОГЭ — 1 задача для каждой линии 1…22.
+      buildMode = 'standard';
+      const plan = new Map();
+      for (let line = 1; line <= MAX_LINE; line++) {
+        plan.set(line, { count: 1, subtopics: new Set() });
+      }
 
-    // Финальная сортировка: часть 1 → часть 2, внутри — по kim_line
-    selectedTasks.sort((a, b) => (a.part - b.part) || (a.kim_line - b.kim_line));
+      console.log(`[ИНФО] Стандартный вариант ${EXAM_SPEC.title}: строго по 1 задаче для линий 1–${MAX_LINE}${TOPICS.length ? ` (темы: ${TOPICS.join(', ')})` : ''}${SELECTED_TOPICS.length ? ` (узкие темы: ${SELECTED_TOPICS.join(', ')})` : ''}.`);
+      selectedTasks = selectByLinePlan(pool, plan, SELECTED_TOPICS);
+
+      const gotLines = new Set(selectedTasks.map(t => Number(t.kim_line)));
+      const missingLines = [];
+      for (let line = 1; line <= MAX_LINE; line++) {
+        if (!gotLines.has(line)) missingLines.push(line);
+      }
+      if (missingLines.length > 0) {
+        console.warn(`[ВНИМАНИЕ] В варианте нет задач для линий: ${missingLines.join(', ')}.`);
+      }
+    }
   }
+
+  sortByKimLine(selectedTasks);
 
   if (selectedTasks.length === 0) {
     console.error(`[ОШИБКА] После применения всех фильтров список задач пуст.`);
     process.exit(1);
   }
 
-  const part1Tasks = selectedTasks.filter(t => t.part === 1);
-  const part2Tasks = selectedTasks.filter(t => t.part === 2);
+  // Часть задачи определяем по номеру линии КИМ (надёжнее, чем поле part в базе),
+  // чтобы часть 2 всегда начиналась с линии 21 (ЕГЭ) / 17 (ОГЭ).
+  const partOfTask = (task) => {
+    const line = Number(task.kim_line);
+    if (Number.isInteger(line) && line >= 1) return line <= EXAM_SPEC.part1Lines ? 1 : 2;
+    return Number(task.part) === 2 ? 2 : 1;
+  };
+  const part1Tasks = selectedTasks.filter(t => partOfTask(t) === 1);
+  const part2Tasks = selectedTasks.filter(t => partOfTask(t) === 2);
 
   // Компактные рисунки: старые записи с центрированным \includegraphics
   // автоматически переводим на макрос \kimimg из fipi_style.sty.
   function compactFigureLatex(latex) {
-    return String(latex || '').replace(
-      /\\begin\{center\}\s*\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}\s*\\end\{center\}/g,
-      (_m, imgPath) => `\\kimimg{${imgPath}}`
-    );
+    return String(latex || '')
+      .replace(
+        /\\begin\{center\}\s*\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}\s*\\end\{center\}/g,
+        (_m, imgPath) => `\\kimimg{${imgPath}}`
+      )
+      // \begin{center} внутри ячеек tabular недопустим («Not allowed in LR mode»).
+      .replace(/\\begin\{center\}\s*([\s\S]*?)\s*\\end\{center\}/g, '$1');
   }
 
   for (const t of selectedTasks) {
@@ -314,7 +575,10 @@ const { execSync } = require('child_process');
 
   function renderTaskStudent(task, index) {
     let answerBlock = '';
-    if (task.part === 1) {
+    // В некоторых старых задачах таблица для ответа уже включена в условие —
+    // не дублируем её автоматическим блоком.
+    const hasEmbeddedAnswerTable = /\\begin\{tabular\}/.test(String(task.latex_condition || ''));
+    if (partOfTask(task) === 1 && !hasEmbeddedAnswerTable) {
       if (Array.isArray(task.cols) && task.cols.length === 2) {
         answerBlock = `\\ansTwoCols{${sanitizeLatex(task.cols[0])}}{${sanitizeLatex(task.cols[1])}}`;
       } else if (task.grading_rule === 'ordered_sequence') {
@@ -351,6 +615,7 @@ const { execSync } = require('child_process');
         num: globalIndex,
         id: t.id,
         part: 1,
+        kim_line: Number(t.kim_line) || null,
         rule: t.grading_rule,
         max_points: t.max_points,
         answer: stripInvisibleChars(t.answer),
@@ -370,6 +635,7 @@ const { execSync } = require('child_process');
         num: globalIndex,
         id: t.id,
         part: 2,
+        kim_line: Number(t.kim_line) || null,
         rule: 'manual',
         max_points: t.max_points,
         answer: stripInvisibleChars(t.answer),
@@ -392,17 +658,17 @@ const { execSync } = require('child_process');
 
   if (part1Tasks.length > 0) {
     teacherTex += `\\section*{Таблица ответов к Части 1 (Вариант ${EXAM}-${VARIANT_ID})}
-\\begin{tabular}{|c|c|c|c|c|}
+\\begin{tabular}{|c|c|c|c|c|c|}
 \\hline
-\\textbf{№} & \\textbf{ID задачи} & \\textbf{Тип проверки} & \\textbf{Макс. балл} & \\textbf{Эталонный ответ} \\\\ \\hline
-${keyMap.filter(k => k.part === 1).map(k => `${k.num} & \\texttt{${escapeLatex(k.id)}} & \\texttt{${escapeLatex(k.rule)}} & ${k.max_points} & \\textbf{${sanitizeLatex(k.answer)}} \\\\ \\hline`).join('\n')}
+\\textbf{№} & \\textbf{Линия КИМ (ФИПИ)} & \\textbf{ID задачи} & \\textbf{Тип проверки} & \\textbf{Макс. балл} & \\textbf{Эталонный ответ} \\\\ \\hline
+${keyMap.filter(k => k.part === 1).map(k => `${k.num} & ${k.kim_line ?? '-'} & \\texttt{${escapeLatex(k.id)}} & \\texttt{${escapeLatex(k.rule)}} & ${k.max_points} & \\textbf{${escapeAnswerCell(k.answer)}} \\\\ \\hline`).join('\n')}
 \\end{tabular}
 \\vspace{12pt}
 `;
   }
 
   teacherTex += `\\section*{Разбор заданий и критерии оценивания}
-${keyMap.map(k => `\\kimtask{${k.num}}{\\textbf{ID:} \\texttt{${escapeLatex(k.id)}} (Макс. балл: ${k.max_points})\\\\[4pt] ${k.solution}\n\n\\noindent\\textbf{Ответ:} ${sanitizeLatex(k.answer)}}`).join('\n\n')}
+${keyMap.map(k => `\\kimtask{${k.num}}{\\textbf{ID:} \\texttt{${escapeLatex(k.id)}} (Линия КИМ: ${k.kim_line ?? '—'}, макс. балл: ${k.max_points})\\\\[4pt] ${k.solution}\n\n\\noindent\\textbf{Ответ:} ${escapeAnswerCell(k.answer)}}`).join('\n\n')}
 \\end{document}\n`;
 
   // ── 6. Сохранение полных ключей и публичного манифеста ───────────────────────
@@ -424,6 +690,7 @@ ${keyMap.map(k => `\\kimtask{${k.num}}{\\textbf{ID:} \\texttt{${escapeLatex(k.id
     variant_id: `${EXAM}-${VARIANT_ID}`,
     exam: EXAM,
     title: TITLE,
+    build_mode: buildMode,
     duration_minutes: DURATION_MINUTES,
     created_at: new Date().toISOString(),
     tasks: keyMap
@@ -439,6 +706,7 @@ ${keyMap.map(k => `\\kimtask{${k.num}}{\\textbf{ID:} \\texttt{${escapeLatex(k.id
       const item = {
         num: k.num,
         part: k.part,
+        kim_line: k.kim_line,
         rule: k.rule,
         max_points: k.max_points
       };
