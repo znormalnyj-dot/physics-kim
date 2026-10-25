@@ -411,6 +411,10 @@ const { execSync } = require('child_process');
       .replace(/↑/g, '\\ensuremath{\\uparrow}')
       .replace(/↓/g, '\\ensuremath{\\downarrow}')
       .replace(/≈/g, '\\ensuremath{\\approx}')
+      // Символы сравнения: в T2A/pdflatex их нельзя печатать напрямую.
+      .replace(/[≤⩽]/g, '\\ensuremath{\\le}')
+      .replace(/[≥⩾]/g, '\\ensuremath{\\ge}')
+      .replace(/≠/g, '\\ensuremath{\\ne}')
       .replace(/−/g, '-')
       .replace(/–/g, '-')
       .replace(/·/g, '\\ensuremath{\\cdot}')
@@ -444,10 +448,21 @@ const { execSync } = require('child_process');
     // ── Режим --ids: выбираем задачи строго по указанным ID (--exam и --topics игнорируются)
     buildMode = 'ids';
     console.log(`[ИНФО] Режим --ids: отбор задач по ID: ${IDS_FILTER.join(', ')}`);
-    const idSet = new Set(IDS_FILTER);
-    selectedTasks = db.filter(t => idSet.has(String(t.id)));
-    const foundIds = selectedTasks.map(t => String(t.id));
-    const missing  = IDS_FILTER.filter(id => !foundIds.includes(id));
+    // Сохраняем порядок, в котором ID переданы в --ids: это важно при
+    // пересборке уже опубликованного варианта, чтобы нумерация задач
+    // и зарегистрированный ключ не разъехались.
+    const byId = new Map(db.map(t => [String(t.id), t]));
+    const seenIds = new Set();
+    selectedTasks = [];
+    for (const id of IDS_FILTER) {
+      const key = String(id);
+      const task = byId.get(key);
+      if (task && !seenIds.has(key)) {
+        seenIds.add(key);
+        selectedTasks.push(task);
+      }
+    }
+    const missing = IDS_FILTER.filter(id => !seenIds.has(String(id)));
     if (missing.length > 0) {
       console.warn(`[ВНИМАНИЕ] Следующие ID не найдены в базе: ${missing.join(', ')}`);
     }
