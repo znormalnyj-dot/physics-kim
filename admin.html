@@ -1803,6 +1803,710 @@
     .toast.success { background: #047857; }
     .toast.error { background: #b91c1c; }
 
+    /* ── Вкладки панели и журнал работ ───────────────────────────────────── */
+    .workspace-tabs {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px;
+      margin-bottom: 20px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      box-shadow: var(--shadow-sm);
+      width: fit-content;
+      max-width: 100%;
+      overflow-x: auto;
+    }
+
+    .workspace-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 15px;
+      color: var(--muted);
+      background: transparent;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .workspace-tab:hover { color: var(--ink-soft); background: var(--surface-soft); }
+    .workspace-tab.is-active {
+      color: #fff;
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      box-shadow: 0 5px 14px rgba(37, 99, 235, 0.22);
+    }
+
+    .workspace-tab-badge {
+      display: inline-grid;
+      place-items: center;
+      min-width: 22px;
+      height: 20px;
+      padding: 0 6px;
+      border-radius: 999px;
+      font-size: 11px;
+      line-height: 1;
+      color: var(--blue-dark);
+      background: var(--blue-soft);
+      border: 1px solid #bfdbfe;
+    }
+
+    .workspace-tab.is-active .workspace-tab-badge {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .attempts-card { overflow: hidden; }
+    .attempts-count {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      border: 1px solid #bfdbfe;
+      color: var(--blue-dark);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .attempts-toolbar {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 0 22px 16px;
+    }
+
+    .attempt-filter {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      min-width: 170px;
+    }
+
+    .attempt-filter > span {
+      color: var(--muted);
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+
+    .attempt-filter .text-input { min-height: 40px; padding: 8px 11px; }
+    .attempt-search { flex: 1 1 240px; min-width: 200px; }
+
+    .attempts-hint {
+      margin-left: auto;
+      align-self: center;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .alert.warning {
+      color: #92400e;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+    }
+
+    .attempts-card > .alert {
+      margin: 0 22px 14px;
+    }
+
+    .attempts-table-wrap {
+      overflow: auto;
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .attempts-table {
+      width: 100%;
+      min-width: 1020px;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+
+    .attempts-table th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      text-align: left;
+      padding: 10px 12px;
+      color: var(--muted);
+      background: #f8fafc;
+      border-bottom: 1px solid var(--line);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .attempts-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid #eef2f7;
+      vertical-align: middle;
+      color: var(--ink-soft);
+    }
+
+    .attempts-table tbody tr:hover { background: #fbfdff; }
+    .attempts-table tbody tr:last-child td { border-bottom: 0; }
+
+    .attempt-date { white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .attempt-student { font-weight: 700; color: var(--ink); }
+    .attempt-variant { font-weight: 700; color: var(--blue-dark); white-space: nowrap; }
+    .attempt-score-cell { font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .attempt-score-cell b { color: var(--ink); }
+    .attempt-score-cell small { color: var(--muted); }
+
+    .attempt-result {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      white-space: nowrap;
+    }
+
+    .attempt-result b { color: var(--ink); font-size: 13px; }
+    .attempt-result small { color: var(--muted); font-size: 11.3px; }
+
+    .attempt-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+
+    .attempt-status::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      flex: none;
+    }
+
+    .attempt-status.pending { color: #b45309; background: #fffbeb; border-color: #fde68a; }
+    .attempt-status.checked { color: #047857; background: #ecfdf5; border-color: #a7f3d0; }
+
+    .attempt-review-btn {
+      border: 1px solid #bfdbfe;
+      border-radius: 9px;
+      padding: 7px 12px;
+      color: var(--blue-dark);
+      background: var(--blue-soft);
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .attempt-review-btn:hover { background: #dbeafe; border-color: #93c5fd; }
+
+    .attempts-card .empty-state { margin: 18px 22px 22px; }
+
+    .attempt-key-warning {
+      margin: 0 0 12px;
+      padding: 9px 11px;
+      border-radius: 9px;
+      color: #92400e;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    /* ── Модальное окно проверки ─────────────────────────────────────────── */
+    .attempt-modal[hidden],
+    .photo-lightbox[hidden] { display: none; }
+
+    .attempt-modal,
+    .photo-lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .photo-lightbox { z-index: 90; }
+
+    .attempt-modal-backdrop,
+    .photo-lightbox-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.56);
+      backdrop-filter: blur(3px);
+    }
+
+    .attempt-modal-dialog {
+      position: relative;
+      z-index: 1;
+      width: min(1480px, calc(100vw - 32px));
+      max-height: calc(100vh - 32px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-radius: 20px;
+      background: var(--surface);
+      box-shadow: 0 30px 90px rgba(15, 23, 42, 0.35);
+    }
+
+    .attempt-modal-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff, #fbfdff);
+    }
+
+    .attempt-modal-head h2 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+    }
+
+    .attempt-modal-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.45;
+    }
+
+    .attempt-modal-close {
+      flex: none;
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--ink-soft);
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .attempt-modal-close:hover { background: var(--red-soft); color: var(--red); border-color: #fecaca; }
+
+    .attempt-modal-body {
+      display: grid;
+      grid-template-columns: minmax(300px, 0.82fr) minmax(440px, 1.18fr);
+      gap: 0;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .attempt-review-left,
+    .attempt-review-right {
+      min-height: 0;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .attempt-review-left { border-right: 1px solid var(--line); background: #fbfdff; }
+
+    .attempt-review-panel {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+      padding: 13px;
+    }
+
+    .attempt-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .attempt-panel-head h3 {
+      margin: 0;
+      font-size: 13.5px;
+      color: var(--ink);
+    }
+
+    .attempt-panel-head > span {
+      color: var(--muted);
+      font-size: 11.5px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .attempt-photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 9px;
+    }
+
+    .attempt-photo-card {
+      position: relative;
+      display: block;
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      padding: 0;
+      overflow: hidden;
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      background: #f8fafc;
+      cursor: zoom-in;
+    }
+
+    .attempt-photo-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.2s ease;
+    }
+
+    .attempt-photo-card:hover img { transform: scale(1.035); }
+
+    .attempt-photo-card span {
+      position: absolute;
+      left: 6px;
+      bottom: 6px;
+      max-width: calc(100% - 12px);
+      padding: 3px 6px;
+      border-radius: 6px;
+      color: #fff;
+      background: rgba(15, 23, 42, 0.72);
+      font-size: 10.5px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .attempt-photo-empty {
+      grid-column: 1 / -1;
+      padding: 24px 12px;
+      border: 1px dashed var(--line-strong);
+      border-radius: 10px;
+      color: var(--muted);
+      background: var(--surface-soft);
+      text-align: center;
+      font-size: 12.5px;
+      line-height: 1.45;
+    }
+
+    .attempt-folder-link { margin-top: 10px; display: inline-flex; }
+
+    .part1-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .part1-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      min-width: 44px;
+      justify-content: center;
+      padding: 5px 7px;
+      border-radius: 7px;
+      border: 1px solid var(--line);
+      background: var(--surface-soft);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .part1-item b { color: var(--ink); }
+    .part1-item.correct { color: #047857; background: #ecfdf5; border-color: #a7f3d0; }
+    .part1-item.incorrect { color: #b91c1c; background: #fef2f2; border-color: #fecaca; }
+    .part1-item.unknown { color: #92400e; background: #fffbeb; border-color: #fde68a; }
+
+    .part1-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .attempt-task {
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 13px;
+      background: var(--surface);
+    }
+
+    .attempt-task + .attempt-task { margin-top: 11px; }
+
+    .attempt-task-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 9px;
+    }
+
+    .attempt-task-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .attempt-task-num {
+      display: inline-grid;
+      place-items: center;
+      min-width: 30px;
+      height: 26px;
+      padding: 0 7px;
+      border-radius: 8px;
+      color: #fff;
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      font-size: 12px;
+    }
+
+    .attempt-task-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      justify-content: flex-end;
+    }
+
+    .attempt-task-chip {
+      display: inline-flex;
+      padding: 3px 7px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: var(--surface-soft);
+      border: 1px solid var(--line);
+      font-size: 10.5px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .attempt-task-condition,
+    .latex-content {
+      color: var(--ink-soft);
+      font-size: 12.5px;
+      line-height: 1.55;
+      word-break: break-word;
+    }
+
+    .latex-content {
+      padding: 9px 10px;
+      border-radius: 8px;
+      background: #fbfdff;
+      border: 1px dashed #dbe4ef;
+    }
+
+    .latex-content sup,
+    .latex-content sub { line-height: 0; }
+
+    .math-img-note {
+      display: inline-block;
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: var(--blue-dark);
+      background: var(--blue-soft);
+      font-size: 11px;
+    }
+
+    .attempt-task-subhead {
+      margin: 10px 0 4px;
+      color: var(--muted);
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .attempt-task-answer {
+      margin-top: 8px;
+      color: #065f46;
+      font-size: 12.5px;
+      font-weight: 700;
+    }
+
+    .attempt-score-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 11px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--line);
+    }
+
+    .attempt-score-label {
+      margin-right: 3px;
+      color: var(--muted);
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+
+    .attempt-score-btn {
+      min-width: 34px;
+      height: 32px;
+      padding: 0 9px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--ink-soft);
+      font-size: 12.5px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+
+    .attempt-score-btn:hover { border-color: #93c5fd; background: var(--blue-soft); color: var(--blue-dark); }
+
+    .attempt-score-btn.is-selected {
+      color: #fff;
+      border-color: var(--blue);
+      background: var(--blue);
+      box-shadow: 0 3px 10px rgba(37, 99, 235, 0.24);
+    }
+
+    .attempt-review-footer {
+      display: grid;
+      grid-template-columns: minmax(260px, 0.85fr) minmax(260px, 1fr) auto;
+      align-items: end;
+      gap: 14px;
+      padding: 14px 20px 16px;
+      border-top: 1px solid var(--line);
+      background: #fbfdff;
+    }
+
+    .attempt-live {
+      padding: 10px 12px;
+      border: 1px solid #bfdbfe;
+      border-radius: 11px;
+      color: var(--ink-soft);
+      background: var(--blue-soft);
+      font-size: 12px;
+      line-height: 1.6;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .attempt-live b { color: var(--ink); }
+    .attempt-live strong { color: var(--blue-dark); }
+    .attempt-live small { display: block; color: var(--muted); font-size: 11px; }
+
+    .attempt-comment {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+
+    .attempt-comment textarea {
+      width: 100%;
+      min-height: 62px;
+      max-height: 120px;
+      resize: vertical;
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      padding: 8px 10px;
+      color: var(--ink);
+      background: var(--surface);
+      font-size: 12.5px;
+      line-height: 1.45;
+      outline: 0;
+    }
+
+    .attempt-comment textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .attempt-save {
+      min-height: 42px;
+      padding-left: 18px;
+      padding-right: 18px;
+      white-space: nowrap;
+    }
+
+    .photo-lightbox-panel {
+      position: relative;
+      z-index: 1;
+      width: min(1180px, calc(100vw - 32px));
+      height: min(900px, calc(100vh - 32px));
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-radius: 16px;
+      background: #0f172a;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.45);
+    }
+
+    .photo-lightbox-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      color: #e2e8f0;
+      background: #111827;
+      font-size: 12.5px;
+      font-weight: 700;
+    }
+
+    .photo-lightbox-actions { display: flex; align-items: center; gap: 6px; }
+
+    .photo-lightbox-actions button {
+      min-width: 34px;
+      height: 32px;
+      padding: 0 9px;
+      border: 1px solid rgba(226, 232, 240, 0.22);
+      border-radius: 7px;
+      color: #e2e8f0;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .photo-lightbox-actions button:hover { background: rgba(255, 255, 255, 0.16); }
+
+    .photo-lightbox-stage {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      place-items: center;
+      overflow: auto;
+      padding: 14px;
+    }
+
+    .photo-lightbox-stage img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      transform-origin: center center;
+      transition: transform 0.15s ease;
+      user-select: none;
+    }
+
     @media (max-width: 1080px) {
       .layout { grid-template-columns: minmax(0, 1fr); }
       .side { position: static; }
@@ -1844,6 +2548,38 @@
       .page-footer { flex-direction: column; align-items: flex-start; }
     }
 
+    @media (max-width: 980px) {
+      .attempt-modal { padding: 0; align-items: stretch; }
+      .attempt-modal-dialog {
+        width: 100vw;
+        max-height: 100vh;
+        border-radius: 0;
+      }
+      .attempt-modal-body { grid-template-columns: 1fr; overflow-y: auto; }
+      .attempt-review-left,
+      .attempt-review-right { overflow: visible; }
+      .attempt-review-left { border-right: 0; border-bottom: 1px solid var(--line); }
+      .attempt-review-footer { grid-template-columns: 1fr; align-items: stretch; }
+      .attempt-save { width: 100%; }
+      .photo-lightbox { padding: 0; }
+      .photo-lightbox-panel { width: 100vw; height: 100vh; border-radius: 0; }
+    }
+
+    @media (max-width: 720px) {
+      .workspace-tabs { width: 100%; }
+      .workspace-tab { flex: 1; justify-content: center; padding-left: 10px; padding-right: 10px; }
+      .attempts-toolbar { padding-left: 15px; padding-right: 15px; }
+      .attempt-filter, .attempt-search { flex: 1 1 100%; min-width: 0; }
+      .attempts-hint { margin-left: 0; white-space: normal; }
+      .attempts-card > .alert { margin-left: 15px; margin-right: 15px; }
+      .attempts-card .empty-state { margin-left: 15px; margin-right: 15px; }
+      .attempt-modal-head, .attempt-review-left, .attempt-review-right, .attempt-review-footer {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+      .attempt-photo-grid { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
       html { scroll-behavior: auto; }
@@ -1870,6 +2606,17 @@
   <main class="page">
     <div id="globalError" class="alert error" hidden></div>
 
+    <div class="workspace-tabs" id="workspaceTabs" role="tablist" aria-label="Разделы панели преподавателя">
+      <button type="button" class="workspace-tab is-active" data-workspace="builder" role="tab" aria-selected="true">
+        Конструктор вариантов
+      </button>
+      <button type="button" class="workspace-tab" data-workspace="attempts" role="tab" aria-selected="false">
+        Работы учеников (Журнал и проверка Ч.2)
+        <span class="workspace-tab-badge" id="attemptsTabCount">0</span>
+      </button>
+    </div>
+
+    <div id="builderWorkspace">
     <section class="exam-bar" aria-label="Выбор экзамена">
       <div class="segmented" role="tablist" aria-label="Экзамен">
         <button type="button" class="exam-btn is-active" data-exam="EGE" role="tab" aria-selected="true">
@@ -2121,12 +2868,155 @@
         <div class="empty-state">Загрузка архива…</div>
       </div>
     </section>
+    </div>
+
+    <section class="attempts-workspace" id="attemptsWorkspace" hidden aria-labelledby="attemptsTitle">
+      <section class="card attempts-card">
+        <div class="card-head">
+          <div>
+            <h2 id="attemptsTitle"><span class="step-badge">Ч2</span> Работы учеников и проверка Части 2</h2>
+            <p>Журнал сданных работ, фотографии решений, ответы Части 1 и эталонные критерии из базы задач.</p>
+          </div>
+          <div class="head-actions">
+            <span class="attempts-count" id="attemptsCount">0 работ</span>
+            <button type="button" class="link-btn" id="refreshAttemptsBtn">Обновить из Google Таблицы</button>
+          </div>
+        </div>
+
+        <div class="attempts-toolbar">
+          <label class="attempt-filter" for="attemptVariantFilter">
+            <span>Вариант</span>
+            <select class="text-input" id="attemptVariantFilter">
+              <option value="">Все варианты</option>
+            </select>
+          </label>
+          <label class="attempt-filter" for="attemptStatusFilter">
+            <span>Статус</span>
+            <select class="text-input" id="attemptStatusFilter">
+              <option value="">Все</option>
+              <option value="pending">Ожидают проверки Ч.2</option>
+              <option value="checked">Проверено</option>
+            </select>
+          </label>
+          <label class="attempt-filter attempt-search" for="attemptSearchInput">
+            <span>Поиск по ученику</span>
+            <input class="text-input" id="attemptSearchInput" type="search" autocomplete="off" placeholder="Имя или фамилия ученика">
+          </label>
+          <div class="attempts-hint" id="attemptsHint">Загрузка журнала…</div>
+        </div>
+
+        <div class="alert error" id="attemptsError" hidden></div>
+        <div class="alert warning" id="attemptsWarning" hidden></div>
+
+        <div class="attempts-table-wrap" id="attemptsTableWrap" hidden>
+          <table class="attempts-table">
+            <thead>
+              <tr>
+                <th>Дата</th>
+                <th>Вариант</th>
+                <th>Ученик</th>
+                <th>Класс</th>
+                <th>Ч.1</th>
+                <th>Ч.2</th>
+                <th>Итог</th>
+                <th>Статус</th>
+                <th>Действие</th>
+              </tr>
+            </thead>
+            <tbody id="attemptsTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="empty-state" id="attemptsEmpty">
+          <b>Загрузка работ…</b>
+          Получаем список из Google Таблицы.
+        </div>
+      </section>
+    </section>
 
     <footer class="page-footer">
       <div>Сервер: <code id="serverAddress">http://localhost:3000</code> · локальный режим</div>
       <div>Сборка: <code>node build.js</code> · панель: <code>node server.js</code></div>
     </footer>
   </main>
+
+  <div class="attempt-modal" id="attemptModal" hidden>
+    <div class="attempt-modal-backdrop" data-attempt-close></div>
+    <div class="attempt-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="attemptModalTitle">
+      <header class="attempt-modal-head">
+        <div>
+          <h2 id="attemptModalTitle">Проверка работы</h2>
+          <p id="attemptModalMeta">—</p>
+        </div>
+        <button type="button" class="attempt-modal-close" id="attemptModalClose" aria-label="Закрыть окно проверки">×</button>
+      </header>
+
+      <div class="attempt-modal-body">
+        <aside class="attempt-review-left">
+          <section class="attempt-review-panel">
+            <div class="attempt-panel-head">
+              <h3>Фото решения Части 2</h3>
+              <span id="attemptPhotoCount">0 фото</span>
+            </div>
+            <div class="attempt-photo-grid" id="attemptPhotoGallery"></div>
+            <a class="mini-btn attempt-folder-link" id="attemptFolderLink" href="#" target="_blank" rel="noopener" hidden>
+              Открыть папку Google Диска ↗
+            </a>
+          </section>
+
+          <section class="attempt-review-panel">
+            <div class="attempt-panel-head">
+              <h3>Часть 1: краткие ответы</h3>
+              <span id="attemptPart1Score">—</span>
+            </div>
+            <div class="part1-list" id="attemptPart1Summary"></div>
+            <div class="part1-legend">
+              <span>✓ верно</span>
+              <span>✕ ошибка</span>
+              <span>? нет данных</span>
+            </div>
+          </section>
+        </aside>
+
+        <section class="attempt-review-right">
+          <section class="attempt-review-panel">
+            <div class="attempt-panel-head">
+              <h3>Задачи Части 2 и эталонные критерии</h3>
+              <span id="attemptPart2Score">—</span>
+            </div>
+            <div id="attemptPart2Tasks"></div>
+          </section>
+        </section>
+      </div>
+
+      <footer class="attempt-review-footer">
+        <div class="attempt-live" id="attemptLiveScore">—</div>
+        <label class="attempt-comment" for="attemptTeacherComment">
+          Комментарий преподавателя
+          <textarea id="attemptTeacherComment" rows="3" placeholder="Что зачтено, что исправить, на что обратить внимание…"></textarea>
+        </label>
+        <button type="button" class="btn-primary attempt-save" id="attemptSaveBtn">Сохранить проверку в таблицу</button>
+      </footer>
+    </div>
+  </div>
+
+  <div class="photo-lightbox" id="photoLightbox" hidden>
+    <div class="photo-lightbox-backdrop" data-photo-close></div>
+    <div class="photo-lightbox-panel">
+      <div class="photo-lightbox-bar">
+        <span id="photoLightboxName">Фото решения</span>
+        <div class="photo-lightbox-actions">
+          <button type="button" data-photo-zoom="-1" title="Уменьшить">−</button>
+          <button type="button" data-photo-zoom="1" title="Увеличить">+</button>
+          <button type="button" data-photo-rotate title="Повернуть на 90°">⟳</button>
+          <button type="button" data-photo-close title="Закрыть">×</button>
+        </div>
+      </div>
+      <div class="photo-lightbox-stage">
+        <img id="photoLightboxImg" alt="Фото решения ученика">
+      </div>
+    </div>
+  </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -2153,6 +3043,20 @@
         buildTimer: null,
         buildStartedAt: 0,
         webBaseUrl: ''
+      };
+
+      const attemptState = {
+        items: [],
+        loaded: false,
+        loading: false,
+        error: '',
+        warning: '',
+        filterVariant: '',
+        filterStatus: '',
+        search: '',
+        current: null,
+        scores: {},
+        photo: { src: '', name: '', rotation: 0, zoom: 1 }
       };
 
       const PART_LABELS = {
@@ -2225,7 +3129,38 @@
         catalogEgeLink: document.getElementById('catalogEgeLink'),
         catalogOgeLink: document.getElementById('catalogOgeLink'),
         serverAddress: document.getElementById('serverAddress'),
-        toast: document.getElementById('toast')
+        toast: document.getElementById('toast'),
+        builderWorkspace: document.getElementById('builderWorkspace'),
+        attemptsWorkspace: document.getElementById('attemptsWorkspace'),
+        attemptsTabCount: document.getElementById('attemptsTabCount'),
+        attemptsCount: document.getElementById('attemptsCount'),
+        refreshAttemptsBtn: document.getElementById('refreshAttemptsBtn'),
+        attemptVariantFilter: document.getElementById('attemptVariantFilter'),
+        attemptStatusFilter: document.getElementById('attemptStatusFilter'),
+        attemptSearchInput: document.getElementById('attemptSearchInput'),
+        attemptsHint: document.getElementById('attemptsHint'),
+        attemptsError: document.getElementById('attemptsError'),
+        attemptsWarning: document.getElementById('attemptsWarning'),
+        attemptsTableWrap: document.getElementById('attemptsTableWrap'),
+        attemptsTableBody: document.getElementById('attemptsTableBody'),
+        attemptsEmpty: document.getElementById('attemptsEmpty'),
+        attemptModal: document.getElementById('attemptModal'),
+        attemptModalClose: document.getElementById('attemptModalClose'),
+        attemptModalTitle: document.getElementById('attemptModalTitle'),
+        attemptModalMeta: document.getElementById('attemptModalMeta'),
+        attemptPhotoCount: document.getElementById('attemptPhotoCount'),
+        attemptPhotoGallery: document.getElementById('attemptPhotoGallery'),
+        attemptFolderLink: document.getElementById('attemptFolderLink'),
+        attemptPart1Score: document.getElementById('attemptPart1Score'),
+        attemptPart1Summary: document.getElementById('attemptPart1Summary'),
+        attemptPart2Score: document.getElementById('attemptPart2Score'),
+        attemptPart2Tasks: document.getElementById('attemptPart2Tasks'),
+        attemptLiveScore: document.getElementById('attemptLiveScore'),
+        attemptTeacherComment: document.getElementById('attemptTeacherComment'),
+        attemptSaveBtn: document.getElementById('attemptSaveBtn'),
+        photoLightbox: document.getElementById('photoLightbox'),
+        photoLightboxName: document.getElementById('photoLightboxName'),
+        photoLightboxImg: document.getElementById('photoLightboxImg')
       };
 
       // ── Вспомогательные функции ─────────────────────────────────────────────
@@ -3699,9 +4634,670 @@
         }
       }
 
+      // ── Работы учеников: журнал, проверка Части 2 ────────────────────────────
+
+      const CLIENT_EGE_SCALE = Object.freeze([
+        0, 5, 9, 14, 18, 23, 27, 32, 36, 39,
+        41, 43, 44, 46, 48, 49, 51, 53, 54, 56,
+        58, 59, 61, 62, 64, 65, 67, 68, 70, 71,
+        73, 74, 76, 77, 79, 80, 82, 84, 86, 88,
+        90, 92, 94, 96, 98, 100
+      ]);
+
+      function convertScoreClient(exam, rawScore, rawMaxPrimary) {
+        const normalizedExam = String(exam || '').toUpperCase() === 'OGE' ? 'OGE' : 'EGE';
+        const fallbackMax = normalizedExam === 'OGE' ? 39 : 45;
+        const maxPrimary = Number(rawMaxPrimary) > 0 ? Number(rawMaxPrimary) : fallbackMax;
+        const score = Math.max(0, Math.min(maxPrimary, Number(rawScore) || 0));
+        const percent = maxPrimary > 0 ? Math.round((score / maxPrimary) * 100) : 0;
+
+        if (normalizedExam === 'OGE') {
+          const isFullVariant = Math.abs(maxPrimary - 39) < 0.01;
+          const grade = isFullVariant
+            ? (score <= 9 ? 2 : score <= 19 ? 3 : score <= 30 ? 4 : 5)
+            : (percent < 35 ? 2 : percent <= 60 ? 3 : percent <= 84 ? 4 : 5);
+          return {
+            exam: 'OGE',
+            score,
+            max_primary: maxPrimary,
+            percent,
+            secondary: grade,
+            grade,
+            is_full_variant: isFullVariant,
+            label: 'Оценка ОГЭ: ' + grade
+          };
+        }
+
+        const isFullVariant = Math.abs(maxPrimary - 45) < 0.01;
+        const secondary = isFullVariant
+          ? CLIENT_EGE_SCALE[Math.max(0, Math.min(45, Math.round(score)))]
+          : percent;
+        return {
+          exam: 'EGE',
+          score,
+          max_primary: maxPrimary,
+          percent,
+          secondary,
+          test_score: secondary,
+          grade: null,
+          is_full_variant: isFullVariant,
+          label: 'Тестовый балл ЕГЭ: ' + secondary + ' из 100'
+        };
+      }
+
+      function formatLatexToHtml(value) {
+        let text = esc(value || '');
+        if (!text.trim()) return '<span class="attempt-photo-empty" style="display:block">Не указано</span>';
+
+        text = text.replace(/\\includegraphics(?:\[[^\]]*\])?\{[^}]*\}/g, '<span class="math-img-note">[рисунок]</span>');
+        text = text.replace(/\\kimimg\{[^}]*\}/g, '<span class="math-img-note">[рисунок]</span>');
+        text = text.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, '($1)/($2)');
+        text = text.replace(/\\text\{([^{}]*)\}/g, '$1');
+        text = text.replace(/\\mathrm\{([^{}]*)\}/g, '$1');
+        text = text.replace(/\\mathbf\{([^{}]*)\}/g, '<b>$1</b>');
+        text = text.replace(/\\left|\\right/g, '');
+        text = text.replace(/\\cdot/g, '·')
+          .replace(/\\times/g, '×')
+          .replace(/\\approx/g, '≈')
+          .replace(/\\pm/g, '±')
+          .replace(/\\Delta/g, 'Δ')
+          .replace(/\\alpha/g, 'α')
+          .replace(/\\beta/g, 'β')
+          .replace(/\\gamma/g, 'γ')
+          .replace(/\\mu/g, 'μ')
+          .replace(/\\pi/g, 'π')
+          .replace(/\\rho/g, 'ρ')
+          .replace(/\\omega/g, 'ω')
+          .replace(/\\varphi/g, 'φ')
+          .replace(/\\infty/g, '∞')
+          .replace(/\\to/g, '→')
+          .replace(/\\le/g, '≤')
+          .replace(/\\ge/g, '≥')
+          .replace(/\\ne/g, '≠');
+        text = text.replace(/\^\{([^{}]+)\}/g, '<sup>$1</sup>');
+        text = text.replace(/\^([0-9a-zA-Z+\-])/g, '<sup>$1</sup>');
+        text = text.replace(/_\{([^{}]+)\}/g, '<sub>$1</sub>');
+        text = text.replace(/_([0-9a-zA-Z+\-])/g, '<sub>$1</sub>');
+        text = text.replace(/\\\\/g, '<br>');
+        text = text.replace(/\\[a-zA-Z]+/g, ' ');
+        text = text.replace(/\$/g, '');
+        text = text.replace(/\n/g, '<br>');
+        return text;
+      }
+
+      function attemptStatusKey(attempt) {
+        return String(attempt && attempt.status || '') === 'Проверено' ? 'checked' : 'pending';
+      }
+
+      function attemptStatusText(attempt) {
+        return attemptStatusKey(attempt) === 'checked' ? 'Проверено' : 'Ожидает Ч.2';
+      }
+
+      function attemptResultHtml(attempt) {
+        if (!attempt || !attempt.key_found) {
+          return '<b>—</b><small>ключ варианта не найден</small>';
+        }
+        const conversion = attempt.conversion || convertScoreClient(
+          attempt.exam,
+          attempt.total_primary,
+          attempt.max_primary
+        );
+        if (conversion.exam === 'OGE') {
+          return '<b>' + esc(attempt.total_primary) + ' / ' + esc(attempt.max_primary) + '</b>' +
+            '<small>Оценка: ' + esc(conversion.grade) + '</small>';
+        }
+        return '<b>' + esc(attempt.total_primary) + ' / ' + esc(attempt.max_primary) + '</b>' +
+          '<small>Тест: ' + esc(conversion.secondary) + ' / 100</small>';
+      }
+
+      function renderAttemptFilters() {
+        const previous = attemptState.filterVariant || els.attemptVariantFilter.value || '';
+        const variants = Array.from(new Set(attemptState.items.map(function (item) {
+          return String(item.variant_id || '').trim();
+        }).filter(Boolean))).sort(function (a, b) {
+          return a.localeCompare(b, 'ru');
+        });
+
+        els.attemptVariantFilter.innerHTML = '<option value="">Все варианты</option>' +
+          variants.map(function (variant) {
+            return '<option value="' + esc(variant) + '">' + esc(variant) + '</option>';
+          }).join('');
+
+        if (previous && variants.indexOf(previous) !== -1) {
+          attemptState.filterVariant = previous;
+        } else if (previous) {
+          attemptState.filterVariant = '';
+        }
+        els.attemptVariantFilter.value = attemptState.filterVariant;
+      }
+
+      function filteredAttempts() {
+        const query = attemptState.search.trim().toLowerCase();
+        return attemptState.items.filter(function (attempt) {
+          if (attemptState.filterVariant && String(attempt.variant_id) !== attemptState.filterVariant) return false;
+          if (attemptState.filterStatus && attemptStatusKey(attempt) !== attemptState.filterStatus) return false;
+          if (query) {
+            const haystack = [
+              attempt.student_name,
+              attempt.student_grade,
+              attempt.variant_id
+            ].join(' ').toLowerCase();
+            if (haystack.indexOf(query) === -1) return false;
+          }
+          return true;
+        });
+      }
+
+      function renderAttempts() {
+        const total = attemptState.items.length;
+        const filtered = filteredAttempts();
+        const countText = total + ' ' + plural(total, 'работа', 'работы', 'работ');
+        els.attemptsCount.textContent = countText;
+        els.attemptsTabCount.textContent = String(total);
+
+        els.attemptsError.hidden = !attemptState.error;
+        els.attemptsError.innerHTML = attemptState.error
+          ? '<b>Не удалось загрузить журнал</b>' + esc(attemptState.error)
+          : '';
+
+        els.attemptsWarning.hidden = !attemptState.warning;
+        els.attemptsWarning.innerHTML = attemptState.warning
+          ? '<b>Google Таблица ответила не полностью</b>' + esc(attemptState.warning)
+          : '';
+
+        if (attemptState.loading && !attemptState.loaded) {
+          els.attemptsHint.textContent = 'Обновляем журнал…';
+          els.attemptsTableWrap.hidden = true;
+          els.attemptsEmpty.hidden = false;
+          els.attemptsEmpty.innerHTML = '<b>Загрузка работ…</b>Получаем список из Google Таблицы.';
+          return;
+        }
+
+        if (!filtered.length) {
+          els.attemptsTableWrap.hidden = true;
+          els.attemptsEmpty.hidden = false;
+          els.attemptsHint.textContent = total
+            ? 'Показано 0 из ' + total
+            : 'Журнал пуст';
+          els.attemptsEmpty.innerHTML = total
+            ? '<b>По фильтрам ничего не найдено</b>Измените вариант, статус или строку поиска.'
+            : '<b>Сданных работ пока нет</b>Они появятся здесь после отправки бланка учеником.';
+          return;
+        }
+
+        els.attemptsTableWrap.hidden = false;
+        els.attemptsEmpty.hidden = true;
+        els.attemptsHint.textContent = 'Показано ' + filtered.length + ' из ' + total;
+
+        els.attemptsTableBody.innerHTML = filtered.map(function (attempt) {
+          const statusKey = attemptStatusKey(attempt);
+          const statusText = attemptStatusText(attempt);
+          return '<tr>' +
+            '<td class="attempt-date">' + esc(formatDate(attempt.date)) + '</td>' +
+            '<td><span class="attempt-variant">' + esc(attempt.variant_id || '—') + '</span>' +
+              (!attempt.key_found ? '<div class="attempt-key-warning" style="margin:5px 0 0;padding:3px 5px">нет Key.json</div>' : '') +
+            '</td>' +
+            '<td><div class="attempt-student">' + esc(attempt.student_name || '—') + '</div></td>' +
+            '<td>' + esc(attempt.student_grade || '—') + '</td>' +
+            '<td class="attempt-score-cell"><b>' + esc(attempt.score_part1) + '</b> <small>/ ' + esc(attempt.max_part1 || '—') + '</small></td>' +
+            '<td class="attempt-score-cell"><b>' + esc(attempt.score_part2 || 0) + '</b> <small>/ ' + esc(attempt.max_part2 || '—') + '</small></td>' +
+            '<td><div class="attempt-result">' + attemptResultHtml(attempt) + '</div></td>' +
+            '<td><span class="attempt-status ' + statusKey + '">' + statusText + '</span></td>' +
+            '<td><button type="button" class="attempt-review-btn" data-review-attempt="' + esc(attempt.attempt_id) + '" data-review-row="' + esc(attempt.row_index) + '">Проверить</button></td>' +
+            '</tr>';
+        }).join('');
+      }
+
+      async function loadAttempts(options) {
+        const opts = options || {};
+        if (attemptState.loading) return;
+        attemptState.loading = true;
+        attemptState.error = '';
+        els.refreshAttemptsBtn.disabled = true;
+        els.refreshAttemptsBtn.textContent = 'Обновляем…';
+        renderAttempts();
+
+        try {
+          const response = await fetch('/api/attempts', { cache: 'no-store' });
+          const data = await response.json().catch(function () { return null; });
+          if (!response.ok || !data || !data.ok) {
+            throw new Error((data && data.error) || ('HTTP ' + response.status));
+          }
+          attemptState.items = Array.isArray(data.attempts) ? data.attempts : [];
+          attemptState.warning = data.warning || '';
+          attemptState.loaded = true;
+          renderAttemptFilters();
+          if (!opts.silent) {
+            showToast('Журнал обновлён: ' + attemptState.items.length + ' ' +
+              plural(attemptState.items.length, 'работа', 'работы', 'работ') + '.', 'success');
+          }
+        } catch (error) {
+          attemptState.error = error.message || 'Неизвестная ошибка.';
+          attemptState.warning = '';
+          attemptState.loaded = true;
+          if (!opts.silent) {
+            showToast('Не удалось загрузить журнал: ' + attemptState.error, 'error');
+          }
+        } finally {
+          attemptState.loading = false;
+          els.refreshAttemptsBtn.disabled = false;
+          els.refreshAttemptsBtn.textContent = 'Обновить из Google Таблицы';
+          renderAttempts();
+        }
+      }
+
+      function switchWorkspace(name) {
+        const isAttempts = name === 'attempts';
+        els.builderWorkspace.hidden = isAttempts;
+        els.attemptsWorkspace.hidden = !isAttempts;
+        document.querySelectorAll('[data-workspace]').forEach(function (button) {
+          const active = button.dataset.workspace === name;
+          button.classList.toggle('is-active', active);
+          button.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        if (isAttempts) {
+          if (!attemptState.loaded && !attemptState.loading) loadAttempts({ silent: true });
+          else renderAttempts();
+        }
+      }
+
+      function openAttemptReview(attemptId, rowIndex) {
+        const attempt = attemptState.items.find(function (item) {
+          return String(item.attempt_id) === String(attemptId) ||
+            (rowIndex != null && Number(item.row_index) === Number(rowIndex));
+        });
+        if (!attempt) {
+          showToast('Работа не найдена. Обновите журнал.', 'error');
+          return;
+        }
+
+        attemptState.current = attempt;
+        attemptState.scores = {};
+        (attempt.part2_tasks || []).forEach(function (task) {
+          const key = String(task.num);
+          const saved = attempt.part2_scores && attempt.part2_scores[key] != null
+            ? Number(attempt.part2_scores[key])
+            : 0;
+          attemptState.scores[key] = Number.isFinite(saved)
+            ? Math.max(0, Math.min(task.max_points, saved))
+            : 0;
+        });
+
+        els.attemptTeacherComment.value = attempt.teacher_comment || '';
+        els.attemptModal.hidden = false;
+        document.body.style.overflow = 'hidden';
+        renderAttemptModal();
+      }
+
+      function closeAttemptReview() {
+        closePhotoLightbox();
+        els.attemptModal.hidden = true;
+        attemptState.current = null;
+        attemptState.scores = {};
+        document.body.style.overflow = '';
+      }
+
+      function renderAttemptModal() {
+        const attempt = attemptState.current;
+        if (!attempt) return;
+
+        const student = attempt.student_name || 'ученик';
+        els.attemptModalTitle.textContent = 'Проверка работы: ' + student;
+        const meta = [
+          attempt.variant_id || 'вариант не указан',
+          attempt.student_grade ? 'класс ' + attempt.student_grade : '',
+          formatDate(attempt.date),
+          'Часть 1: ' + (attempt.score_part1 || 0) + ' / ' + (attempt.max_part1 || 0)
+        ].filter(Boolean);
+        els.attemptModalMeta.textContent = meta.join(' · ');
+
+        renderAttemptPhotos(attempt);
+        renderAttemptPart1(attempt);
+        renderAttemptPart2(attempt);
+        updateAttemptLiveScore();
+
+        els.attemptSaveBtn.disabled = !attempt.key_found || !(attempt.part2_tasks || []).length;
+        els.attemptSaveBtn.textContent = attemptStatusKey(attempt) === 'checked'
+          ? 'Сохранить изменения'
+          : 'Сохранить проверку в таблицу';
+      }
+
+      function renderAttemptPhotos(attempt) {
+        const photos = Array.isArray(attempt.photos) ? attempt.photos.filter(Boolean) : [];
+        els.attemptPhotoCount.textContent = photos.length + ' ' +
+          plural(photos.length, 'фото', 'фото', 'фото');
+
+        if (!photos.length) {
+          els.attemptPhotoGallery.innerHTML =
+            '<div class="attempt-photo-empty">Ученик не прикрепил фотографии Части 2.<br>' +
+            'Проверьте ответы Части 1 и сохраните результат.</div>';
+        } else {
+          els.attemptPhotoGallery.innerHTML = photos.map(function (photo, index) {
+            const name = photo.name || ('Страница ' + (index + 1));
+            const src = photo.thumbUrl || photo.viewUrl || '';
+            return '<button type="button" class="attempt-photo-card" data-photo-index="' + index + '" title="' + esc(name) + '">' +
+              '<img src="' + esc(src) + '" alt="' + esc(name) + '" loading="lazy" referrerpolicy="no-referrer" ' +
+              'onerror="this.style.opacity=\'0.18\'">' +
+              '<span>' + esc(name) + '</span>' +
+              '</button>';
+          }).join('');
+        }
+
+        const folderUrl = String(attempt.folder_url || '');
+        if (/^https?:\/\//i.test(folderUrl)) {
+          els.attemptFolderLink.href = folderUrl;
+          els.attemptFolderLink.hidden = false;
+        } else {
+          els.attemptFolderLink.href = '#';
+          els.attemptFolderLink.hidden = true;
+        }
+      }
+
+      function renderAttemptPart1(attempt) {
+        const tasks = Array.isArray(attempt.part1_summary) ? attempt.part1_summary : [];
+        const maxPart1 = tasks.reduce(function (sum, task) { return sum + (Number(task.max_points) || 0); }, 0);
+        els.attemptPart1Score.textContent = (attempt.score_part1 || 0) + ' / ' + (maxPart1 || attempt.max_part1 || 0);
+
+        if (!attempt.key_found) {
+          els.attemptPart1Summary.innerHTML =
+            '<div class="attempt-photo-empty">Ключ варианта не найден. ' +
+            esc(attempt.key_error || 'Проверьте наличие Key.json в output/.') + '</div>';
+          return;
+        }
+        if (!tasks.length) {
+          els.attemptPart1Summary.innerHTML = '<div class="attempt-photo-empty">В варианте нет заданий Части 1.</div>';
+          return;
+        }
+
+        els.attemptPart1Summary.innerHTML = tasks.map(function (task) {
+          const key = String(task.num);
+          const detail = attempt.part1_summary.find(function (item) { return String(item.num) === key; });
+          const points = detail && detail.points != null ? detail.points : null;
+          const cls = points == null ? 'unknown' : (points >= task.max_points ? 'correct' : 'incorrect');
+          const mark = cls === 'correct' ? '✓' : cls === 'incorrect' ? '✕' : '?';
+          const title = '№' + task.num + ': ответ «' + (detail && detail.student_answer ? detail.student_answer : '—') +
+            '», ' + (points == null ? 'нет данных' : points + ' из ' + task.max_points);
+          return '<span class="part1-item ' + cls + '" title="' + esc(title) + '">' +
+            '<span>№' + esc(task.num) + '</span>' +
+            '<b>' + esc(detail && detail.student_answer ? detail.student_answer : '—') + '</b>' +
+            '<span>' + mark + '</span>' +
+            '</span>';
+        }).join('');
+      }
+
+      function renderAttemptPart2(attempt) {
+        const tasks = Array.isArray(attempt.part2_tasks) ? attempt.part2_tasks : [];
+        const maxPart2 = tasks.reduce(function (sum, task) { return sum + (Number(task.max_points) || 0); }, 0);
+        els.attemptPart2Score.textContent = '0 / ' + maxPart2;
+
+        if (!attempt.key_found) {
+          els.attemptPart2Tasks.innerHTML =
+            '<div class="attempt-photo-empty"><b>Ключ варианта не найден</b>' +
+            esc(attempt.key_error || ('Проверьте output/KIM_' + (attempt.variant_id || '<вариант>') + '_Key.json')) +
+            '</div>';
+          els.attemptSaveBtn.disabled = true;
+          return;
+        }
+        if (!tasks.length) {
+          els.attemptPart2Tasks.innerHTML =
+            '<div class="attempt-photo-empty"><b>В этом варианте нет заданий Части 2</b>' +
+            'Проверка Части 2 не требуется.</div>';
+          els.attemptSaveBtn.disabled = true;
+          return;
+        }
+
+        els.attemptPart2Tasks.innerHTML = tasks.map(function (task) {
+          const num = Number(task.num);
+          const maxPoints = Math.max(0, Math.round(Number(task.max_points) || 0));
+          const currentScore = Number(attemptState.scores[String(num)] || 0);
+          const meta = [];
+          if (task.kim_line) meta.push('<span class="attempt-task-chip">Линия ' + esc(task.kim_line) + '</span>');
+          meta.push('<span class="attempt-task-chip">' + maxPoints + ' ' +
+            plural(maxPoints, 'балл', 'балла', 'баллов') + '</span>');
+          if (task.subtopic_title) {
+            meta.push('<span class="attempt-task-chip">' + esc(task.subtopic_title) + '</span>');
+          }
+
+          const scoreButtons = [];
+          for (let score = 0; score <= maxPoints; score++) {
+            scoreButtons.push(
+              '<button type="button" class="attempt-score-btn' + (score === currentScore ? ' is-selected' : '') +
+              '" data-score-task="' + num + '" data-score-value="' + score + '">' + score + '</button>'
+            );
+          }
+
+          return '<article class="attempt-task" data-task-num="' + num + '">' +
+            '<div class="attempt-task-head">' +
+              '<div class="attempt-task-title"><span class="attempt-task-num">№ ' + esc(num) + '</span>' +
+                '<span>Задание Части 2</span></div>' +
+              '<div class="attempt-task-meta">' + meta.join('') + '</div>' +
+            '</div>' +
+            '<div class="attempt-task-condition"><b>Условие:</b> ' +
+              formatLatexToHtml(task.condition || 'Условие не найдено в базе задач.') + '</div>' +
+            '<div class="attempt-task-subhead">Эталонное решение / критерии</div>' +
+            '<div class="latex-content">' + formatLatexToHtml(task.solution || 'Решение не указано.') + '</div>' +
+            '<div class="attempt-task-answer">Ответ: ' +
+              formatLatexToHtml(task.answer == null || task.answer === '' ? '—' : task.answer) + '</div>' +
+            '<div class="attempt-score-row"><span class="attempt-score-label">Балл за задание:</span>' +
+              scoreButtons.join('') + '</div>' +
+            '</article>';
+        }).join('');
+      }
+
+      function updateAttemptLiveScore() {
+        const attempt = attemptState.current;
+        if (!attempt) return;
+
+        const part1 = Number(attempt.score_part1) || 0;
+        const part2 = (attempt.part2_tasks || []).reduce(function (sum, task) {
+          return sum + (Number(attemptState.scores[String(task.num)]) || 0);
+        }, 0);
+        const maxPrimary = Number(attempt.max_primary) || (attempt.exam === 'OGE' ? 39 : 45);
+        const total = part1 + part2;
+        const conversion = convertScoreClient(attempt.exam, total, maxPrimary);
+        const maxPart2 = (attempt.part2_tasks || []).reduce(function (sum, task) {
+          return sum + (Number(task.max_points) || 0);
+        }, 0);
+
+        els.attemptPart2Score.textContent = part2 + ' / ' + maxPart2;
+        const scaleNote = conversion.is_full_variant
+          ? 'Официальная шкала ФИПИ'
+          : 'Тематический вариант · ' + conversion.percent + '% выполнения';
+
+        els.attemptLiveScore.innerHTML =
+          'Часть 1: <b>' + part1 + '</b> | Часть 2: <b>' + part2 + '</b> | ' +
+          'Итого первичный: <b>' + total + '</b> из <b>' + maxPrimary + '</b>' +
+          '<br><strong>' + esc(conversion.label) + '</strong>' +
+          '<small>' + esc(scaleNote) + '</small>';
+
+        els.attemptSaveBtn.disabled = !attempt.key_found || !(attempt.part2_tasks || []).length;
+      }
+
+      async function saveAttemptReview() {
+        const attempt = attemptState.current;
+        if (!attempt || !attempt.key_found) return;
+
+        els.attemptSaveBtn.disabled = true;
+        const originalText = els.attemptSaveBtn.textContent;
+        els.attemptSaveBtn.textContent = 'Сохраняем…';
+
+        try {
+          const response = await fetch('/api/attempts/grade', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json; charset=utf-8' },
+            body: JSON.stringify({
+              attempt_id: attempt.attempt_id,
+              row_index: attempt.row_index,
+              variant_id: attempt.variant_id,
+              part1_score: attempt.score_part1,
+              part2_scores: attemptState.scores,
+              teacher_comment: els.attemptTeacherComment.value
+            })
+          });
+          const data = await response.json().catch(function () { return null; });
+          if (!response.ok || !data || !data.ok) {
+            throw new Error((data && data.error) || ('HTTP ' + response.status));
+          }
+
+          const updated = data.attempt;
+          const index = attemptState.items.findIndex(function (item) {
+            return String(item.attempt_id) === String(attempt.attempt_id) ||
+              Number(item.row_index) === Number(attempt.row_index);
+          });
+          if (index !== -1 && updated) attemptState.items[index] = updated;
+          attemptState.current = updated || attempt;
+          attemptState.scores = {};
+          (attemptState.current.part2_tasks || []).forEach(function (task) {
+            const key = String(task.num);
+            attemptState.scores[key] = Number(attemptState.current.part2_scores &&
+              attemptState.current.part2_scores[key] != null
+              ? attemptState.current.part2_scores[key]
+              : 0) || 0;
+          });
+          els.attemptTeacherComment.value = attemptState.current.teacher_comment || '';
+
+          renderAttemptFilters();
+          renderAttempts();
+          renderAttemptModal();
+          showToast('Проверка сохранена в Google Таблицу. Статус: «Проверено».', 'success');
+        } catch (error) {
+          showToast('Не удалось сохранить проверку: ' + (error.message || 'неизвестная ошибка'), 'error');
+          els.attemptSaveBtn.textContent = originalText;
+        } finally {
+          const current = attemptState.current;
+          els.attemptSaveBtn.disabled = !current || !current.key_found || !(current.part2_tasks || []).length;
+          if (!els.attemptSaveBtn.textContent.includes('Сохранить')) {
+            els.attemptSaveBtn.textContent = current && attemptStatusKey(current) === 'checked'
+              ? 'Сохранить изменения'
+              : 'Сохранить проверку в таблицу';
+          }
+        }
+      }
+
+      function openPhotoLightbox(index) {
+        const attempt = attemptState.current;
+        const photos = attempt && Array.isArray(attempt.photos) ? attempt.photos : [];
+        const photo = photos[Number(index)];
+        if (!photo) return;
+        const src = photo.thumbUrl || photo.viewUrl || '';
+        if (!src) return;
+
+        attemptState.photo = {
+          src: src,
+          name: photo.name || ('Фото ' + (Number(index) + 1)),
+          rotation: 0,
+          zoom: 1
+        };
+        els.photoLightboxName.textContent = attemptState.photo.name;
+        els.photoLightboxImg.src = src;
+        applyPhotoTransform();
+        els.photoLightbox.hidden = false;
+      }
+
+      function applyPhotoTransform() {
+        const photo = attemptState.photo;
+        els.photoLightboxImg.style.transform =
+          'rotate(' + photo.rotation + 'deg) scale(' + photo.zoom + ')';
+      }
+
+      function closePhotoLightbox() {
+        if (!els.photoLightbox || els.photoLightbox.hidden) return;
+        els.photoLightbox.hidden = true;
+        els.photoLightboxImg.removeAttribute('src');
+        attemptState.photo = { src: '', name: '', rotation: 0, zoom: 1 };
+      }
+
       // ── События ─────────────────────────────────────────────────────────────
 
       function bindEvents() {
+        document.querySelectorAll('[data-workspace]').forEach(function (button) {
+          button.addEventListener('click', function () {
+            switchWorkspace(button.dataset.workspace);
+          });
+        });
+
+        els.refreshAttemptsBtn.addEventListener('click', function () {
+          loadAttempts();
+        });
+
+        els.attemptVariantFilter.addEventListener('change', function () {
+          attemptState.filterVariant = els.attemptVariantFilter.value;
+          renderAttempts();
+        });
+
+        els.attemptStatusFilter.addEventListener('change', function () {
+          attemptState.filterStatus = els.attemptStatusFilter.value;
+          renderAttempts();
+        });
+
+        els.attemptSearchInput.addEventListener('input', function () {
+          attemptState.search = els.attemptSearchInput.value;
+          renderAttempts();
+        });
+
+        els.attemptsTableBody.addEventListener('click', function (event) {
+          const button = event.target.closest('[data-review-attempt]');
+          if (!button) return;
+          openAttemptReview(button.dataset.reviewAttempt, button.dataset.reviewRow);
+        });
+
+        els.attemptModal.addEventListener('click', function (event) {
+          if (event.target.closest('[data-attempt-close]')) closeAttemptReview();
+        });
+
+        els.attemptModalClose.addEventListener('click', closeAttemptReview);
+
+        els.attemptPhotoGallery.addEventListener('click', function (event) {
+          const card = event.target.closest('[data-photo-index]');
+          if (!card) return;
+          openPhotoLightbox(Number(card.dataset.photoIndex));
+        });
+
+        els.attemptPart2Tasks.addEventListener('click', function (event) {
+          const button = event.target.closest('[data-score-task]');
+          if (!button || !attemptState.current) return;
+          const taskNum = String(button.dataset.scoreTask);
+          const value = Number(button.dataset.scoreValue) || 0;
+          attemptState.scores[taskNum] = value;
+
+          const card = button.closest('[data-task-num]');
+          if (card) {
+            card.querySelectorAll('[data-score-task]').forEach(function (item) {
+              item.classList.toggle('is-selected', item === button);
+            });
+          }
+          updateAttemptLiveScore();
+        });
+
+        els.attemptSaveBtn.addEventListener('click', saveAttemptReview);
+
+        els.photoLightbox.addEventListener('click', function (event) {
+          if (event.target.closest('[data-photo-close]')) {
+            closePhotoLightbox();
+            return;
+          }
+          const zoomButton = event.target.closest('[data-photo-zoom]');
+          if (zoomButton) {
+            const delta = Number(zoomButton.dataset.photoZoom) || 0;
+            attemptState.photo.zoom = Math.max(0.35, Math.min(4, attemptState.photo.zoom + delta * 0.25));
+            applyPhotoTransform();
+            return;
+          }
+          if (event.target.closest('[data-photo-rotate]')) {
+            attemptState.photo.rotation = (attemptState.photo.rotation + 90) % 360;
+            applyPhotoTransform();
+          }
+        });
+
+        document.addEventListener('keydown', function (event) {
+          if (event.key !== 'Escape') return;
+          if (!els.photoLightbox.hidden) {
+            closePhotoLightbox();
+          } else if (!els.attemptModal.hidden) {
+            closeAttemptReview();
+          }
+        });
+
         document.querySelectorAll('.exam-btn').forEach(function (btn) {
           btn.addEventListener('click', function () {
             const exam = btn.dataset.exam;
@@ -3926,6 +5522,7 @@
         bindEvents();
         loadStats({ initial: true });
         loadWebConfig();
+        loadAttempts({ silent: true });
       }
 
       init();
