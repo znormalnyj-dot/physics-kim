@@ -36,6 +36,18 @@ const EXAM_LABELS = {
   OGE: 'ОГЭ (9 класс)'
 };
 
+// Официальная шкала ФИПИ 2026: 45 первичных баллов ЕГЭ по физике -> 100 тестовых.
+const EGE_PRIMARY_TO_TEST = Object.freeze([
+  0, 5, 9, 14, 18, 23, 27, 32, 36, 39,
+  41, 43, 44, 46, 48, 49, 51, 53, 54, 56,
+  58, 59, 61, 62, 64, 65, 67, 68, 70, 71,
+  73, 74, 76, 77, 79, 80, 82, 84, 86, 88,
+  90, 92, 94, 96, 98, 100
+]);
+const EGE_MAX_PRIMARY = 45;
+const OGE_MAX_PRIMARY = 39;
+const ATTEMPTS_GAS_TIMEOUT_MS = Number(process.env.ATTEMPTS_GAS_TIMEOUT_MS) || 25000;
+
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.htm': 'text/html; charset=utf-8',
@@ -794,6 +806,384 @@ function buildStatsPayload() {
   };
 }
 
+// ─── Работы учеников и проверка Части 2 ─────────────────────────────────────
+
+function getGasWebhookSetting() {
+  const fromProcess = String(process.env.GAS_WEBHOOK_URL || '').trim();
+  if (fromProcess) return { value: fromProcess, source: 'process.env' };
+
+  const env = readEnvFile();
+  const fromEnv = String(env.GAS_WEBHOOK_URL || '').trim();
+  if (fromEnv) return { value: fromEnv, source: '.env' };
+
+  const config = readConfigJson();
+  const fromConfig = String(config.GAS_WEBHOOK_URL || '').trim();
+  if (fromConfig) return { value: fromConfig, source: 'config.json' };
+
+  return { value: '', source: 'default' };
+}
+
+async function gasRequest(action, payload, method) {
+  const setting = getGasWebhookSetting();
+  if (!setting.value) {
+    const error = new Error('GAS_WEBHOOK_URL не задан в config.json или .env.');
+    error.statusCode = 503;
+    throw error;
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ATTEMPTS_GAS_TIMEOUT_MS);
+  let response;
+  try {
+    if (method === 'GET') {
+      const target = new URL(setting.value);
+      target.searchParams.set('action', action);
+      target.searchParams.set('_', String(Date.now()));
+      response = await fetch(target, { method: 'GET', redirect: 'follow', signal: controller.signal });
+    } else {
+      response = await fetch(setting.value, {
+        method: 'POST',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(Object.assign({ action }, payload || {})),
+        signal: controller.signal
+      });
+    }
+
+    const text = await response.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      const error = new Error(`GAS вернул не JSON (HTTP ${response.status}): ${text.slice(0, 300)}`);
+      error.statusCode = 502;
+      throw error;
+    }
+
+    if (!response.ok) {
+      const error = new Error(data.error || `GAS вернул HTTP ${response.status}.`);
+      error.statusCode = 502;
+      error.gas = data;
+      throw error;
+    }
+    if (data && data.ok === false) {
+      const error = new Error(data.error || 'GAS вернул ошибку.');
+      error.statusCode = 502;
+      error.gas = data;
+      throw error;
+    }
+
+    return { data, source: setting.source };
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      const timeoutError = new Error(`GAS не ответил за ${Math.round(ATTEMPTS_GAS_TIMEOUT_MS / 1000)} с.`);
+      timeoutError.statusCode = 504;
+      throw timeoutError;
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function readVariantKey(variantId) {
+  const parsed = parseVariantCode(variantId);
+  if (!parsed) return { key: null, parsed: null, error: 'Некорректный код варианта.' };
+
+  const keyPath = path.join(OUTPUT_DIR, `KIM_${parsed.exam}_${parsed.variant}_Key.json`);
+  if (!isInsideDir(OUTPUT_DIR, keyPath)) {
+    return { key: null, parsed, error: 'Путь к ключу варианта вне output/.' };
+  }
+  try {
+    const key = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
+    return { key, parsed, path: displayPath(keyPath), error: null };
+  } catch (error) {
+    return {
+      key: null,
+      parsed,
+      path: displayPath(keyPath),
+      error: `Не удалось прочитать ключ варианта: ${error.message}`
+    };
+  }
+}
+
+function parseBreakdown(value) {
+  const result = {};
+  const re = /№\s*(\d+)\s*:\s*"([^"]*)"\s*\[\s*(\d+)\s*\/\s*(\d+)\s*\]/g;
+  let match;
+  while ((match = re.exec(String(value || ''))) !== null) {
+    result[Number(match[1])] = {
+      student_answer: match[2],
+      points: Number(match[3]) || 0,
+      max_points: Number(match[4]) || 0
+    };
+  }
+  return result;
+}
+
+function clampNumber(value, min, max) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return min;
+  return Math.max(min, Math.min(max, n));
+}
+
+function convertScore(exam, rawScore, rawMaxPrimary) {
+  const normalizedExam = String(exam || '').toUpperCase() === 'OGE' ? 'OGE' : 'EGE';
+  const fallbackMax = normalizedExam === 'OGE' ? OGE_MAX_PRIMARY : EGE_MAX_PRIMARY;
+  const maxPrimary = Number(rawMaxPrimary) > 0 ? Number(rawMaxPrimary) : fallbackMax;
+  const score = clampNumber(rawScore, 0, maxPrimary);
+  const percent = maxPrimary > 0 ? Math.round((score / maxPrimary) * 100) : 0;
+
+  if (normalizedExam === 'OGE') {
+    const isFullVariant = Math.abs(maxPrimary - OGE_MAX_PRIMARY) < 0.01;
+    const grade = isFullVariant
+      ? (score <= 9 ? 2 : score <= 19 ? 3 : score <= 30 ? 4 : 5)
+      : (percent < 35 ? 2 : percent <= 60 ? 3 : percent <= 84 ? 4 : 5);
+    return {
+      exam: 'OGE',
+      scale: 'oge',
+      score: Number(score.toFixed(2)),
+      max_primary: maxPrimary,
+      percent,
+      secondary: grade,
+      grade,
+      is_full_variant: isFullVariant,
+      label: `Оценка ОГЭ: ${grade}`
+    };
+  }
+
+  const isFullVariant = Math.abs(maxPrimary - EGE_MAX_PRIMARY) < 0.01;
+  const primaryRounded = Math.round(score);
+  const secondary = isFullVariant
+    ? EGE_PRIMARY_TO_TEST[Math.max(0, Math.min(EGE_MAX_PRIMARY, primaryRounded))]
+    : percent;
+  return {
+    exam: 'EGE',
+    scale: 'ege',
+    score: Number(score.toFixed(2)),
+    max_primary: maxPrimary,
+    percent,
+    secondary,
+    test_score: secondary,
+    grade: null,
+    is_full_variant: isFullVariant,
+    label: `Тестовый балл ЕГЭ: ${secondary} из 100`
+  };
+}
+
+function enrichAttempt(attempt, dbById) {
+  const variantId = String(attempt.variant_id || '').trim();
+  const keyInfo = readVariantKey(variantId);
+  const keyTasks = keyInfo.key && Array.isArray(keyInfo.key.tasks) ? keyInfo.key.tasks : [];
+  const breakdown = parseBreakdown(attempt.breakdown);
+  const answers = attempt.answers_json && typeof attempt.answers_json === 'object'
+    ? attempt.answers_json
+    : {};
+
+  const tasks = keyTasks.map((task) => {
+    const dbTask = dbById.get(String(task.id)) || null;
+    return {
+      num: Number(task.num),
+      id: String(task.id || ''),
+      part: Number(task.part) === 2 ? 2 : 1,
+      kim_line: Number(task.kim_line) || null,
+      rule: String(task.rule || ''),
+      max_points: Number(task.max_points) || 1,
+      answer: dbTask ? dbTask.answer : (task.answer == null ? '' : task.answer),
+      unit: dbTask && dbTask.unit != null ? dbTask.unit : (task.unit || ''),
+      condition: (dbTask && dbTask.latex_condition) || task.condition || '',
+      solution: (dbTask && dbTask.latex_solution) || task.solution || '',
+      subtopic_title: dbTask ? dbTask.subtopic_title : '',
+      topics: dbTask && Array.isArray(dbTask.topics) ? dbTask.topics : []
+    };
+  });
+
+  const part1Tasks = tasks.filter((task) => task.part === 1);
+  const part2Tasks = tasks.filter((task) => task.part === 2);
+  const part1Summary = part1Tasks.map((task) => {
+    const detail = breakdown[task.num];
+    const raw = detail
+      ? detail.student_answer
+      : (answers[task.num] == null ? '' : String(answers[task.num]));
+    const points = detail ? detail.points : null;
+    return Object.assign({}, task, {
+      student_answer: raw,
+      points,
+      correct: points == null ? null : points >= task.max_points
+    });
+  });
+
+  const maxPart1 = part1Tasks.reduce((sum, task) => sum + task.max_points, 0);
+  const maxPart2 = part2Tasks.reduce((sum, task) => sum + task.max_points, 0);
+  const maxPrimary = maxPart1 + maxPart2;
+  const scorePart1 = Number(attempt.score_part1) || 0;
+  const scorePart2 = Number(attempt.score_part2) || 0;
+  const hasStoredTotal = attempt.total_primary !== null && attempt.total_primary !== undefined &&
+    attempt.total_primary !== '' && Number.isFinite(Number(attempt.total_primary));
+  const totalPrimary = hasStoredTotal ? Number(attempt.total_primary) : scorePart1 + scorePart2;
+  const parsed = keyInfo.parsed || parseVariantCode(variantId);
+  const exam = parsed ? parsed.exam : 'EGE';
+  const conversion = convertScore(exam, totalPrimary, maxPrimary || (exam === 'OGE' ? OGE_MAX_PRIMARY : EGE_MAX_PRIMARY));
+  const status = String(attempt.status || '').trim() === 'Проверено' ? 'Проверено' : 'На проверке Ч.2';
+
+  return Object.assign({}, attempt, {
+    attempt_id: String(attempt.attempt_id || '').trim() || `ROW_${attempt.row_index}`,
+    variant_id: variantId,
+    exam,
+    exam_label: EXAM_LABELS[exam],
+    key_found: Boolean(keyInfo.key),
+    key_path: keyInfo.path || null,
+    key_error: keyInfo.error || null,
+    variant_title: keyInfo.key && keyInfo.key.title ? keyInfo.key.title : '',
+    status,
+    photos: Array.isArray(attempt.photos) ? attempt.photos : [],
+    folder_url: attempt.folder_url || '',
+    answers_json: answers,
+    tasks,
+    part1_tasks: part1Tasks,
+    part2_tasks: part2Tasks,
+    part1_summary: part1Summary,
+    max_part1: maxPart1 || Number(attempt.max_part1) || 0,
+    max_part2: maxPart2,
+    max_primary: maxPrimary || (exam === 'OGE' ? OGE_MAX_PRIMARY : EGE_MAX_PRIMARY),
+    score_part1: scorePart1,
+    score_part2: scorePart2,
+    total_primary: totalPrimary,
+    stored_secondary_score: attempt.secondary_score,
+    conversion
+  });
+}
+
+async function loadAttemptsFromGas() {
+  const gas = await gasRequest('list_attempts', null, 'GET');
+  const attempts = Array.isArray(gas.data.attempts) ? gas.data.attempts : [];
+  return {
+    attempts,
+    gas: gas.data,
+    source: gas.source,
+    warning: Array.isArray(gas.data.attempts) ? null
+      : 'GAS не вернул массив attempts. Обновите развёртывание gas/Code.gs.'
+  };
+}
+
+function buildAttemptsResponse(gasResult) {
+  const dbById = new Map(state.db.map((task) => [String(task.id), task]));
+  const attempts = gasResult.attempts.map((attempt) => enrichAttempt(attempt, dbById));
+  return {
+    ok: true,
+    generatedAt: new Date().toISOString(),
+    count: attempts.length,
+    attempts,
+    warning: gasResult.warning,
+    gasConfigured: true,
+    gasSource: gasResult.source,
+    gasResponse: gasResult.warning ? { message: gasResult.gas && gasResult.gas.message } : undefined
+  };
+}
+
+function normalizePart2Scores(raw, part2Tasks) {
+  const source = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  const result = {};
+  for (const task of part2Tasks) {
+    const rawValue = source[task.num] != null ? source[task.num] : source[String(task.num)];
+    const points = Math.round(clampNumber(rawValue, 0, task.max_points));
+    result[String(task.num)] = points;
+  }
+  return result;
+}
+
+async function gradeAttempt(body) {
+  const attemptId = String(body.attempt_id || '').trim();
+  const rowIndex = Number(body.row_index);
+  const requestedVariant = String(body.variant_id || '').trim();
+
+  let gas = null;
+  let found = null;
+  try {
+    gas = await loadAttemptsFromGas();
+    found = gas.attempts.find((attempt) => {
+      if (Number.isFinite(rowIndex) && Number(attempt.row_index) === rowIndex) return true;
+      return attemptId && String(attempt.attempt_id || '').trim() === attemptId;
+    }) || null;
+  } catch (error) {
+    if (Number(body.part1_score) !== Number(body.part1_score)) throw error;
+  }
+
+  if (!found && Number(body.part1_score) !== Number(body.part1_score)) {
+    const error = new Error('Работа не найдена в Google Таблице. Обновите список работ.');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const variantId = found ? found.variant_id : requestedVariant;
+  const keyInfo = readVariantKey(variantId);
+  if (!keyInfo.key || !Array.isArray(keyInfo.key.tasks)) {
+    const error = new Error(keyInfo.error || `Ключ варианта ${variantId || '(не указан)'} не найден в output/.`);
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const part2Tasks = keyInfo.key.tasks
+    .filter((task) => Number(task.part) === 2)
+    .map((task) => ({
+      num: Number(task.num),
+      max_points: Number(task.max_points) || 1
+    }));
+  const part2Scores = normalizePart2Scores(body.part2_scores, part2Tasks);
+  const scorePart2 = Object.keys(part2Scores).reduce((sum, key) => sum + (Number(part2Scores[key]) || 0), 0);
+  const part1Score = found ? Number(found.score_part1) || 0 : Number(body.part1_score) || 0;
+  const maxPrimary = keyInfo.key.tasks.reduce((sum, task) => sum + (Number(task.max_points) || 0), 0);
+  const totalPrimary = part1Score + scorePart2;
+  const conversion = convertScore(keyInfo.parsed.exam, totalPrimary, maxPrimary);
+
+  const gasPayload = {
+    attempt_id: found ? found.attempt_id : attemptId,
+    row_index: found ? found.row_index : (Number.isFinite(rowIndex) ? rowIndex : undefined),
+    variant_id: variantId,
+    part2_scores: part2Scores,
+    score_part2: scorePart2,
+    total_primary: totalPrimary,
+    secondary_score: conversion.secondary,
+    teacher_comment: body.teacher_comment == null ? '' : String(body.teacher_comment)
+  };
+
+  const gasResult = await gasRequest('grade_part2', gasPayload, 'POST');
+  const baseAttempt = found || {
+    attempt_id: attemptId || `ROW_${rowIndex}`,
+    row_index: Number.isFinite(rowIndex) ? rowIndex : null,
+    variant_id: variantId,
+    student_name: '',
+    student_grade: '',
+    score_part1: part1Score,
+    max_part1: 0,
+    score_part2: 0,
+    total_primary: totalPrimary,
+    status: 'Проверено',
+    photos: [],
+    answers_json: {},
+    folder_url: '',
+    breakdown: '',
+    teacher_comment: ''
+  };
+  const updatedAttempt = Object.assign({}, baseAttempt, {
+    part2_scores: part2Scores,
+    score_part2: scorePart2,
+    total_primary: totalPrimary,
+    secondary_score: conversion.secondary,
+    status: 'Проверено',
+    teacher_comment: gasPayload.teacher_comment
+  });
+  const dbById = new Map(state.db.map((task) => [String(task.id), task]));
+
+  return {
+    ok: true,
+    attempt: enrichAttempt(updatedAttempt, dbById),
+    conversion,
+    gas: gasResult.data,
+    gasSource: gasResult.source
+  };
+}
+
 // ─── HTTP-ответы и статика ───────────────────────────────────────────────────
 
 function sendJson(res, statusCode, payload) {
@@ -1255,6 +1645,57 @@ async function handleApi(req, res, url) {
       return;
     }
     sendJson(res, 200, payload);
+    return;
+  }
+
+  // Журнал сданных работ и проверка Части 2.
+  if (pathname === '/api/attempts') {
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      sendJson(res, 405, { ok: false, error: 'Метод не поддерживается. Используйте GET.' });
+      return;
+    }
+    try {
+      const gasResult = await loadAttemptsFromGas();
+      const payload = buildAttemptsResponse(gasResult);
+      if (req.method === 'HEAD') {
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
+        res.end();
+        return;
+      }
+      sendJson(res, 200, payload);
+    } catch (error) {
+      sendJson(res, error.statusCode || 502, {
+        ok: false,
+        error: error.message,
+        attempts: [],
+        gasConfigured: Boolean(getGasWebhookSetting().value)
+      });
+    }
+    return;
+  }
+
+  if (pathname === '/api/attempts/grade') {
+    if (req.method !== 'POST') {
+      sendJson(res, 405, { ok: false, error: 'Метод не поддерживается. Используйте POST.' });
+      return;
+    }
+    let body;
+    try {
+      body = await readJsonBody(req, MAX_BODY_BYTES);
+    } catch (error) {
+      sendJson(res, error.statusCode || 400, { ok: false, error: error.message });
+      return;
+    }
+    try {
+      const payload = await gradeAttempt(body);
+      sendJson(res, 200, payload);
+    } catch (error) {
+      sendJson(res, error.statusCode || 502, {
+        ok: false,
+        error: error.message,
+        gas: error.gas || undefined
+      });
+    }
     return;
   }
 

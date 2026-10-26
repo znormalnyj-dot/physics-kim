@@ -9,6 +9,25 @@
  */
 
 const FOLDER_NAME = "Physics_KIM_Работы_Учеников";
+const RESULTS_HEADERS = [
+  "Дата и время",
+  "Вариант",
+  "Ученик",
+  "Класс",
+  "Время (мин)",
+  "Балл Ч.1",
+  "Макс Ч.1",
+  "Ссылка на фото Ч.2",
+  "Детализация Ч.1 (№: ответ [балл])",
+  "Attempt_ID",
+  "Part2_Scores_JSON",
+  "Score_Part2",
+  "Total_Primary",
+  "Test_Score_100_Or_Grade",
+  "Status",
+  "Photos_JSON",
+  "Teacher_Comment"
+];
 
 function doGet(e) {
   const params = (e && e.parameter) || {};
@@ -19,6 +38,22 @@ function doGet(e) {
     // (GitHub Pages / Vercel / Netlify). Ответ не содержит ответов и решений.
     if (action === "get_manifest") {
       return jsonResponse(getPublicManifest(params.v));
+    }
+
+    if (action === "list_attempts") {
+      return jsonResponse(listAttempts());
+    }
+
+    if (action === "grade_part2") {
+      return jsonResponse(gradePart2({
+        attempt_id: params.attempt_id,
+        row_index: params.row_index,
+        part2_scores: parseJsonSafe(params.part2_scores, {}),
+        score_part2: params.score_part2,
+        total_primary: params.total_primary,
+        secondary_score: params.secondary_score,
+        teacher_comment: params.teacher_comment
+      }));
     }
   } catch (err) {
     return jsonResponse({ ok: false, error: err.toString() });
@@ -117,6 +152,10 @@ function doPost(e) {
       return jsonResponse(registerVariantKey(payload));
     } else if (action === "submit_attempt") {
       return jsonResponse(processStudentAttempt(payload));
+    } else if (action === "list_attempts") {
+      return jsonResponse(listAttempts());
+    } else if (action === "grade_part2") {
+      return jsonResponse(gradePart2(payload));
     } else {
       return jsonResponse({ ok: false, error: "Неизвестное действие (action)" });
     }
@@ -208,39 +247,61 @@ function processStudentAttempt(data) {
     });
   }
 
+  const attemptId = generateAttemptId();
+  const part2Tasks = tasksKey.filter(function (task) { return Number(task.part) === 2; });
+  const photos = [];
+
   // Сохранение фотографий Части 2 на Google Диск
   let folderUrl = "Без фото 2-й части";
+  let folderId = "";
   if (data.photos && data.photos.length > 0) {
     const rootFolder = getOrCreateRootFolder();
     const timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyyy-MM-dd_HH-mm");
     const safeName = (data.student_name || "Ученик").replace(/[^\wа-яА-ЯёЁ\s-]/g, "");
     const studentFolder = rootFolder.createFolder(`${data.variant_id}_${safeName}_${timestamp}`);
 
-    data.photos.forEach((photoObj, idx) => {
-      const base64Data = photoObj.dataUrl.split(",")[1];
-      const mimeType = photoObj.dataUrl.match(/data:(.*);base64/)[1] || "image/jpeg";
-      const blob = Utilities.newBlob(Utilities.base64Decode(base64Data), mimeType, `Part2_Page_${idx + 1}.jpg`);
-      studentFolder.createFile(blob);
+    data.photos.forEach(function (photoObj, idx) {
+      if (!photoObj || !photoObj.dataUrl) return;
+      const parts = String(photoObj.dataUrl).split(",");
+      const mimeMatch = String(photoObj.dataUrl).match(/data:(.*);base64/);
+      if (parts.length < 2) return;
+      const mimeType = (mimeMatch && mimeMatch[1]) || "image/jpeg";
+      const blob = Utilities.newBlob(Utilities.base64Decode(parts[1]), mimeType, `Part2_Page_${idx + 1}.jpg`);
+      const file = studentFolder.createFile(blob);
+
+      try {
+        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      } catch (shareErr) {
+        // Домен может запрещать публикацию по ссылке — работу всё равно сохраняем.
+      }
+
+      const id = file.getId();
+      photos.push({
+        name: file.getName(),
+        fileId: id,
+        viewUrl: "https://drive.google.com/file/d/" + id + "/view",
+        thumbUrl: "https://drive.google.com/thumbnail?id=" + id + "&sz=w1600"
+      });
     });
 
     folderUrl = studentFolder.getUrl();
+    folderId = studentFolder.getId();
   }
 
   // Запись результата в лист Results
-  let resSheet = ss.getSheetByName("Results");
-  if (!resSheet) {
-    resSheet = ss.insertSheet("Results");
-    resSheet.appendRow([
-      "Дата и время", "Вариант", "Ученик", "Класс", "Время (мин)",
-      "Балл Ч.1", "Макс Ч.1", "Ссылка на фото Ч.2", "Детализация Ч.1 (№: ответ [балл])"
-    ]);
-    resSheet.getRange("A1:I1").setFontWeight("bold");
-  }
-
+  const resSheet = getOrCreateResultsSheet(ss);
   const breakdownStr = detailedResults
     .map(r => `№${r.num}: "${r.student_answer}" [${r.points}/${r.max_points}]`)
     .join(" | ");
 
+  const photosPayload = {
+    photos: photos,
+    answers_json: studentAnswers,
+    folder_url: folderUrl,
+    folder_id: folderId
+  };
+
+  const status = part2Tasks.length > 0 ? "На проверке Ч.2" : "Проверено";
   resSheet.appendRow([
     new Date(),
     data.variant_id,
@@ -250,16 +311,245 @@ function processStudentAttempt(data) {
     totalPointsPart1,
     maxPointsPart1,
     folderUrl,
-    breakdownStr
+    breakdownStr,
+    attemptId,
+    "{}",
+    0,
+    totalPointsPart1,
+    "",
+    status,
+    JSON.stringify(photosPayload),
+    ""
   ]);
 
   return {
     ok: true,
+    attempt_id: attemptId,
     variant_id: data.variant_id,
     score_part1: totalPointsPart1,
     max_part1: maxPointsPart1,
+    status: status,
+    photos: photos,
+    folder_url: folderUrl,
     results: detailedResults
   };
+}
+
+/**
+ * Возвращает все сданные работы, включая старые строки, где заполнены только A–I.
+ * Новые работы идут первыми.
+ */
+function listAttempts() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName("Results");
+  if (!sheet) return { ok: true, attempts: [], count: 0 };
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return { ok: true, attempts: [], count: 0 };
+
+  const lastCol = Math.max(17, sheet.getLastColumn());
+  const rows = sheet.getRange(2, 1, lastRow - 1, lastCol).getValues();
+  const attempts = [];
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const rowIndex = i + 2;
+    const photosPayload = parseJsonSafe(row[15], {});
+    const part2Scores = parseJsonSafe(row[10], {});
+    const photos = Array.isArray(photosPayload)
+      ? photosPayload
+      : (Array.isArray(photosPayload.photos) ? photosPayload.photos : []);
+    const answersJson = (!Array.isArray(photosPayload) && photosPayload.answers_json)
+      ? photosPayload.answers_json
+      : {};
+    const folderUrl = String(row[7] || "").trim() ||
+      (!Array.isArray(photosPayload) && photosPayload.folder_url) ||
+      "";
+
+    let status = String(row[14] || "").trim();
+    if (!status) {
+      const hasPart2Result = String(row[11] || "").trim() !== "" ||
+        String(row[12] || "").trim() !== "" ||
+        String(row[13] || "").trim() !== "";
+      status = hasPart2Result ? "Проверено" : "На проверке Ч.2";
+    }
+
+    attempts.push({
+      row_index: rowIndex,
+      attempt_id: String(row[9] || "").trim() || ("ROW_" + rowIndex),
+      date: toIsoDate(row[0]),
+      variant_id: String(row[1] || "").trim(),
+      student_name: String(row[2] || "").trim(),
+      student_grade: String(row[3] || "").trim(),
+      time_spent_minutes: row[4],
+      score_part1: Number(row[5]) || 0,
+      max_part1: Number(row[6]) || 0,
+      folder_url: folderUrl,
+      breakdown: String(row[8] || "").trim(),
+      part2_scores: part2Scores,
+      score_part2: String(row[11] || "").trim() === "" ? 0 : Number(row[11]) || 0,
+      total_primary: String(row[12] || "").trim() === "" ? null : Number(row[12]),
+      secondary_score: String(row[13] || "").trim() === "" ? null : row[13],
+      status: status,
+      photos: photos,
+      answers_json: answersJson,
+      teacher_comment: String(row[16] || "").trim()
+    });
+  }
+
+  attempts.sort(function (a, b) {
+    const da = Date.parse(a.date) || 0;
+    const db = Date.parse(b.date) || 0;
+    return (db - da) || (b.row_index - a.row_index);
+  });
+
+  return { ok: true, attempts: attempts, count: attempts.length, sheet_url: ss.getUrl() };
+}
+
+/**
+ * Сохраняет баллы Части 2, итоговые баллы и комментарий преподавателя.
+ * Работа ищется по attempt_id (колонка J) или по row_index.
+ */
+function gradePart2(data) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName("Results");
+  if (!sheet) return { ok: false, error: "Лист Results не найден." };
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return { ok: false, error: "В листе Results нет сданных работ." };
+
+  const rowIndex = findAttemptRow(sheet, data.attempt_id, data.row_index, lastRow);
+  if (!rowIndex) {
+    return { ok: false, error: "Работа не найдена. Передайте attempt_id или row_index." };
+  }
+
+  const row = sheet.getRange(rowIndex, 1, 1, 17).getValues()[0];
+  const part2Scores = normalizeScores(data.part2_scores);
+  let scorePart2 = Number(data.score_part2);
+  if (!isFinite(scorePart2)) {
+    scorePart2 = Object.keys(part2Scores).reduce(function (sum, key) {
+      return sum + (Number(part2Scores[key]) || 0);
+    }, 0);
+  }
+
+  const part1 = Number(row[5]) || 0;
+  let totalPrimary = Number(data.total_primary);
+  if (!isFinite(totalPrimary)) totalPrimary = part1 + scorePart2;
+
+  const secondaryScore = (data.secondary_score === undefined || data.secondary_score === null ||
+    String(data.secondary_score).trim() === "") ? row[13] : data.secondary_score;
+  const teacherComment = (data.teacher_comment === undefined || data.teacher_comment === null)
+    ? String(row[16] || "")
+    : String(data.teacher_comment);
+  const attemptId = String(row[9] || "").trim() || String(data.attempt_id || "").trim() || ("ROW_" + rowIndex);
+
+  sheet.getRange(rowIndex, 10, 1, 8).setValues([[
+    attemptId,
+    JSON.stringify(part2Scores),
+    scorePart2,
+    totalPrimary,
+    secondaryScore,
+    "Проверено",
+    row[15],
+    teacherComment
+  ]]);
+
+  return {
+    ok: true,
+    row_index: rowIndex,
+    attempt_id: attemptId,
+    part2_scores: part2Scores,
+    score_part2: scorePart2,
+    total_primary: totalPrimary,
+    secondary_score: secondaryScore,
+    status: "Проверено",
+    teacher_comment: teacherComment
+  };
+}
+
+function findAttemptRow(sheet, attemptId, rawRowIndex, lastRow) {
+  const rowIndex = Number(rawRowIndex);
+  if (Number.isInteger(rowIndex) && rowIndex >= 2 && rowIndex <= lastRow) return rowIndex;
+
+  const id = String(attemptId || "").trim();
+  if (!id) return 0;
+
+  const rowMatch = id.match(/^ROW_(\d+)$/);
+  if (rowMatch) {
+    const parsed = Number(rowMatch[1]);
+    if (parsed >= 2 && parsed <= lastRow) return parsed;
+  }
+
+  const ids = sheet.getRange(2, 10, lastRow - 1, 1).getValues();
+  for (let i = 0; i < ids.length; i++) {
+    if (String(ids[i][0] || "").trim() === id) return i + 2;
+  }
+  return 0;
+}
+
+function getOrCreateResultsSheet(ss) {
+  let sheet = ss.getSheetByName("Results");
+  if (!sheet) {
+    sheet = ss.insertSheet("Results");
+    sheet.appendRow(RESULTS_HEADERS);
+    sheet.getRange(1, 1, 1, RESULTS_HEADERS.length).setFontWeight("bold");
+    return sheet;
+  }
+
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(RESULTS_HEADERS);
+    sheet.getRange(1, 1, 1, RESULTS_HEADERS.length).setFontWeight("bold");
+    return sheet;
+  }
+
+  const first = sheet.getRange(1, 1, 1, RESULTS_HEADERS.length).getValues()[0];
+  if (!String(first[0] || "").trim()) {
+    sheet.getRange(1, 1, 1, 9).setValues([RESULTS_HEADERS.slice(0, 9)]);
+    sheet.getRange(1, 1, 1, 9).setFontWeight("bold");
+  }
+
+  const extra = first.slice(9);
+  if (extra.some(function (value) { return !String(value || "").trim(); })) {
+    sheet.getRange(1, 10, 1, 8).setValues([RESULTS_HEADERS.slice(9)]);
+    sheet.getRange(1, 10, 1, 8).setFontWeight("bold");
+  }
+
+  return sheet;
+}
+
+function generateAttemptId() {
+  const stamp = new Date().getTime();
+  const random = Math.floor(Math.random() * 1679616).toString(36).toUpperCase();
+  return "ATT_" + stamp + "_" + ("00000" + random).slice(-5);
+}
+
+function normalizeScores(raw) {
+  let value = raw;
+  if (typeof value === "string") value = parseJsonSafe(value, {});
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const result = {};
+  Object.keys(value).forEach(function (key) {
+    const num = Number(value[key]);
+    if (isFinite(num)) result[String(key)] = num;
+  });
+  return result;
+}
+
+function parseJsonSafe(value, fallback) {
+  if (value === undefined || value === null || value === "") return fallback;
+  if (typeof value === "object") return value;
+  try {
+    return JSON.parse(String(value));
+  } catch (err) {
+    return fallback;
+  }
+}
+
+function toIsoDate(value) {
+  if (value instanceof Date) return value.toISOString();
+  if (!value) return "";
+  const parsed = new Date(value);
+  return isNaN(parsed.getTime()) ? String(value) : parsed.toISOString();
 }
 
 // 3. Строгие правила оценивания ФИПИ (ЕГЭ / ОГЭ по физике)
@@ -358,4 +648,3 @@ function jsonResponse(obj) {
     .createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
 }
-
