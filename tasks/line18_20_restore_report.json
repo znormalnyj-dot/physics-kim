@@ -1,0 +1,2975 @@
+{
+  "generated_at": "2026-10-25T21:31:59.014Z",
+  "write": true,
+  "restored_tasks": 101,
+  "by_line": {
+    "18": 66,
+    "20": 35
+  },
+  "before": {
+    "EGE": {
+      "lineCounts": {
+        "1": 193,
+        "2": 168,
+        "3": 179,
+        "4": 179,
+        "5": 74,
+        "6": 143,
+        "7": 92,
+        "8": 171,
+        "9": 96,
+        "10": 104,
+        "11": 225,
+        "12": 100,
+        "13": 210,
+        "14": 113,
+        "15": 162,
+        "16": 175,
+        "17": 139,
+        "19": 31,
+        "21": 139,
+        "22": 55,
+        "23": 140,
+        "24": 130,
+        "25": 162,
+        "26": 105
+      },
+      "emptyLines": [
+        18,
+        20
+      ],
+      "emptySubtopics": [
+        {
+          "line": 18,
+          "id": "theme_403",
+          "title": "Задания для подготовки"
+        },
+        {
+          "line": 20,
+          "id": "theme_378",
+          "title": "Экспериментальное исследование"
+        }
+      ]
+    },
+    "OGE": {
+      "lineCounts": {
+        "1": 766,
+        "2": 35,
+        "3": 60,
+        "4": 74,
+        "5": 81,
+        "6": 49,
+        "7": 57,
+        "8": 55,
+        "9": 74,
+        "10": 49,
+        "11": 68,
+        "12": 57,
+        "13": 57,
+        "14": 35,
+        "15": 76,
+        "16": 97,
+        "17": 84,
+        "18": 257,
+        "19": 86,
+        "20": 216,
+        "21": 75,
+        "22": 78
+      },
+      "emptyLines": [],
+      "emptySubtopics": []
+    }
+  },
+  "after": {
+    "EGE": {
+      "lineCounts": {
+        "1": 193,
+        "2": 165,
+        "3": 178,
+        "4": 168,
+        "5": 74,
+        "6": 143,
+        "7": 91,
+        "8": 168,
+        "9": 96,
+        "10": 104,
+        "11": 216,
+        "12": 89,
+        "13": 184,
+        "14": 113,
+        "15": 162,
+        "16": 146,
+        "17": 132,
+        "18": 66,
+        "19": 31,
+        "20": 35,
+        "21": 139,
+        "22": 55,
+        "23": 140,
+        "24": 130,
+        "25": 162,
+        "26": 105
+      },
+      "emptyLines": [],
+      "emptySubtopics": []
+    },
+    "OGE": {
+      "lineCounts": {
+        "1": 766,
+        "2": 35,
+        "3": 60,
+        "4": 74,
+        "5": 81,
+        "6": 49,
+        "7": 57,
+        "8": 55,
+        "9": 74,
+        "10": 49,
+        "11": 68,
+        "12": 57,
+        "13": 57,
+        "14": 35,
+        "15": 76,
+        "16": 97,
+        "17": 84,
+        "18": 257,
+        "19": 86,
+        "20": 216,
+        "21": 75,
+        "22": 78
+      },
+      "emptyLines": [],
+      "emptySubtopics": []
+    }
+  },
+  "changes": [
+    {
+      "id": "EGE-MSR-0005",
+      "line": 18,
+      "before": {
+        "kim_line": 17,
+        "part": 1,
+        "subtopic_id": "theme_396",
+        "subtopic_title": "Квантовая физика, ядерная физика",
+        "topics": [
+          "quantum",
+          "quantum_physics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0006",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0007",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0008",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_248",
+        "subtopic_title": "Колебательный контур",
+        "topics": [
+          "electrodynamics",
+          "em_oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0009",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0010",
+      "line": 18,
+      "before": {
+        "kim_line": 17,
+        "part": 1,
+        "subtopic_id": "theme_396",
+        "subtopic_title": "Квантовая физика, ядерная физика",
+        "topics": [
+          "quantum",
+          "quantum_physics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0011",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0012",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0013",
+      "line": 18,
+      "before": {
+        "kim_line": 17,
+        "part": 1,
+        "subtopic_id": "theme_396",
+        "subtopic_title": "Квантовая физика, ядерная физика",
+        "topics": [
+          "quantum",
+          "quantum_physics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0014",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0015",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0016",
+      "line": 18,
+      "before": {
+        "kim_line": 17,
+        "part": 1,
+        "subtopic_id": "theme_396",
+        "subtopic_title": "Квантовая физика, ядерная физика",
+        "topics": [
+          "quantum",
+          "quantum_physics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0017",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0018",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_248",
+        "subtopic_title": "Колебательный контур",
+        "topics": [
+          "electrodynamics",
+          "em_oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0019",
+      "line": 18,
+      "before": {
+        "kim_line": 17,
+        "part": 1,
+        "subtopic_id": "theme_396",
+        "subtopic_title": "Квантовая физика, ядерная физика",
+        "topics": [
+          "quantum",
+          "quantum_physics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0020",
+      "line": 18,
+      "before": {
+        "kim_line": 17,
+        "part": 1,
+        "subtopic_id": "theme_396",
+        "subtopic_title": "Квантовая физика, ядерная физика",
+        "topics": [
+          "quantum",
+          "quantum_physics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0021",
+      "line": 18,
+      "before": {
+        "kim_line": 12,
+        "part": 1,
+        "subtopic_id": "theme_364",
+        "subtopic_title": "Закон ЭДС индукции",
+        "topics": [
+          "electrodynamics",
+          "magnetism"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0022",
+      "line": 18,
+      "before": {
+        "kim_line": 12,
+        "part": 1,
+        "subtopic_id": "theme_364",
+        "subtopic_title": "Закон ЭДС индукции",
+        "topics": [
+          "electrodynamics",
+          "magnetism"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0023",
+      "line": 18,
+      "before": {
+        "kim_line": 17,
+        "part": 1,
+        "subtopic_id": "theme_396",
+        "subtopic_title": "Квантовая физика, ядерная физика",
+        "topics": [
+          "quantum",
+          "quantum_physics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0024",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0025",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0026",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_248",
+        "subtopic_title": "Колебательный контур",
+        "topics": [
+          "electrodynamics",
+          "em_oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0027",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0028",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0029",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0076",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0077",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_248",
+        "subtopic_title": "Колебательный контур",
+        "topics": [
+          "electrodynamics",
+          "em_oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0078",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0079",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_367",
+        "subtopic_title": "Зеркала",
+        "topics": [
+          "electrodynamics",
+          "optics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0080",
+      "line": 18,
+      "before": {
+        "kim_line": 12,
+        "part": 1,
+        "subtopic_id": "theme_364",
+        "subtopic_title": "Закон ЭДС индукции",
+        "topics": [
+          "electrodynamics",
+          "magnetism"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0081",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0082",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_248",
+        "subtopic_title": "Колебательный контур",
+        "topics": [
+          "electrodynamics",
+          "em_oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0083",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_248",
+        "subtopic_title": "Колебательный контур",
+        "topics": [
+          "electrodynamics",
+          "em_oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0084",
+      "line": 18,
+      "before": {
+        "kim_line": 12,
+        "part": 1,
+        "subtopic_id": "theme_364",
+        "subtopic_title": "Закон ЭДС индукции",
+        "topics": [
+          "electrodynamics",
+          "magnetism"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0085",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_248",
+        "subtopic_title": "Колебательный контур",
+        "topics": [
+          "electrodynamics",
+          "em_oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0086",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0087",
+      "line": 18,
+      "before": {
+        "kim_line": 12,
+        "part": 1,
+        "subtopic_id": "theme_364",
+        "subtopic_title": "Закон ЭДС индукции",
+        "topics": [
+          "electrodynamics",
+          "magnetism"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0088",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0089",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0090",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_248",
+        "subtopic_title": "Колебательный контур",
+        "topics": [
+          "electrodynamics",
+          "em_oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0091",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0092",
+      "line": 18,
+      "before": {
+        "kim_line": 12,
+        "part": 1,
+        "subtopic_id": "theme_364",
+        "subtopic_title": "Закон ЭДС индукции",
+        "topics": [
+          "electrodynamics",
+          "magnetism"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0093",
+      "line": 18,
+      "before": {
+        "kim_line": 12,
+        "part": 1,
+        "subtopic_id": "theme_364",
+        "subtopic_title": "Закон ЭДС индукции",
+        "topics": [
+          "electrodynamics",
+          "magnetism"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0094",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_248",
+        "subtopic_title": "Колебательный контур",
+        "topics": [
+          "electrodynamics",
+          "em_oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0095",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_367",
+        "subtopic_title": "Зеркала",
+        "topics": [
+          "electrodynamics",
+          "optics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0096",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_248",
+        "subtopic_title": "Колебательный контур",
+        "topics": [
+          "electrodynamics",
+          "em_oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0097",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_248",
+        "subtopic_title": "Колебательный контур",
+        "topics": [
+          "electrodynamics",
+          "em_oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0098",
+      "line": 18,
+      "before": {
+        "kim_line": 11,
+        "part": 1,
+        "subtopic_id": "theme_386",
+        "subtopic_title": "Закон Кулона, закон сохранения заряда",
+        "topics": [
+          "electrodynamics",
+          "electrostatics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0099",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0100",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0101",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_367",
+        "subtopic_title": "Зеркала",
+        "topics": [
+          "electrodynamics",
+          "optics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0102",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0103",
+      "line": 18,
+      "before": {
+        "kim_line": 12,
+        "part": 1,
+        "subtopic_id": "theme_364",
+        "subtopic_title": "Закон ЭДС индукции",
+        "topics": [
+          "electrodynamics",
+          "magnetism"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0104",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_248",
+        "subtopic_title": "Колебательный контур",
+        "topics": [
+          "electrodynamics",
+          "em_oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0105",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0106",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_248",
+        "subtopic_title": "Колебательный контур",
+        "topics": [
+          "electrodynamics",
+          "em_oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0107",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0108",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_248",
+        "subtopic_title": "Колебательный контур",
+        "topics": [
+          "electrodynamics",
+          "em_oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0109",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_248",
+        "subtopic_title": "Колебательный контур",
+        "topics": [
+          "electrodynamics",
+          "em_oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0110",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0111",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_367",
+        "subtopic_title": "Зеркала",
+        "topics": [
+          "electrodynamics",
+          "optics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0112",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0113",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_248",
+        "subtopic_title": "Колебательный контур",
+        "topics": [
+          "electrodynamics",
+          "em_oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0114",
+      "line": 18,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_248",
+        "subtopic_title": "Колебательный контур",
+        "topics": [
+          "electrodynamics",
+          "em_oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0115",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0116",
+      "line": 18,
+      "before": {
+        "kim_line": 16,
+        "part": 1,
+        "subtopic_id": "theme_370",
+        "subtopic_title": "Периодическая система Менделеева, химические элементы",
+        "topics": [
+          "quantum",
+          "nuclear"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      },
+      "after": {
+        "kim_line": 18,
+        "part": 1,
+        "subtopic_id": "theme_403",
+        "subtopic_title": "Задания для подготовки",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 2
+      }
+    },
+    {
+      "id": "EGE-MSR-0057",
+      "line": 20,
+      "before": {
+        "kim_line": 4,
+        "part": 1,
+        "subtopic_id": "theme_222",
+        "subtopic_title": "Волны",
+        "topics": [
+          "mechanics",
+          "oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0058",
+      "line": 20,
+      "before": {
+        "kim_line": 11,
+        "part": 1,
+        "subtopic_id": "theme_241",
+        "subtopic_title": "Сила тока, закон Ома",
+        "topics": [
+          "electrodynamics",
+          "direct_current"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0059",
+      "line": 20,
+      "before": {
+        "kim_line": 3,
+        "part": 1,
+        "subtopic_id": "theme_217",
+        "subtopic_title": "Механическая энергия, закон сохранения энергии",
+        "topics": [
+          "mechanics",
+          "conservation_laws"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0060",
+      "line": 20,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_367",
+        "subtopic_title": "Зеркала",
+        "topics": [
+          "electrodynamics",
+          "optics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0061",
+      "line": 20,
+      "before": {
+        "kim_line": 4,
+        "part": 1,
+        "subtopic_id": "theme_380",
+        "subtopic_title": "Сила Архимеда, закон Паскаля",
+        "topics": [
+          "mechanics",
+          "statics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0062",
+      "line": 20,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_367",
+        "subtopic_title": "Зеркала",
+        "topics": [
+          "electrodynamics",
+          "optics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0063",
+      "line": 20,
+      "before": {
+        "kim_line": 8,
+        "part": 1,
+        "subtopic_id": "theme_397",
+        "subtopic_title": "Работа, количество теплоты, внутренняя энергия",
+        "topics": [
+          "mkt_thermo",
+          "thermodynamics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0064",
+      "line": 20,
+      "before": {
+        "kim_line": 4,
+        "part": 1,
+        "subtopic_id": "theme_380",
+        "subtopic_title": "Сила Архимеда, закон Паскаля",
+        "topics": [
+          "mechanics",
+          "statics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0065",
+      "line": 20,
+      "before": {
+        "kim_line": 11,
+        "part": 1,
+        "subtopic_id": "theme_386",
+        "subtopic_title": "Закон Кулона, закон сохранения заряда",
+        "topics": [
+          "electrodynamics",
+          "electrostatics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0066",
+      "line": 20,
+      "before": {
+        "kim_line": 11,
+        "part": 1,
+        "subtopic_id": "theme_241",
+        "subtopic_title": "Сила тока, закон Ома",
+        "topics": [
+          "electrodynamics",
+          "direct_current"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0067",
+      "line": 20,
+      "before": {
+        "kim_line": 12,
+        "part": 1,
+        "subtopic_id": "theme_364",
+        "subtopic_title": "Закон ЭДС индукции",
+        "topics": [
+          "electrodynamics",
+          "magnetism"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0068",
+      "line": 20,
+      "before": {
+        "kim_line": 12,
+        "part": 1,
+        "subtopic_id": "theme_364",
+        "subtopic_title": "Закон ЭДС индукции",
+        "topics": [
+          "electrodynamics",
+          "magnetism"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0069",
+      "line": 20,
+      "before": {
+        "kim_line": 12,
+        "part": 1,
+        "subtopic_id": "theme_364",
+        "subtopic_title": "Закон ЭДС индукции",
+        "topics": [
+          "electrodynamics",
+          "magnetism"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0070",
+      "line": 20,
+      "before": {
+        "kim_line": 4,
+        "part": 1,
+        "subtopic_id": "theme_380",
+        "subtopic_title": "Сила Архимеда, закон Паскаля",
+        "topics": [
+          "mechanics",
+          "statics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0071",
+      "line": 20,
+      "before": {
+        "kim_line": 4,
+        "part": 1,
+        "subtopic_id": "theme_222",
+        "subtopic_title": "Волны",
+        "topics": [
+          "mechanics",
+          "oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0072",
+      "line": 20,
+      "before": {
+        "kim_line": 4,
+        "part": 1,
+        "subtopic_id": "theme_222",
+        "subtopic_title": "Волны",
+        "topics": [
+          "mechanics",
+          "oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0073",
+      "line": 20,
+      "before": {
+        "kim_line": 4,
+        "part": 1,
+        "subtopic_id": "theme_380",
+        "subtopic_title": "Сила Архимеда, закон Паскаля",
+        "topics": [
+          "mechanics",
+          "statics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0074",
+      "line": 20,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_367",
+        "subtopic_title": "Зеркала",
+        "topics": [
+          "electrodynamics",
+          "optics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0075",
+      "line": 20,
+      "before": {
+        "kim_line": 2,
+        "part": 1,
+        "subtopic_id": "theme_208",
+        "subtopic_title": "Второй закон Ньютона",
+        "topics": [
+          "mechanics",
+          "dynamics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0186",
+      "line": 20,
+      "before": {
+        "kim_line": 11,
+        "part": 1,
+        "subtopic_id": "theme_386",
+        "subtopic_title": "Закон Кулона, закон сохранения заряда",
+        "topics": [
+          "electrodynamics",
+          "electrostatics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0187",
+      "line": 20,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_248",
+        "subtopic_title": "Колебательный контур",
+        "topics": [
+          "electrodynamics",
+          "em_oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0188",
+      "line": 20,
+      "before": {
+        "kim_line": 8,
+        "part": 1,
+        "subtopic_id": "theme_397",
+        "subtopic_title": "Работа, количество теплоты, внутренняя энергия",
+        "topics": [
+          "mkt_thermo",
+          "thermodynamics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0189",
+      "line": 20,
+      "before": {
+        "kim_line": 13,
+        "part": 1,
+        "subtopic_id": "theme_367",
+        "subtopic_title": "Зеркала",
+        "topics": [
+          "electrodynamics",
+          "optics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0190",
+      "line": 20,
+      "before": {
+        "kim_line": 8,
+        "part": 1,
+        "subtopic_id": "theme_397",
+        "subtopic_title": "Работа, количество теплоты, внутренняя энергия",
+        "topics": [
+          "mkt_thermo",
+          "thermodynamics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0191",
+      "line": 20,
+      "before": {
+        "kim_line": 7,
+        "part": 1,
+        "subtopic_id": "theme_381",
+        "subtopic_title": "Основное уравнение МКТ",
+        "topics": [
+          "mkt_thermo",
+          "mkt"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0192",
+      "line": 20,
+      "before": {
+        "kim_line": 11,
+        "part": 1,
+        "subtopic_id": "theme_241",
+        "subtopic_title": "Сила тока, закон Ома",
+        "topics": [
+          "electrodynamics",
+          "direct_current"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0193",
+      "line": 20,
+      "before": {
+        "kim_line": 4,
+        "part": 1,
+        "subtopic_id": "theme_222",
+        "subtopic_title": "Волны",
+        "topics": [
+          "mechanics",
+          "oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0194",
+      "line": 20,
+      "before": {
+        "kim_line": 4,
+        "part": 1,
+        "subtopic_id": "theme_222",
+        "subtopic_title": "Волны",
+        "topics": [
+          "mechanics",
+          "oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0195",
+      "line": 20,
+      "before": {
+        "kim_line": 4,
+        "part": 1,
+        "subtopic_id": "theme_380",
+        "subtopic_title": "Сила Архимеда, закон Паскаля",
+        "topics": [
+          "mechanics",
+          "statics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0003",
+      "line": 20,
+      "before": {
+        "kim_line": 2,
+        "part": 1,
+        "subtopic_id": "theme_208",
+        "subtopic_title": "Второй закон Ньютона",
+        "topics": [
+          "mechanics",
+          "dynamics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0004",
+      "line": 20,
+      "before": {
+        "kim_line": 11,
+        "part": 1,
+        "subtopic_id": "theme_241",
+        "subtopic_title": "Сила тока, закон Ома",
+        "topics": [
+          "electrodynamics",
+          "direct_current"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0053",
+      "line": 20,
+      "before": {
+        "kim_line": 11,
+        "part": 1,
+        "subtopic_id": "theme_386",
+        "subtopic_title": "Закон Кулона, закон сохранения заряда",
+        "topics": [
+          "electrodynamics",
+          "electrostatics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0054",
+      "line": 20,
+      "before": {
+        "kim_line": 2,
+        "part": 1,
+        "subtopic_id": "theme_208",
+        "subtopic_title": "Второй закон Ньютона",
+        "topics": [
+          "mechanics",
+          "dynamics"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0055",
+      "line": 20,
+      "before": {
+        "kim_line": 11,
+        "part": 1,
+        "subtopic_id": "theme_241",
+        "subtopic_title": "Сила тока, закон Ома",
+        "topics": [
+          "electrodynamics",
+          "direct_current"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    },
+    {
+      "id": "EGE-MSR-0056",
+      "line": 20,
+      "before": {
+        "kim_line": 4,
+        "part": 1,
+        "subtopic_id": "theme_222",
+        "subtopic_title": "Волны",
+        "topics": [
+          "mechanics",
+          "oscillations"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      },
+      "after": {
+        "kim_line": 20,
+        "part": 1,
+        "subtopic_id": "theme_378",
+        "subtopic_title": "Экспериментальное исследование",
+        "topics": [
+          "methods",
+          "measurements"
+        ],
+        "grading_rule": "unordered_set",
+        "max_points": 1
+      }
+    }
+  ]
+}
