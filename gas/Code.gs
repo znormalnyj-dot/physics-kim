@@ -372,7 +372,7 @@ function listAttempts() {
     // Старые строки (до появления колонки P) хранят только ссылку на папку
     // в колонке H. Один раз читаем папку через DriveApp и кэшируем список
     // файлов в P, чтобы следующие запросы не обращались к Google Диску.
-    if (photos.length === 0 && folderUrl && !photosPayload.photos_synced_at) {
+    if (photos.length === 0 && folderUrl && extractDriveRef(folderUrl) && !photosPayload.photos_synced_at) {
       const scanned = loadDrivePhotos(folderUrl);
       if (scanned.ok) {
         photos = scanned.photos;
