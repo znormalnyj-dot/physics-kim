@@ -5112,7 +5112,7 @@
             const src = candidates[0] || '';
             const fallback = JSON.stringify(candidates.slice(1));
             return '<button type="button" class="attempt-photo-card" data-photo-index="' + index + '" title="' + esc(name) + '">' +
-              '<img src="' + esc(src) + '" alt="' + esc(name) + '" loading="lazy" referrerpolicy="no-referrer" ' +
+              '<img src="' + esc(src) + '" alt="' + esc(name) + '" referrerpolicy="no-referrer" ' +
               'data-photo-fallback="' + esc(fallback) + '" onerror="window.advancePhotoSrc(this)">' +
               '<span>' + esc(name) + '</span>' +
               '</button>';
