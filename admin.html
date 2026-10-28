@@ -2221,6 +2221,7 @@
       gap: 4px;
       min-width: 44px;
       justify-content: center;
+      flex-wrap: wrap;
       padding: 5px 7px;
       border-radius: 7px;
       border: 1px solid var(--line);
@@ -2329,6 +2330,40 @@
       background: var(--blue-soft);
       font-size: 11px;
     }
+
+    .task-img-wrap {
+      display: block;
+      margin: 8px 0;
+    }
+
+    .task-img-wrap img {
+      display: block;
+      max-width: 100%;
+      max-height: 320px;
+      height: auto;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .task-img-wrap.task-img-inline {
+      display: inline-block;
+      margin: 0 3px;
+      vertical-align: middle;
+    }
+
+    .task-img-wrap.task-img-inline img {
+      display: inline-block;
+      max-height: 1.8em;
+      border-radius: 3px;
+    }
+
+    .part1-key {
+      color: #065f46;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .part1-item.incorrect .part1-key { color: #b91c1c; }
 
     .attempt-task-subhead {
       margin: 10px 0 4px;
@@ -4685,44 +4720,113 @@
         };
       }
 
+      const LATEX_SYMBOLS_CLIENT = {
+        cdot: '·', times: '×', div: '÷', approx: '≈', pm: '±', mp: '∓',
+        Delta: 'Δ', alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ',
+        epsilon: 'ε', varepsilon: 'ε', zeta: 'ζ', eta: 'η', theta: 'θ',
+        kappa: 'κ', lambda: 'λ', mu: 'μ', nu: 'ν', xi: 'ξ', pi: 'π',
+        rho: 'ρ', sigma: 'σ', tau: 'τ', phi: 'φ', varphi: 'φ', chi: 'χ',
+        psi: 'ψ', omega: 'ω', Omega: 'Ω', Sigma: 'Σ', infinity: '∞',
+        to: '→', rightarrow: '→', leftarrow: '←', Rightarrow: '⇒',
+        leftrightarrow: '↔', le: '≤', leq: '≤', ge: '≥', geq: '≥',
+        ne: '≠', neq: '≠', equiv: '≡', circ: '°', degree: '°',
+        angle: '∠', perp: '⊥', parallel: '∥', sum: 'Σ', int: '∫'
+      };
+
+      function normalizeLatexImageName(name) {
+        return String(name || '')
+          .trim()
+          .replace(/\\_/g, '_')
+          .replace(/\\/g, '')
+          .replace(/^images[\\/]/i, '')
+          .split('/')
+          .pop();
+      }
+
+      function latexImageHtmlClient(name, inline) {
+        const file = normalizeLatexImageName(name);
+        if (!file) return '';
+        return '<span class="task-img-wrap' + (inline ? ' task-img-inline' : '') +
+          '"><img src="/tasks/images/' + encodeURIComponent(file) +
+          '" alt="Рисунок к задаче" loading="lazy"></span>';
+      }
+
+      function stripLatexServiceCommands(value) {
+        let text = String(value || '');
+        text = text.replace(/\\(?:leavevmode|noindent|centering|par|newline|linebreak|bigskip|medskip|smallskip|filbreak|clearpage|newpage)\b\s*/g, ' ');
+        text = text.replace(/\\(?:vspace|hspace)\*?\s*(?:\[[^\]]*\])?\s*\{[^{}]*\}/g, ' ');
+        text = text.replace(/\\(?:vspace|hspace)\*?\s*[-+]?\d+(?:\.\d+)?\s*(?:pt|em|ex|cm|mm|in)\b/g, ' ');
+        text = text.replace(/\\(?:begin|end)\s*\{(?:center|flushleft|flushright|minipage|wrapfigure|figure|table)\}(?:\s*\[[^\]]*\])?(?:\s*\{[^{}]*\})?/g, ' ');
+        return text;
+      }
+
       function formatLatexToHtml(value) {
-        let text = esc(value || '');
+        let text = stripLatexServiceCommands(value);
         if (!text.trim()) return '<span class="attempt-photo-empty" style="display:block">Не указано</span>';
 
-        text = text.replace(/\\includegraphics(?:\[[^\]]*\])?\{[^}]*\}/g, '<span class="math-img-note">[рисунок]</span>');
-        text = text.replace(/\\kimimg\{[^}]*\}/g, '<span class="math-img-note">[рисунок]</span>');
-        text = text.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, '($1)/($2)');
-        text = text.replace(/\\text\{([^{}]*)\}/g, '$1');
-        text = text.replace(/\\mathrm\{([^{}]*)\}/g, '$1');
-        text = text.replace(/\\mathbf\{([^{}]*)\}/g, '<b>$1</b>');
-        text = text.replace(/\\left|\\right/g, '');
-        text = text.replace(/\\cdot/g, '·')
-          .replace(/\\times/g, '×')
-          .replace(/\\approx/g, '≈')
-          .replace(/\\pm/g, '±')
-          .replace(/\\Delta/g, 'Δ')
-          .replace(/\\alpha/g, 'α')
-          .replace(/\\beta/g, 'β')
-          .replace(/\\gamma/g, 'γ')
-          .replace(/\\mu/g, 'μ')
-          .replace(/\\pi/g, 'π')
-          .replace(/\\rho/g, 'ρ')
-          .replace(/\\omega/g, 'ω')
-          .replace(/\\varphi/g, 'φ')
-          .replace(/\\infty/g, '∞')
-          .replace(/\\to/g, '→')
-          .replace(/\\le/g, '≤')
-          .replace(/\\ge/g, '≥')
-          .replace(/\\ne/g, '≠');
-        text = text.replace(/\^\{([^{}]+)\}/g, '<sup>$1</sup>');
-        text = text.replace(/\^([0-9a-zA-Z+\-])/g, '<sup>$1</sup>');
-        text = text.replace(/_\{([^{}]+)\}/g, '<sub>$1</sub>');
-        text = text.replace(/_([0-9a-zA-Z+\-])/g, '<sub>$1</sub>');
+        text = esc(text);
+
+        const images = [];
+        const imageToken = function (name, inline) {
+          const html = latexImageHtmlClient(name, inline);
+          if (!html) return ' ';
+          images.push(html);
+          return '\u0000KIMIMG' + (images.length - 1) + '\u0000';
+        };
+        text = text.replace(/\\kimimg\s*\{([^{}]*)\}/g, function (match, name) {
+          return imageToken(name, false);
+        });
+        text = text.replace(/\\includegraphics\*?\s*(?:\[([^\]]*)\])?\s*\{([^{}]*)\}/g, function (match, options, name) {
+          return imageToken(name, Boolean(options && /height\s*=/.test(options)));
+        });
+
+        text = text.replace(/\\(?:textbf|bfseries)\s*\{([^{}]*)\}/g, '<b>$1</b>');
+        text = text.replace(/\\(?:textit|emph|itshape)\s*\{([^{}]*)\}/g, '<i>$1</i>');
+        text = text.replace(/\\(?:underline|uline)\s*\{([^{}]*)\}/g, '<u>$1</u>');
+        text = text.replace(/\\(?:texttt|textsf|textrm|textnormal|text|mathrm|operatorname|mbox)\s*\{([^{}]*)\}/g, '$1');
+        text = text.replace(/\\mathbf\s*\{([^{}]*)\}/g, '<b>$1</b>');
+        text = text.replace(/\\mathit\s*\{([^{}]*)\}/g, '<i>$1</i>');
+
+        text = text.replace(/\\frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g, '($1)/($2)');
+        text = text.replace(/\\dfrac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g, '($1)/($2)');
+        text = text.replace(/\\sqrt\s*\{([^{}]*)\}/g, '√($1)');
+
+        text = text.replace(/\\(?:circ|degree)(?=\s*[A-Za-zА-Яа-я])/g, '°');
+
+        // (?![A-Za-z]) — обязательно, иначе \leavevmode станет ≤avevmode.
+        text = text.replace(/\\([A-Za-z]+)(?![A-Za-z])/g, function (match, name) {
+          if (Object.prototype.hasOwnProperty.call(LATEX_SYMBOLS_CLIENT, name)) {
+            return LATEX_SYMBOLS_CLIENT[name];
+          }
+          return ' ';
+        });
+
+        text = text.replace(/\\%/g, '%')
+          .replace(/\\&amp;/g, '&amp;')
+          .replace(/\\_/g, '_')
+          .replace(/\\#/g, '#')
+          .replace(/\\\$/g, '$');
+
+        text = text.replace(/\^\{([^{}]*)\}/g, '<sup>$1</sup>');
+        text = text.replace(/\^([0-9A-Za-z+\-])/g, '<sup>$1</sup>');
+        text = text.replace(/_\{([^{}]*)\}/g, '<sub>$1</sub>');
+        text = text.replace(/_([0-9A-Za-z+\-])/g, '<sub>$1</sub>');
+
+        text = text.replace(/[{}]/g, '').replace(/\$/g, '');
         text = text.replace(/\\\\/g, '<br>');
-        text = text.replace(/\\[a-zA-Z]+/g, ' ');
-        text = text.replace(/\$/g, '');
+        text = text.replace(/\n{2,}/g, '<br><br>');
         text = text.replace(/\n/g, '<br>');
-        return text;
+        text = text.replace(/[ \t]{2,}/g, ' ');
+
+        text = text.replace(/\u0000KIMIMG(\d+)\u0000/g, function (match, index) {
+          return images[Number(index)] || '';
+        });
+        return text.trim() || '<span class="attempt-photo-empty" style="display:block">Не указано</span>';
+      }
+
+      function isTestVariantClient(code) {
+        const value = String(code || '').toUpperCase();
+        return /(^|[^A-Z])(TEST|CHECK|SMOKE|TMP|REFTEST)([^A-Z]|$)/.test(value);
       }
 
       function attemptStatusKey(attempt) {
@@ -4962,6 +5066,36 @@
           : 'Сохранить проверку в таблицу';
       }
 
+      function photoCandidates(photo) {
+        const list = [];
+        if (photo && photo.fileId) {
+          list.push('/api/attempts/photo/' + encodeURIComponent(photo.fileId));
+        }
+        if (photo && photo.thumbUrl) list.push(photo.thumbUrl);
+        if (photo && photo.viewUrl) list.push(photo.viewUrl);
+        if (photo && photo.dataUrl) list.push(photo.dataUrl);
+        return list.filter(Boolean);
+      }
+
+      function advancePhotoSrc(img) {
+        let rest = [];
+        try {
+          rest = JSON.parse(img.getAttribute('data-photo-fallback') || '[]');
+        } catch (e) {
+          rest = [];
+        }
+        if (!Array.isArray(rest) || !rest.length) {
+          img.setAttribute('data-photo-fallback', '[]');
+          img.style.opacity = '0.18';
+          return;
+        }
+        const next = rest.shift();
+        img.setAttribute('data-photo-fallback', JSON.stringify(rest));
+        img.style.opacity = '';
+        img.src = next;
+      }
+      window.advancePhotoSrc = advancePhotoSrc;
+
       function renderAttemptPhotos(attempt) {
         const photos = Array.isArray(attempt.photos) ? attempt.photos.filter(Boolean) : [];
         els.attemptPhotoCount.textContent = photos.length + ' ' +
@@ -4974,10 +5108,12 @@
         } else {
           els.attemptPhotoGallery.innerHTML = photos.map(function (photo, index) {
             const name = photo.name || ('Страница ' + (index + 1));
-            const src = photo.thumbUrl || photo.viewUrl || '';
+            const candidates = photoCandidates(photo);
+            const src = candidates[0] || '';
+            const fallback = JSON.stringify(candidates.slice(1));
             return '<button type="button" class="attempt-photo-card" data-photo-index="' + index + '" title="' + esc(name) + '">' +
               '<img src="' + esc(src) + '" alt="' + esc(name) + '" loading="lazy" referrerpolicy="no-referrer" ' +
-              'onerror="this.style.opacity=\'0.18\'">' +
+              'data-photo-fallback="' + esc(fallback) + '" onerror="window.advancePhotoSrc(this)">' +
               '<span>' + esc(name) + '</span>' +
               '</button>';
           }).join('');
@@ -5015,12 +5151,19 @@
           const points = detail && detail.points != null ? detail.points : null;
           const cls = points == null ? 'unknown' : (points >= task.max_points ? 'correct' : 'incorrect');
           const mark = cls === 'correct' ? '✓' : cls === 'incorrect' ? '✕' : '?';
-          const title = '№' + task.num + ': ответ «' + (detail && detail.student_answer ? detail.student_answer : '—') +
-            '», ' + (points == null ? 'нет данных' : points + ' из ' + task.max_points);
-          return '<span class="part1-item ' + cls + '" title="' + esc(title) + '">' +
+          const studentAnswer = detail && detail.student_answer ? String(detail.student_answer) : '';
+          const correctAnswer = task.answer == null || task.answer === '' ? '—' : String(task.answer);
+          const conditionText = (task.condition_plain || '').trim();
+          const tooltip = ['№' + task.num + '. ' + (conditionText || 'Условие не найдено в базе задач.'),
+            'Ответ ученика: ' + (studentAnswer || 'пусто'),
+            'Правильный ответ: ' + correctAnswer,
+            'Балл: ' + (points == null ? 'нет данных' : points + ' из ' + task.max_points)
+          ].join('\n');
+          return '<span class="part1-item ' + cls + '" title="' + esc(tooltip) + '">' +
             '<span>№' + esc(task.num) + '</span>' +
-            '<b>' + esc(detail && detail.student_answer ? detail.student_answer : '—') + '</b>' +
-            '<span>' + mark + '</span>' +
+            '<b>' + esc(studentAnswer || 'пусто') + '</b>' +
+            '<span class="part1-key">ключ: ' + esc(correctAnswer) + '</span>' +
+            '<span>' + mark + ' ' + (points == null ? '' : esc(points) + '/' + esc(task.max_points)) + '</span>' +
             '</span>';
         }).join('');
       }
@@ -5073,11 +5216,12 @@
               '<div class="attempt-task-meta">' + meta.join('') + '</div>' +
             '</div>' +
             '<div class="attempt-task-condition"><b>Условие:</b> ' +
-              formatLatexToHtml(task.condition || 'Условие не найдено в базе задач.') + '</div>' +
+              (task.condition_html || formatLatexToHtml(task.condition || 'Условие не найдено в базе задач.')) + '</div>' +
             '<div class="attempt-task-subhead">Эталонное решение / критерии</div>' +
-            '<div class="latex-content">' + formatLatexToHtml(task.solution || 'Решение не указано.') + '</div>' +
+            '<div class="latex-content">' +
+              (task.solution_html || formatLatexToHtml(task.solution || 'Решение не указано.')) + '</div>' +
             '<div class="attempt-task-answer">Ответ: ' +
-              formatLatexToHtml(task.answer == null || task.answer === '' ? '—' : task.answer) + '</div>' +
+              (task.answer_html || formatLatexToHtml(task.answer == null || task.answer === '' ? '—' : task.answer)) + '</div>' +
             '<div class="attempt-score-row"><span class="attempt-score-label">Балл за задание:</span>' +
               scoreButtons.join('') + '</div>' +
             '</article>';
@@ -5179,7 +5323,8 @@
         const photos = attempt && Array.isArray(attempt.photos) ? attempt.photos : [];
         const photo = photos[Number(index)];
         if (!photo) return;
-        const src = photo.thumbUrl || photo.viewUrl || '';
+        const candidates = photoCandidates(photo);
+        const src = candidates[0] || '';
         if (!src) return;
 
         attemptState.photo = {
@@ -5189,6 +5334,8 @@
           zoom: 1
         };
         els.photoLightboxName.textContent = attemptState.photo.name;
+        els.photoLightboxImg.setAttribute('data-photo-fallback', JSON.stringify(candidates.slice(1)));
+        els.photoLightboxImg.onerror = function () { advancePhotoSrc(this); };
         els.photoLightboxImg.src = src;
         applyPhotoTransform();
         els.photoLightbox.hidden = false;
@@ -5488,10 +5635,10 @@
         els.cleanupTestBtn.addEventListener('click', function () {
           const variants = (state.stats && state.stats.variants) || [];
           const codes = variants
-            .filter(function (v) { return !/^\d+$/.test(String(v.variant)); })
+            .filter(function (v) { return isTestVariantClient(v.code); })
             .map(function (v) { return v.code; });
           if (codes.length === 0) {
-            showToast('Тестовых вариантов с нецифровым кодом нет.', 'success');
+            showToast('Тестовых вариантов (TEST, CHECK, SMOKE, TMP, REFTEST) нет.', 'success');
             return;
           }
           deleteVariants(codes, 'тестовые варианты');
