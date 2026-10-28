@@ -4826,7 +4826,9 @@
 
       function isTestVariantClient(code) {
         const value = String(code || '').toUpperCase();
-        return /(^|[^A-Z])(TEST|CHECK|SMOKE|TMP|REFTEST)([^A-Z]|$)/.test(value);
+        return ['TEST', 'CHECK', 'SMOKE', 'TMP', 'REFTEST'].some(function (marker) {
+          return value.indexOf(marker) !== -1;
+        });
       }
 
       function attemptStatusKey(attempt) {

@@ -1161,7 +1161,7 @@ function isTestVariant(code) {
   const value = String(code || '').toUpperCase();
   // Тестовыми считаются только явные служебные коды. Пользовательские варианты
   // (HW, DOM, KR, SR, PROB, MECH, KIN и т.п.) тестовыми НЕ являются.
-  return /(^|[^A-Z])(TEST|CHECK|SMOKE|TMP|REFTEST)([^A-Z]|$)/.test(value);
+  return ['TEST', 'CHECK', 'SMOKE', 'TMP', 'REFTEST'].some((marker) => value.includes(marker));
 }
 
 function enrichAttempt(attempt, dbById) {
