@@ -16,14 +16,14 @@ if (-not (Test-Path '.git')) {
   throw 'Не найден .git. Запустите скрипт из папки Physics_KIM_Generator.'
 }
 
-Write-Host '[2/4] Фиксируем изменения проекта в main...'
-git add -A
+Write-Host '[2/4] Фиксируем изменения фронтенда в main...'
+git add -- web
 git diff --cached --quiet
 if ($LASTEXITCODE -ne 0) {
-  git commit -m 'Update project before web deploy'
+  git commit -m 'Обновить фронтенд перед публикацией на GitHub Pages'
   if ($LASTEXITCODE -ne 0) { throw 'Не удалось создать коммит.' }
 } else {
-  Write-Host '      Изменений нет — коммит не нужен.'
+  Write-Host '      Изменений в web/ нет — коммит не нужен.'
 }
 
 Write-Host '[3/4] Пересобираем ветку gh-pages из web/...'

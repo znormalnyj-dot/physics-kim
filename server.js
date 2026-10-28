@@ -13,7 +13,9 @@
 
 const http = require('http');
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
+const crypto = require('crypto');
 const { spawn } = require('child_process');
 const { URL } = require('url');
 
@@ -23,6 +25,10 @@ const WEB_VARIANTS_DIR = path.join(WEB_DIR, 'variants');
 const OUTPUT_DIR = path.join(ROOT, 'output');
 const BUILD_SCRIPT = path.join(ROOT, 'build.js');
 const LOCAL_TASKS_DIR = path.join(ROOT, 'tasks');
+const TASKS_IMAGES_DIR = path.join(LOCAL_TASKS_DIR, 'images');
+const PHOTO_CACHE_DIR = path.join(os.tmpdir(), 'physics-kim-photo-cache');
+const PHOTO_MEMORY_LIMIT_BYTES = 48 * 1024 * 1024;
+const PHOTO_MEMORY_MAX_ITEMS = 40;
 
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || '127.0.0.1';
@@ -838,6 +844,12 @@ async function gasRequest(action, payload, method) {
     if (method === 'GET') {
       const target = new URL(setting.value);
       target.searchParams.set('action', action);
+      const params = payload && typeof payload === 'object' ? payload : {};
+      Object.keys(params).forEach((key) => {
+        const value = params[key];
+        if (value === undefined || value === null || value === '') return;
+        target.searchParams.set(key, String(value));
+      });
       target.searchParams.set('_', String(Date.now()));
       response = await fetch(target, { method: 'GET', redirect: 'follow', signal: controller.signal });
     } else {
@@ -971,6 +983,187 @@ function convertScore(exam, rawScore, rawMaxPrimary) {
   };
 }
 
+function escapeHtml(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function latexImageName(name) {
+  return String(name || '')
+    .trim()
+    .replace(/\\_/g, '_')
+    .replace(/\\/g, '')
+    .replace(/^images[\\/]/i, '');
+}
+
+function latexImageHtml(name, inline) {
+  const file = latexImageName(name);
+  if (!file) return '';
+  const safeFile = file.split('/').pop();
+  return '<span class="task-img-wrap' + (inline ? ' task-img-inline' : '') +
+    '"><img src="/tasks/images/' + encodeURIComponent(safeFile) +
+    '" alt="Рисунок к задаче" loading="lazy"></span>';
+}
+
+const LATEX_SYMBOLS = {
+  cdot: '·',
+  times: '×',
+  div: '÷',
+  approx: '≈',
+  pm: '±',
+  mp: '∓',
+  Delta: 'Δ',
+  alpha: 'α',
+  beta: 'β',
+  gamma: 'γ',
+  delta: 'δ',
+  epsilon: 'ε',
+  varepsilon: 'ε',
+  zeta: 'ζ',
+  eta: 'η',
+  theta: 'θ',
+  kappa: 'κ',
+  lambda: 'λ',
+  mu: 'μ',
+  nu: 'ν',
+  xi: 'ξ',
+  pi: 'π',
+  rho: 'ρ',
+  sigma: 'σ',
+  tau: 'τ',
+  phi: 'φ',
+  varphi: 'φ',
+  chi: 'χ',
+  psi: 'ψ',
+  omega: 'ω',
+  Omega: 'Ω',
+  Sigma: 'Σ',
+  infinity: '∞',
+  to: '→',
+  rightarrow: '→',
+  leftarrow: '←',
+  Rightarrow: '⇒',
+  leftrightarrow: '↔',
+  le: '≤',
+  leq: '≤',
+  ge: '≥',
+  geq: '≥',
+  ne: '≠',
+  neq: '≠',
+  equiv: '≡',
+  circ: '°',
+  degree: '°',
+  angle: '∠',
+  perp: '⊥',
+  parallel: '∥',
+  sum: 'Σ',
+  int: '∫'
+};
+
+function stripLatexServiceCommands(value) {
+  let text = String(value || '');
+  text = text.replace(/\\(?:leavevmode|noindent|centering|par|newline|linebreak|bigskip|medskip|smallskip|filbreak|clearpage|newpage)\b\s*/g, ' ');
+  text = text.replace(/\\(?:vspace|hspace)\*?\s*(?:\[[^\]]*\])?\s*\{[^{}]*\}/g, ' ');
+  text = text.replace(/\\(?:vspace|hspace)\*?\s*[-+]?\d+(?:\.\d+)?\s*(?:pt|em|ex|cm|mm|in)\b/g, ' ');
+  text = text.replace(/\\(?:begin|end)\s*\{(?:center|flushleft|flushright|minipage|wrapfigure|figure|table)\}(?:\s*\[[^\]]*\])?(?:\s*\{[^{}]*\})?/g, ' ');
+  return text;
+}
+
+function latexToHtml(value) {
+  let text = stripLatexServiceCommands(value);
+  if (!text.trim()) return '';
+  text = escapeHtml(text);
+
+  // 1. Изображения. Прячем готовый HTML в токены, чтобы последующие замены
+  //    (например, _1 → <sub>1</sub>) не портили имя файла и тег <img>.
+  const images = [];
+  const imageToken = (name, inline) => {
+    const html = latexImageHtml(name, inline);
+    if (!html) return ' ';
+    images.push(html);
+    return `\u0000KIMIMG${images.length - 1}\u0000`;
+  };
+  text = text.replace(/\\kimimg\s*\{([^{}]*)\}/g, (match, name) => imageToken(name, false));
+  text = text.replace(/\\includegraphics\*?\s*(?:\[([^\]]*)\])?\s*\{([^{}]*)\}/g,
+    (match, options, name) => imageToken(name, Boolean(options && /height\s*=/.test(options))));
+
+  // 2. Текстовые команды: \textbf{...} → <b>...</b> и т.д.
+  text = text.replace(/\\(?:textbf|bfseries)\s*\{([^{}]*)\}/g, '<b>$1</b>');
+  text = text.replace(/\\(?:textit|emph|itshape)\s*\{([^{}]*)\}/g, '<i>$1</i>');
+  text = text.replace(/\\(?:underline|uline)\s*\{([^{}]*)\}/g, '<u>$1</u>');
+  text = text.replace(/\\(?:texttt|textsf|textrm|textnormal|text|mathrm|operatorname|mbox)\s*\{([^{}]*)\}/g, '$1');
+  text = text.replace(/\\mathbf\s*\{([^{}]*)\}/g, '<b>$1</b>');
+  text = text.replace(/\\mathit\s*\{([^{}]*)\}/g, '<i>$1</i>');
+
+  // 3. Дроби, корни и т.п.
+  text = text.replace(/\\frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g, '($1)/($2)');
+  text = text.replace(/\\dfrac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g, '($1)/($2)');
+  text = text.replace(/\\sqrt\s*\{([^{}]*)\}/g, '√($1)');
+
+  // 4. Градусы перед буквой: 15^\circC → 15^°C.
+  text = text.replace(/\\(?:circ|degree)(?=\s*[A-Za-zА-Яа-я])/g, '°');
+
+  // 5. Математические символы. Негативный просмотр вперёд (?![A-Za-z])
+  //    обязателен: иначе \leavevmode превращается в ≤avevmode, а \left — в ≤ft.
+  text = text.replace(/\\([A-Za-z]+)(?![A-Za-z])/g, (match, name) => {
+    if (Object.prototype.hasOwnProperty.call(LATEX_SYMBOLS, name)) return LATEX_SYMBOLS[name];
+    if (name === 'vec') return '';
+    if (name === 'overline' || name === 'bar') return '';
+    return ' ';
+  });
+
+  // 6. Экранированные символы.
+  text = text.replace(/\\%/g, '%')
+    .replace(/\\&amp;/g, '&amp;')
+    .replace(/\\_/g, '_')
+    .replace(/\\#/g, '#')
+    .replace(/\\\$/g, '$');
+
+  // 7. Степени, индексы и переносы.
+  text = text.replace(/\^\{([^{}]*)\}/g, '<sup>$1</sup>');
+  text = text.replace(/\^([0-9A-Za-z+\-])/g, '<sup>$1</sup>');
+  text = text.replace(/_\{([^{}]*)\}/g, '<sub>$1</sub>');
+  text = text.replace(/_([0-9A-Za-z+\-])/g, '<sub>$1</sub>');
+
+  // 8. Остатки группирующих скобок и $.
+  text = text.replace(/[{}]/g, '');
+  text = text.replace(/\$/g, '');
+  text = text.replace(/\\\\/g, '<br>');
+  text = text.replace(/\n{2,}/g, '<br><br>');
+  text = text.replace(/\n/g, '<br>');
+  text = text.replace(/[ \t]{2,}/g, ' ');
+
+  // 9. Возвращаем изображения на место.
+  text = text.replace(/\u0000KIMIMG(\d+)\u0000/g, (match, index) => images[Number(index)] || '');
+
+  return text.trim();
+}
+
+function latexToPlainText(value) {
+  let text = stripLatexServiceCommands(value);
+  text = text.replace(/\\kimimg\s*\{([^{}]*)\}/g, ' [рисунок] ');
+  text = text.replace(/\\includegraphics\*?\s*(?:\[[^\]]*\])?\s*\{([^{}]*)\}/g, ' [рисунок] ');
+  text = text.replace(/\\(?:textbf|textit|emph|underline|texttt|textsf|textrm|textnormal|text|mathrm|operatorname|mbox|mathbf|mathit)\s*\{([^{}]*)\}/g, '$1');
+  text = text.replace(/\\([A-Za-z]+)(?![A-Za-z])/g, (match, name) => {
+    if (Object.prototype.hasOwnProperty.call(LATEX_SYMBOLS, name)) return LATEX_SYMBOLS[name];
+    return ' ';
+  });
+  text = text.replace(/[{}]/g, '').replace(/\$/g, '');
+  text = text.replace(/\\%/g, '%').replace(/\\_/g, '_');
+  text = text.replace(/\s+/g, ' ').trim();
+  return text;
+}
+
+function isTestVariant(code) {
+  const value = String(code || '').toUpperCase();
+  // Тестовыми считаются только явные служебные коды. Пользовательские варианты
+  // (HW, DOM, KR, SR, PROB, MECH, KIN и т.п.) тестовыми НЕ являются.
+  return /(^|[^A-Z])(TEST|CHECK|SMOKE|TMP|REFTEST)([^A-Z]|$)/.test(value);
+}
+
 function enrichAttempt(attempt, dbById) {
   const variantId = String(attempt.variant_id || '').trim();
   const keyInfo = readVariantKey(variantId);
@@ -982,6 +1175,9 @@ function enrichAttempt(attempt, dbById) {
 
   const tasks = keyTasks.map((task) => {
     const dbTask = dbById.get(String(task.id)) || null;
+    const condition = (dbTask && dbTask.latex_condition) || task.condition || '';
+    const solution = (dbTask && dbTask.latex_solution) || task.solution || '';
+    const answer = dbTask ? dbTask.answer : (task.answer == null ? '' : task.answer);
     return {
       num: Number(task.num),
       id: String(task.id || ''),
@@ -989,10 +1185,15 @@ function enrichAttempt(attempt, dbById) {
       kim_line: Number(task.kim_line) || null,
       rule: String(task.rule || ''),
       max_points: Number(task.max_points) || 1,
-      answer: dbTask ? dbTask.answer : (task.answer == null ? '' : task.answer),
+      answer: answer == null ? '' : String(answer),
       unit: dbTask && dbTask.unit != null ? dbTask.unit : (task.unit || ''),
-      condition: (dbTask && dbTask.latex_condition) || task.condition || '',
-      solution: (dbTask && dbTask.latex_solution) || task.solution || '',
+      condition,
+      condition_html: latexToHtml(condition),
+      condition_plain: latexToPlainText(condition),
+      condition_has_image: /\\kimimg|\\includegraphics/.test(condition),
+      solution,
+      solution_html: latexToHtml(solution),
+      answer_html: latexToHtml(answer == null ? '' : String(answer)),
       subtopic_title: dbTask ? dbTask.subtopic_title : '',
       topics: dbTask && Array.isArray(dbTask.topics) ? dbTask.topics : []
     };
@@ -1079,6 +1280,130 @@ function buildAttemptsResponse(gasResult) {
     gasSource: gasResult.source,
     gasResponse: gasResult.warning ? { message: gasResult.gas && gasResult.gas.message } : undefined
   };
+}
+
+// ─── Кэш фотографий работ (Google Диск → прокси) ─────────────────────────────
+
+const photoMemoryCache = new Map();
+let photoMemoryBytes = 0;
+
+function photoCacheKey(fileId) {
+  return crypto.createHash('sha1').update(String(fileId)).digest('hex');
+}
+
+function photoCacheDiskPaths(fileId) {
+  const key = photoCacheKey(fileId);
+  return {
+    meta: path.join(PHOTO_CACHE_DIR, `${key}.json`),
+    bin: path.join(PHOTO_CACHE_DIR, `${key}.bin`)
+  };
+}
+
+function rememberPhotoInMemory(fileId, entry) {
+  const existing = photoMemoryCache.get(fileId);
+  if (existing) {
+    photoMemoryBytes -= existing.buffer.length;
+    photoMemoryCache.delete(fileId);
+  }
+
+  photoMemoryCache.set(fileId, entry);
+  photoMemoryBytes += entry.buffer.length;
+
+  while (photoMemoryCache.size > PHOTO_MEMORY_MAX_ITEMS || photoMemoryBytes > PHOTO_MEMORY_LIMIT_BYTES) {
+    const oldestKey = photoMemoryCache.keys().next().value;
+    if (oldestKey === undefined) break;
+    const oldest = photoMemoryCache.get(oldestKey);
+    photoMemoryBytes -= oldest.buffer.length;
+    photoMemoryCache.delete(oldestKey);
+  }
+}
+
+function readPhotoFromDisk(fileId) {
+  const paths = photoCacheDiskPaths(fileId);
+  try {
+    const meta = JSON.parse(fs.readFileSync(paths.meta, 'utf8'));
+    const buffer = fs.readFileSync(paths.bin);
+    if (!buffer.length) return null;
+    return {
+      buffer,
+      mimeType: meta.mimeType || 'image/jpeg',
+      name: meta.name || '',
+      fileId
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writePhotoToDisk(fileId, entry) {
+  const paths = photoCacheDiskPaths(fileId);
+  try {
+    fs.mkdirSync(PHOTO_CACHE_DIR, { recursive: true });
+    fs.writeFileSync(paths.bin, entry.buffer);
+    fs.writeFileSync(paths.meta, JSON.stringify({
+      fileId,
+      mimeType: entry.mimeType,
+      name: entry.name || '',
+      cachedAt: new Date().toISOString()
+    }), 'utf8');
+  } catch (error) {
+    console.warn(`[ФОТО] Не удалось записать кэш на диск: ${error.message}`);
+  }
+}
+
+async function loadPhotoFromGas(fileId) {
+  const gas = await gasRequest('get_photo', { fileId }, 'GET');
+  const dataUrl = String(gas.data.dataUrl || '');
+  const match = dataUrl.match(/^data:([^;,]+)?;base64,([\s\S]+)$/);
+  if (!match) {
+    const error = new Error('GAS вернул файл без dataUrl в формате Base64.');
+    error.statusCode = 502;
+    throw error;
+  }
+
+  const buffer = Buffer.from(match[2], 'base64');
+  if (!buffer.length) {
+    const error = new Error('GAS вернул пустой файл.');
+    error.statusCode = 502;
+    throw error;
+  }
+
+  return {
+    buffer,
+    mimeType: match[1] || gas.data.mimeType || 'image/jpeg',
+    name: gas.data.name || '',
+    fileId
+  };
+}
+
+async function getPhotoEntry(fileId) {
+  const memory = photoMemoryCache.get(fileId);
+  if (memory) {
+    photoMemoryCache.delete(fileId);
+    photoMemoryCache.set(fileId, memory);
+    return memory;
+  }
+
+  const disk = readPhotoFromDisk(fileId);
+  if (disk) {
+    rememberPhotoInMemory(fileId, disk);
+    return disk;
+  }
+
+  const fresh = await loadPhotoFromGas(fileId);
+  rememberPhotoInMemory(fileId, fresh);
+  writePhotoToDisk(fileId, fresh);
+  return fresh;
+}
+
+function sendPhoto(res, entry) {
+  res.writeHead(200, {
+    'Content-Type': entry.mimeType || 'image/jpeg',
+    'Content-Length': entry.buffer.length,
+    'Cache-Control': 'private, max-age=86400',
+    'X-Content-Type-Options': 'nosniff'
+  });
+  res.end(entry.buffer);
 }
 
 function normalizePart2Scores(raw, part2Tasks) {
@@ -1674,6 +1999,49 @@ async function handleApi(req, res, url) {
     return;
   }
 
+  // Прокси фотографий работ: файлы Google Диска могут быть приватными,
+  // поэтому читаем их через GAS (get_photo) и кэшируем здесь.
+  if (pathname.startsWith('/api/attempts/photo/')) {
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      sendJson(res, 405, { ok: false, error: 'Метод не поддерживается. Используйте GET.' });
+      return;
+    }
+
+    let fileId = pathname.slice('/api/attempts/photo/'.length);
+    try {
+      fileId = decodeURIComponent(fileId);
+    } catch {
+      // оставляем как есть
+    }
+    fileId = String(fileId || '').trim();
+
+    if (!/^[A-Za-z0-9_-]{10,}$/.test(fileId)) {
+      sendJson(res, 400, { ok: false, error: 'Некорректный идентификатор файла Google Диска.' });
+      return;
+    }
+
+    try {
+      const entry = await getPhotoEntry(fileId);
+      if (req.method === 'HEAD') {
+        res.writeHead(200, {
+          'Content-Type': entry.mimeType || 'image/jpeg',
+          'Content-Length': entry.buffer.length,
+          'Cache-Control': 'private, max-age=86400'
+        });
+        res.end();
+        return;
+      }
+      sendPhoto(res, entry);
+    } catch (error) {
+      sendJson(res, error.statusCode || 502, {
+        ok: false,
+        error: error.message,
+        fileId
+      });
+    }
+    return;
+  }
+
   if (pathname === '/api/attempts/grade') {
     if (req.method !== 'POST') {
       sendJson(res, 405, { ok: false, error: 'Метод не поддерживается. Используйте POST.' });
@@ -1722,7 +2090,7 @@ async function handleApi(req, res, url) {
     if (!Array.isArray(rawCodes)) rawCodes = [rawCodes];
     if (body.testOnly === true || body.test === true || body.cleanupTest === true) {
       rawCodes = scanVariants()
-        .filter((item) => !/^\d+$/.test(String(item.variant)))
+        .filter((item) => isTestVariant(item.code))
         .map((item) => item.code);
     }
 
@@ -1987,6 +2355,18 @@ async function handleRequest(req, res) {
 
   if (pathname === '/admin' || pathname === '/admin/') {
     if (sendFile(req, res, path.join(WEB_DIR, 'admin.html'))) return;
+    send404(req, res);
+    return;
+  }
+
+  if (pathname.startsWith('/tasks/images/')) {
+    const rel = pathname.slice('/tasks/images/'.length);
+    const imagePath = path.resolve(TASKS_IMAGES_DIR, rel);
+    if (!isInsideDir(TASKS_IMAGES_DIR, imagePath)) {
+      send404(req, res);
+      return;
+    }
+    if (sendFile(req, res, imagePath)) return;
     send404(req, res);
     return;
   }

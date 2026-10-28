@@ -44,6 +44,10 @@ function doGet(e) {
       return jsonResponse(listAttempts());
     }
 
+    if (action === "get_photo") {
+      return jsonResponse(getPhoto({ fileId: params.fileId }));
+    }
+
     if (action === "grade_part2") {
       return jsonResponse(gradePart2({
         attempt_id: params.attempt_id,
@@ -154,6 +158,8 @@ function doPost(e) {
       return jsonResponse(processStudentAttempt(payload));
     } else if (action === "list_attempts") {
       return jsonResponse(listAttempts());
+    } else if (action === "get_photo") {
+      return jsonResponse(getPhoto(payload));
     } else if (action === "grade_part2") {
       return jsonResponse(gradePart2(payload));
     } else {
@@ -354,17 +360,40 @@ function listAttempts() {
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
     const rowIndex = i + 2;
-    const photosPayload = parseJsonSafe(row[15], {});
+    let photosPayload = parseJsonSafe(row[15], {});
+    if (Array.isArray(photosPayload)) photosPayload = { photos: photosPayload };
+    if (!photosPayload || typeof photosPayload !== "object") photosPayload = {};
+
     const part2Scores = parseJsonSafe(row[10], {});
-    const photos = Array.isArray(photosPayload)
-      ? photosPayload
-      : (Array.isArray(photosPayload.photos) ? photosPayload.photos : []);
-    const answersJson = (!Array.isArray(photosPayload) && photosPayload.answers_json)
+    let photos = Array.isArray(photosPayload.photos) ? photosPayload.photos : [];
+    let folderUrl = String(row[7] || "").trim() || photosPayload.folder_url || "";
+    let folderId = String(photosPayload.folder_id || "").trim();
+
+    // Старые строки (до появления колонки P) хранят только ссылку на папку
+    // в колонке H. Один раз читаем папку через DriveApp и кэшируем список
+    // файлов в P, чтобы следующие запросы не обращались к Google Диску.
+    if (photos.length === 0 && folderUrl && !photosPayload.photos_synced_at) {
+      const scanned = loadDrivePhotos(folderUrl);
+      if (scanned.ok) {
+        photos = scanned.photos;
+        folderId = scanned.folderId || folderId;
+        photosPayload = Object.assign({}, photosPayload, {
+          photos: photos,
+          folder_url: folderUrl,
+          folder_id: folderId,
+          photos_synced_at: new Date().toISOString()
+        });
+        try {
+          sheet.getRange(rowIndex, 16).setValue(JSON.stringify(photosPayload));
+        } catch (cacheErr) {
+          // Недоступная для записи ячейка не должна ломать журнал.
+        }
+      }
+    }
+
+    const answersJson = photosPayload.answers_json && typeof photosPayload.answers_json === "object"
       ? photosPayload.answers_json
       : {};
-    const folderUrl = String(row[7] || "").trim() ||
-      (!Array.isArray(photosPayload) && photosPayload.folder_url) ||
-      "";
 
     let status = String(row[14] || "").trim();
     if (!status) {
@@ -404,6 +433,97 @@ function listAttempts() {
   });
 
   return { ok: true, attempts: attempts, count: attempts.length, sheet_url: ss.getUrl() };
+}
+
+function extractDriveRef(value) {
+  const text = String(value || "").trim();
+  if (!text) return null;
+
+  let match = text.match(/\/folders\/([A-Za-z0-9_-]{10,})/);
+  if (match) return { id: match[1], kind: "folder" };
+
+  match = text.match(/\/file\/d\/([A-Za-z0-9_-]{10,})/);
+  if (match) return { id: match[1], kind: "file" };
+
+  match = text.match(/[?&]id=([A-Za-z0-9_-]{10,})/);
+  if (match) return { id: match[1], kind: "unknown" };
+
+  return null;
+}
+
+function drivePhotoFromFile(file) {
+  const id = file.getId();
+  return {
+    name: file.getName(),
+    fileId: id,
+    mimeType: file.getMimeType() || "image/jpeg",
+    viewUrl: "https://drive.google.com/file/d/" + id + "/view",
+    thumbUrl: "https://drive.google.com/thumbnail?id=" + id + "&sz=w1600"
+  };
+}
+
+function loadDrivePhotos(folderUrl) {
+  const ref = extractDriveRef(folderUrl);
+  if (!ref) return { ok: false, error: "В ссылке не найден ID папки Google Диска." };
+
+  if (ref.kind === "file") {
+    try {
+      return { ok: true, folderId: "", photos: [drivePhotoFromFile(DriveApp.getFileById(ref.id))] };
+    } catch (err) {
+      return { ok: false, error: err.toString() };
+    }
+  }
+
+  try {
+    const folder = DriveApp.getFolderById(ref.id);
+    const iterator = folder.getFiles();
+    const photos = [];
+    while (iterator.hasNext()) {
+      const file = iterator.next();
+      const mimeType = String(file.getMimeType() || "").toLowerCase();
+      if (mimeType.indexOf("image/") !== 0) continue;
+      photos.push(drivePhotoFromFile(file));
+    }
+    photos.sort(function (a, b) {
+      return String(a.name).localeCompare(String(b.name), "ru", { numeric: true });
+    });
+    return { ok: true, folderId: ref.id, photos: photos };
+  } catch (folderErr) {
+    if (ref.kind === "unknown") {
+      try {
+        return { ok: true, folderId: "", photos: [drivePhotoFromFile(DriveApp.getFileById(ref.id))] };
+      } catch (fileErr) {
+        return { ok: false, error: folderErr.toString() };
+      }
+    }
+    return { ok: false, error: folderErr.toString() };
+  }
+}
+
+/**
+ * Возвращает содержимое файла с Google Диска в виде data URL.
+ * Используется прокси-сервером админки: файлы могут быть приватными,
+ * поэтому прямой thumbUrl в браузере не всегда открывается.
+ */
+function getPhoto(data) {
+  const fileId = String((data && data.fileId) || "").trim();
+  if (!fileId) return { ok: false, error: "Не передан параметр fileId." };
+
+  try {
+    const file = DriveApp.getFileById(fileId);
+    const blob = file.getBlob();
+    const mimeType = blob.getContentType() || file.getMimeType() || "application/octet-stream";
+    const base64 = Utilities.base64Encode(blob.getBytes());
+    return {
+      ok: true,
+      fileId: fileId,
+      name: file.getName(),
+      mimeType: mimeType,
+      dataUrl: "data:" + mimeType + ";base64," + base64
+    };
+  } catch (err) {
+    return { ok: false, error: "Не удалось прочитать файл Google Диска: " + err.toString() };
+  }
 }
 
 /**
