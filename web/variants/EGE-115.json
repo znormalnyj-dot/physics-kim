@@ -1,166 +1,193 @@
 {
-  "variant_id": "EGE-111",
+  "variant_id": "EGE-115",
   "exam": "EGE",
-  "title": "Тренировочный вариант №111",
+  "title": "Тренировочный вариант №115",
   "duration_minutes": 235,
   "tasks": [
     {
       "num": 1,
       "part": 1,
+      "kim_line": 1,
       "rule": "numeric",
       "max_points": 1,
-      "unit": "м/с"
+      "unit": "см"
     },
     {
       "num": 2,
       "part": 1,
+      "kim_line": 2,
       "rule": "numeric",
       "max_points": 1
     },
     {
       "num": 3,
       "part": 1,
+      "kim_line": 3,
       "rule": "numeric",
-      "max_points": 1
+      "max_points": 1,
+      "unit": "м/с"
     },
     {
       "num": 4,
       "part": 1,
+      "kim_line": 4,
       "rule": "numeric",
       "max_points": 1,
-      "unit": "Дж"
+      "unit": "Гц"
     },
     {
       "num": 5,
       "part": 1,
-      "rule": "numeric",
-      "max_points": 1
+      "kim_line": 5,
+      "rule": "unordered_set",
+      "max_points": 2
     },
     {
       "num": 6,
       "part": 1,
-      "rule": "numeric",
-      "max_points": 1,
-      "unit": "Н"
+      "kim_line": 6,
+      "rule": "ordered_sequence",
+      "max_points": 2
     },
     {
       "num": 7,
       "part": 1,
+      "kim_line": 7,
       "rule": "numeric",
       "max_points": 1
     },
     {
       "num": 8,
       "part": 1,
+      "kim_line": 8,
       "rule": "numeric",
-      "max_points": 1
+      "max_points": 1,
+      "unit": "\\%"
     },
     {
       "num": 9,
       "part": 1,
+      "kim_line": 9,
       "rule": "unordered_set",
       "max_points": 2
     },
     {
       "num": 10,
       "part": 1,
-      "rule": "numeric",
-      "max_points": 1
+      "kim_line": 10,
+      "rule": "ordered_sequence",
+      "max_points": 2
     },
     {
       "num": 11,
       "part": 1,
-      "rule": "unordered_set",
-      "max_points": 2
+      "kim_line": 11,
+      "rule": "numeric",
+      "max_points": 1
     },
     {
       "num": 12,
       "part": 1,
-      "rule": "unordered_set",
-      "max_points": 2
+      "kim_line": 12,
+      "rule": "numeric",
+      "max_points": 1,
+      "unit": "см"
     },
     {
       "num": 13,
       "part": 1,
+      "kim_line": 13,
       "rule": "numeric",
-      "max_points": 1,
-      "unit": "Ом"
+      "max_points": 1
     },
     {
       "num": 14,
       "part": 1,
-      "rule": "numeric",
-      "max_points": 1
+      "kim_line": 14,
+      "rule": "unordered_set",
+      "max_points": 2
     },
     {
       "num": 15,
       "part": 1,
-      "rule": "numeric",
-      "max_points": 1
+      "kim_line": 15,
+      "rule": "ordered_sequence",
+      "max_points": 2
     },
     {
       "num": 16,
       "part": 1,
+      "kim_line": 16,
       "rule": "numeric",
       "max_points": 1
     },
     {
       "num": 17,
       "part": 1,
+      "kim_line": 17,
       "rule": "ordered_sequence",
       "max_points": 2
     },
     {
       "num": 18,
       "part": 1,
+      "kim_line": 18,
       "rule": "unordered_set",
       "max_points": 2
     },
     {
       "num": 19,
       "part": 1,
-      "rule": "unordered_set",
-      "max_points": 2
+      "kim_line": 19,
+      "rule": "measurement",
+      "max_points": 1
     },
     {
       "num": 20,
       "part": 1,
+      "kim_line": 20,
       "rule": "unordered_set",
-      "max_points": 2
+      "max_points": 1
     },
     {
       "num": 21,
       "part": 2,
+      "kim_line": 21,
       "rule": "manual",
       "max_points": 3
     },
     {
       "num": 22,
       "part": 2,
+      "kim_line": 22,
       "rule": "manual",
-      "max_points": 3
+      "max_points": 2
     },
     {
       "num": 23,
       "part": 2,
+      "kim_line": 23,
       "rule": "manual",
-      "max_points": 3
+      "max_points": 2
     },
     {
       "num": 24,
       "part": 2,
+      "kim_line": 24,
       "rule": "manual",
       "max_points": 3
     },
     {
       "num": 25,
       "part": 2,
+      "kim_line": 25,
       "rule": "manual",
       "max_points": 3
     },
     {
       "num": 26,
       "part": 2,
+      "kim_line": 26,
       "rule": "manual",
       "max_points": 4
     }
