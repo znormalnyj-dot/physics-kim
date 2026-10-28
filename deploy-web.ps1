@@ -1,4 +1,4 @@
-# Публикация содержимого web/ на GitHub Pages (ветка gh-pages).
+﻿# Публикация содержимого web/ на GitHub Pages (ветка gh-pages).
 # Запуск из папки Physics_KIM_Generator:
 #   powershell -ExecutionPolicy Bypass -File .\deploy-web.ps1
 #
