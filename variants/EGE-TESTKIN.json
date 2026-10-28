@@ -1,0 +1,64 @@
+{
+  "variant_id": "EGE-TESTKIN",
+  "exam": "EGE",
+  "title": "Тренировочный вариант №TESTKIN",
+  "duration_minutes": 235,
+  "tasks": [
+    {
+      "num": 1,
+      "part": 1,
+      "kim_line": 1,
+      "rule": "numeric",
+      "max_points": 1
+    },
+    {
+      "num": 2,
+      "part": 1,
+      "kim_line": 1,
+      "rule": "numeric",
+      "max_points": 1
+    },
+    {
+      "num": 3,
+      "part": 1,
+      "kim_line": 5,
+      "rule": "unordered_set",
+      "max_points": 2
+    },
+    {
+      "num": 4,
+      "part": 1,
+      "kim_line": 5,
+      "rule": "unordered_set",
+      "max_points": 2
+    },
+    {
+      "num": 5,
+      "part": 1,
+      "kim_line": 6,
+      "rule": "ordered_sequence",
+      "max_points": 2
+    },
+    {
+      "num": 6,
+      "part": 1,
+      "kim_line": 6,
+      "rule": "ordered_sequence",
+      "max_points": 2
+    },
+    {
+      "num": 7,
+      "part": 2,
+      "kim_line": 22,
+      "rule": "manual",
+      "max_points": 2
+    },
+    {
+      "num": 8,
+      "part": 2,
+      "kim_line": 22,
+      "rule": "manual",
+      "max_points": 2
+    }
+  ]
+}
