@@ -354,6 +354,50 @@
   }
 
   // ── Карточка задания Части 1 ──────────────────────────────────────────────
+  // Красивое форматирование единиц измерения для веб-бланка.
+  // База хранит единицы в LaTeX-виде ($\text{м/с}^2$, $^\circ\text{C}$, $\%$),
+  // поэтому единицу нужно привести к аккуратному HTML с <sup>.
+  function formatUnitHtml(unit) {
+    let text = String(unit == null ? '' : unit);
+    if (!text.trim()) return '';
+
+    text = text
+      .replace(/\u00a0/g, ' ')
+      .replace(/\u2009|\u202f/g, ' ')
+      .replace(/\\text\s*\{([^{}]*)\}/g, '$1')
+      .replace(/\\mathrm\s*\{([^{}]*)\}/g, '$1')
+      .replace(/\\operatorname\s*\{([^{}]*)\}/g, '$1')
+      // Градусы Цельсия: ^\circ\text{C}, ^{\circ}C, ^\circ C
+      .replace(/\^\s*\{?\s*\\circ\s*\}?\s*\\text\s*\{\s*C\s*\}/gi, '°C')
+      .replace(/\^\s*\{?\s*\\circ\s*\}?\s*C\b/g, '°C')
+      // Остальные градусы
+      .replace(/\^\s*\{?\s*\\circ\s*\}?/g, '°')
+      .replace(/\\circ(?![A-Za-z])/g, '°')
+      .replace(/\\%/g, '%')
+      .replace(/\\cdot(?![A-Za-z])/g, '·')
+      .replace(/\\times(?![A-Za-z])/g, '×')
+      .replace(/\\Omega(?![A-Za-z])/g, 'Ом')
+      .replace(/\\mu(?![A-Za-z])/g, 'мк')
+      .replace(/\\,|\\;|\\!|\\ /g, ' ')
+      .replace(/[{}]/g, '')
+      .replace(/\$/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    // Степени: ^2, ^{2}, ^-1, ^{-1} -> <sup>
+    text = text.replace(/\^\s*\{?\s*(-?\d+)\s*\}?/g, (match, power) =>
+      `<sup>${String(power).replace('-', '−')}</sup>`
+    );
+
+    // Уже готовые юникод-степени
+    text = text
+      .replace(/²/g, '<sup>2</sup>')
+      .replace(/³/g, '<sup>3</sup>')
+      .replace(/⁻¹/g, '<sup>−1</sup>');
+
+    return text;
+  }
+
   function createTaskCard(task) {
     const card = document.createElement('div');
     card.className = 'task-card';
@@ -372,6 +416,8 @@
     }
 
     const pointsText = task.max_points === 1 ? '1 балл' : `${task.max_points} балла`;
+    const unitHtml = formatUnitHtml(task.unit);
+    const unitTitle = unitHtml ? unitHtml.replace(/<[^>]+>/g, '') : '';
 
     card.innerHTML = `
       <div class="task-card-header">
@@ -386,7 +432,7 @@
                placeholder=""
                autocomplete="off"
                spellcheck="false">
-        ${task.unit ? `<span class="fipi-unit-label">${task.unit}</span>` : ''}
+        ${unitHtml ? `<span class="fipi-unit-label" title="${escapeHtml(unitTitle)}">${unitHtml}</span>` : ''}
       </div>
       <div class="task-rule-hint">${hintText}</div>
     `;
@@ -478,38 +524,139 @@
   }
 
   // ── Обработка и сжатие фотографий Части 2 (Canvas) ────────────────────────
+  const MAX_PHOTOS = 10;
+  // Безопасный бюджет пакета: тело запроса в GAS не должно приближаться к лимиту.
+  const PHOTO_BUDGET_BYTES = 7 * 1024 * 1024;
+  let photoQueue = Promise.resolve();
+
+  function photoSignature(file) {
+    return [file.name || 'photo', file.size || 0, file.lastModified || 0].join('|');
+  }
+
+  // 1–4 фото — максимум качества, 5–10 фото — экономный режим.
+  function photoCompressionProfile(count) {
+    return count >= 5
+      ? { maxSide: 1400, quality: 0.68 }
+      : { maxSide: 1600, quality: 0.78 };
+  }
+
   function handleFilesSelected(e) {
     const files = Array.from(e.target.files || []);
-    if (files.length) {
-      processFiles(files);
-    }
-    // Сбрасываем input, чтобы можно было выбрать те же файлы повторно
+    // Сбрасываем input сразу: следующий выбор (лист 2, лист 3) не потеряется.
     e.target.value = '';
+    if (!files.length) return;
+
+    // Очередь не даёт параллельным обработкам затереть друг друга.
+    photoQueue = photoQueue
+      .then(() => processFiles(files))
+      .catch((err) => {
+        console.error('Ошибка обработки фотографий:', err);
+        hideLoading();
+      });
   }
 
   async function processFiles(files) {
-    showLoading('Сжатие и подготовка фотографий...');
-
-    for (const file of files) {
-      if (!file.type.startsWith('image/')) continue;
-
-      try {
-        const compressed = await compressImage(file, 1600, 0.75);
-        attachedPhotos.push({
-          id: 'photo_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
-          originalSize: file.size,
-          compressedSize: compressed.size,
-          dataUrl: compressed.dataUrl
-        });
-      } catch (err) {
-        console.error('Ошибка сжатия:', err);
-        showToast(`Не удалось обработать файл ${file.name}`, 'error');
-      }
+    const images = files.filter((file) => file.type.startsWith('image/'));
+    if (!images.length) {
+      showToast('Выбранные файлы не являются изображениями', 'error');
+      return;
     }
 
-    renderPhotosGallery();
-    updatePart1Progress();
-    hideLoading();
+    const known = new Set(attachedPhotos.map((photo) => photo.signature));
+    const pending = [];
+    let duplicates = 0;
+
+    for (const file of images) {
+      const signature = photoSignature(file);
+      if (known.has(signature)) {
+        duplicates++;
+        continue;
+      }
+      known.add(signature);
+      pending.push(file);
+    }
+
+    const freeSlots = MAX_PHOTOS - attachedPhotos.length;
+    if (freeSlots <= 0) {
+      showToast(`Можно прикрепить не больше ${MAX_PHOTOS} фотографий`, 'error');
+      return;
+    }
+    if (pending.length > freeSlots) {
+      pending.length = freeSlots;
+      showToast(`Лимит ${MAX_PHOTOS} фото: лишние файлы не добавлены`, 'error');
+    }
+    if (!pending.length) {
+      showToast(duplicates ? 'Это фото уже прикреплено' : 'Нечего добавлять', 'error');
+      return;
+    }
+
+    const profile = photoCompressionProfile(attachedPhotos.length + pending.length);
+
+    try {
+      for (let index = 0; index < pending.length; index++) {
+        const file = pending[index];
+        showLoading(`Сжатие фото ${index + 1} из ${pending.length}...`);
+        try {
+          const compressed = await compressImage(file, profile.maxSide, profile.quality);
+          attachedPhotos.push({
+            id: 'photo_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+            name: file.name || `photo_${attachedPhotos.length + 1}.jpg`,
+            signature: photoSignature(file),
+            sourceFile: file,
+            maxSide: profile.maxSide,
+            quality: profile.quality,
+            originalSize: file.size,
+            compressedSize: compressed.size,
+            dataUrl: compressed.dataUrl
+          });
+        } catch (err) {
+          console.error('Ошибка сжатия:', err);
+          showToast(`Не удалось обработать файл ${file.name}`, 'error');
+        }
+        renderPhotosGallery();
+      }
+
+      await shrinkPhotosToBudget();
+    } finally {
+      renderPhotosGallery();
+      updatePart1Progress();
+      saveDraft();
+      hideLoading();
+    }
+  }
+
+  function totalPhotosBytes() {
+    return attachedPhotos.reduce((sum, photo) => sum + (Number(photo.compressedSize) || 0), 0);
+  }
+
+  // Если суммарный пакет превышает бюджет — дожимаем все снимки повторно.
+  async function shrinkPhotosToBudget() {
+    if (!attachedPhotos.length || totalPhotosBytes() <= PHOTO_BUDGET_BYTES) return;
+
+    let profile = { maxSide: 1200, quality: 0.62 };
+    let guard = 0;
+
+    while (totalPhotosBytes() > PHOTO_BUDGET_BYTES && guard < 4) {
+      showLoading('Оптимизация пакета фотографий...');
+      for (const photo of attachedPhotos) {
+        if (!photo.sourceFile) continue;
+        try {
+          const compressed = await compressImage(photo.sourceFile, profile.maxSide, profile.quality);
+          photo.dataUrl = compressed.dataUrl;
+          photo.compressedSize = compressed.size;
+          photo.maxSide = profile.maxSide;
+          photo.quality = profile.quality;
+        } catch (err) {
+          console.error('Ошибка дополнительного сжатия:', err);
+        }
+      }
+      profile = { maxSide: 1000, quality: Math.max(0.45, profile.quality - 0.08) };
+      guard++;
+    }
+
+    if (totalPhotosBytes() > PHOTO_BUDGET_BYTES) {
+      showToast('Не удалось уложиться в лимит. Прикрепите меньше фотографий.', 'error');
+    }
   }
 
   function compressImage(file, maxSide, quality) {
@@ -558,6 +705,24 @@
     });
   }
 
+  function movePhoto(index, delta) {
+    const target = index + delta;
+    if (target < 0 || target >= attachedPhotos.length) return;
+    const moved = attachedPhotos.splice(index, 1)[0];
+    attachedPhotos.splice(target, 0, moved);
+    renderPhotosGallery();
+    updatePart1Progress();
+    saveDraft();
+  }
+
+  function removePhoto(index) {
+    if (index < 0 || index >= attachedPhotos.length) return;
+    attachedPhotos.splice(index, 1);
+    renderPhotosGallery();
+    updatePart1Progress();
+    saveDraft();
+  }
+
   function renderPhotosGallery() {
     elements.photosGallery.innerHTML = '';
 
@@ -566,29 +731,35 @@
       card.className = 'photo-card';
 
       const origMb = (photo.originalSize / (1024 * 1024)).toFixed(1);
-      const compKb = Math.round(photo.compressedSize / 1024);
+      const compKb = Math.max(1, Math.round(photo.compressedSize / 1024));
+      const last = idx === attachedPhotos.length - 1;
 
       card.innerHTML = `
         <div class="photo-thumb-wrap">
           <img src="${photo.dataUrl}" alt="Страница ${idx + 1}" class="photo-thumb">
         </div>
-        <button type="button" class="photo-remove-btn" title="Удалить фото">
+        <button type="button" class="photo-remove-btn" title="Удалить фото" aria-label="Удалить фото">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
-        <div class="photo-info">
+        <div class="photo-move-row">
+          <button type="button" class="photo-move-btn" data-photo-move="-1" title="Переместить раньше"${idx === 0 ? ' disabled' : ''}>←</button>
           <span class="photo-page-badge">Стр. ${idx + 1}</span>
+          <button type="button" class="photo-move-btn" data-photo-move="1" title="Переместить позже"${last ? ' disabled' : ''}>→</button>
+        </div>
+        <div class="photo-info">
           <span class="photo-size-badge">${origMb} МБ → ${compKb} КБ</span>
         </div>
       `;
 
-      card.querySelector('.photo-remove-btn').addEventListener('click', () => {
-        attachedPhotos.splice(idx, 1);
-        renderPhotosGallery();
-        updatePart1Progress();
-      });
+      card.querySelector('.photo-remove-btn').addEventListener('click', () => removePhoto(idx));
+
+      const left = card.querySelector('[data-photo-move="-1"]');
+      const right = card.querySelector('[data-photo-move="1"]');
+      if (left) left.addEventListener('click', () => movePhoto(idx, -1));
+      if (right) right.addEventListener('click', () => movePhoto(idx, 1));
 
       elements.photosGallery.appendChild(card);
     });
@@ -636,7 +807,7 @@
     elements.submitBtn.disabled = true;
     elements.finalSubmitBtn.disabled = true;
 
-    showLoading('Отправка работы и автоматическая проверка ответов...');
+    showLoading('Отправка работы на сервер...');
 
     const studentName = elements.studentNameInput.value.trim();
     const studentGrade = elements.studentGradeInput.value.trim();
@@ -651,9 +822,19 @@
       answers: studentAnswers,
       photos: attachedPhotos.map((p, idx) => ({
         page: idx + 1,
+        name: p.name,
         dataUrl: p.dataUrl
       }))
     };
+
+    const payloadSize = JSON.stringify(payload).length;
+    if (payloadSize > 9 * 1024 * 1024) {
+      elements.submitBtn.disabled = false;
+      elements.finalSubmitBtn.disabled = false;
+      hideLoading();
+      showToast('Пакет с фотографиями слишком большой. Удалите лишние снимки и попробуйте снова.', 'error');
+      return;
+    }
 
     const webhookUrl = config.GAS_WEBHOOK_URL || localStorage.getItem('GAS_WEBHOOK_URL') || '';
 

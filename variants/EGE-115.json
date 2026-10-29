@@ -62,7 +62,7 @@
       "kim_line": 8,
       "rule": "numeric",
       "max_points": 1,
-      "unit": "\\%"
+      "unit": "%"
     },
     {
       "num": 9,
