@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light">
   <title>Конструктор вариантов КИМ — панель преподавателя</title>
+  <!-- KaTeX: настоящий рендер формул ($...$ / $$...$$), как в PDF.
+       Основной CDN — jsDelivr, резервный — unpkg. Если оба недоступны,
+       ниже в коде остаётся прежнийregex-рендер как безопасный fallback. -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+        onerror="this.onerror=null;this.href='https://unpkg.com/katex@0.16.11/dist/katex.min.css'">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
+          onerror="document.write('<script src=&quot;https://unpkg.com/katex@0.16.11/dist/katex.min.js&quot;><\/script>')"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+          onerror="document.write('<script src=&quot;https://unpkg.com/katex@0.16.11/dist/contrib/auto-render.min.js&quot;><\/script>')"></script>
   <style>
     :root {
       --bg: #eef2f9;
@@ -2246,6 +2255,126 @@
       font-size: 11px;
     }
 
+    .part1-item {
+      cursor: pointer;
+      transition: box-shadow 0.12s ease, transform 0.12s ease;
+    }
+
+    .part1-item:hover,
+    .part1-item:focus-visible {
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35);
+      outline: none;
+    }
+
+    .part1-item.is-active {
+      box-shadow: 0 0 0 2px var(--blue);
+      background: var(--blue-soft);
+    }
+
+    /* Предпросмотр выбранного задания Части 1 */
+    .part1-preview {
+      margin-top: 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: 14px;
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .part1-preview[hidden] { display: none; }
+
+    .part1-preview-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      background: var(--surface-soft);
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .part1-preview-head .part1-preview-close {
+      margin-left: auto;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0 4px;
+    }
+
+    .part1-preview-body {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .part1-preview-condition,
+    .part1-preview-solution {
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: var(--ink-soft);
+    }
+
+    .part1-preview-answers {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 8px;
+    }
+
+    .part1-preview-answers > div {
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--surface-soft);
+      font-size: 12px;
+    }
+
+    .part1-preview-answers span {
+      display: block;
+      color: var(--muted);
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 2px;
+    }
+
+    .part1-preview-answers b { font-size: 13px; }
+
+    .part1-preview-solution {
+      border-top: 1px dashed var(--line);
+      padding-top: 9px;
+    }
+
+    .part1-preview-solution > summary {
+      cursor: pointer;
+      color: var(--blue);
+      font-weight: 700;
+      font-size: 11.5px;
+      margin-bottom: 6px;
+    }
+
+    /* Таблицы из \begin{tabular} в условиях задач */
+    .task-table {
+      border-collapse: collapse;
+      margin: 8px 0;
+      font-size: 12px;
+      max-width: 100%;
+    }
+
+    .task-table td {
+      border: 1px solid var(--line-strong);
+      padding: 4px 9px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .task-table tr:first-child td { background: var(--surface-soft); font-weight: 700; }
+
     .attempt-task {
       border: 1px solid var(--line);
       border-radius: 13px;
@@ -3005,6 +3134,7 @@
               <span id="attemptPart1Score">—</span>
             </div>
             <div class="part1-list" id="attemptPart1Summary"></div>
+            <div class="part1-preview" id="attemptPart1Preview" hidden></div>
             <div class="part1-legend">
               <span>✓ верно</span>
               <span>✕ ошибка</span>
@@ -3041,9 +3171,12 @@
       <div class="photo-lightbox-bar">
         <span id="photoLightboxName">Фото решения</span>
         <div class="photo-lightbox-actions">
+          <button type="button" data-photo-prev title="Предыдущее фото (←)">←</button>
+          <button type="button" data-photo-next title="Следующее фото (→)">→</button>
           <button type="button" data-photo-zoom="-1" title="Уменьшить">−</button>
           <button type="button" data-photo-zoom="1" title="Увеличить">+</button>
-          <button type="button" data-photo-rotate title="Повернуть на 90°">⟳</button>
+          <button type="button" data-photo-rotate-left title="Повернуть на 90° влево">↺</button>
+          <button type="button" data-photo-rotate-right title="Повернуть на 90° вправо">↻</button>
           <button type="button" data-photo-close title="Закрыть">×</button>
         </div>
       </div>
@@ -3091,7 +3224,9 @@
         search: '',
         current: null,
         scores: {},
-        photo: { src: '', name: '', rotation: 0, zoom: 1 }
+        part1Tasks: [],
+        activePart1: null,
+        photo: { src: '', name: '', index: 0, total: 0, rotation: 0, zoom: 1 }
       };
 
       const PART_LABELS = {
@@ -3188,6 +3323,7 @@
         attemptFolderLink: document.getElementById('attemptFolderLink'),
         attemptPart1Score: document.getElementById('attemptPart1Score'),
         attemptPart1Summary: document.getElementById('attemptPart1Summary'),
+        attemptPart1Preview: document.getElementById('attemptPart1Preview'),
         attemptPart2Score: document.getElementById('attemptPart2Score'),
         attemptPart2Tasks: document.getElementById('attemptPart2Tasks'),
         attemptLiveScore: document.getElementById('attemptLiveScore'),
@@ -4760,6 +4896,171 @@
         return text;
       }
 
+      // ── Настоящий рендер LaTeX (KaTeX) ──────────────────────────────────────
+      // Структурные макросы документа превращаем в HTML, а все формулы
+      // ($...$ и $$...$$) отдаём KaTeX через renderMathInElement.
+      function escapeHtmlEntities(text) {
+        return String(text == null ? '' : text)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function latexTextToHtml(text) {
+        // Сначала экранируем текст, затем вставляем собственные теги.
+        let out = escapeHtmlEntities(text);
+
+        out = out.replace(/\\(?:textbf|bfseries)\s*\{([^{}]*)\}/g, '<b>$1</b>');
+        out = out.replace(/\\(?:textit|emph|itshape)\s*\{([^{}]*)\}/g, '<i>$1</i>');
+        out = out.replace(/\\(?:underline|uline)\s*\{([^{}]*)\}/g, '<u>$1</u>');
+        out = out.replace(/\\(?:texttt|textsf|textrm|textnormal|text|mathrm|operatorname|mbox)\s*\{([^{}]*)\}/g, '$1');
+        out = out.replace(/\\mathbf\s*\{([^{}]*)\}/g, '<b>$1</b>');
+        out = out.replace(/\\mathit\s*\{([^{}]*)\}/g, '<i>$1</i>');
+
+        out = out.replace(/\\%/g, '%')
+          .replace(/\\&amp;/g, '&amp;')
+          .replace(/\\_/g, '_')
+          .replace(/\\#/g, '#')
+          .replace(/\\\$/g, '$');
+
+        out = out.replace(/\\(?:circ|degree)(?=\s*[A-Za-zА-Яа-я])/g, '°');
+
+        // (?![A-Za-z]) — обязательно, иначе \leavevmode станет ≤avevmode.
+        out = out.replace(/\\([A-Za-z]+)(?![A-Za-z])/g, function (match, name) {
+          if (Object.prototype.hasOwnProperty.call(LATEX_SYMBOLS_CLIENT, name)) {
+            return LATEX_SYMBOLS_CLIENT[name];
+          }
+          return ' ';
+        });
+
+        out = out.replace(/\^\{([^{}]*)\}/g, '<sup>$1</sup>');
+        out = out.replace(/\^([0-9A-Za-z+\-])/g, '<sup>$1</sup>');
+        out = out.replace(/_\{([^{}]*)\}/g, '<sub>$1</sub>');
+        out = out.replace(/_([0-9A-Za-z+\-])/g, '<sub>$1</sub>');
+
+        out = out.replace(/[{}]/g, '').replace(/\$/g, '');
+        out = out.replace(/\\\\/g, '<br>').replace(/\n{2,}/g, '<br><br>').replace(/\n/g, '<br>');
+        out = out.replace(/[ \t]{2,}/g, ' ');
+        return out;
+      }
+
+      function latexTablesToHtml(text, tableSink) {
+        return text.replace(
+          /\\begin\{tabular\}\{([^{}]*)\}([\s\S]*?)\\end\{tabular\}/g,
+          function (match, spec, body) {
+            const rows = body
+              .split(/\\\\\s*(?:\[[^\]]*\])?/)
+              .map(function (row) {
+                return row.replace(/\\hline/g, '').replace(/\\cline\s*\{[^{}]*\}/g, '').trim();
+              })
+              .filter(function (row) { return row.length > 0; });
+
+            if (!rows.length) return '';
+
+            const htmlRows = rows.map(function (row) {
+              const cells = row.split('&').map(function (cell) {
+                return '<td>' + latexTextToHtml(cell.trim()) + '</td>';
+              }).join('');
+              return '<tr>' + cells + '</tr>';
+            }).join('');
+
+            tableSink.push('<table class="task-table">' + htmlRows + '</table>');
+            return '\u0002TABLE' + (tableSink.length - 1) + '\u0002';
+          }
+        );
+      }
+
+      // Приводим «сырые» градусы Цельсия к виду, который понимает KaTeX.
+      // $15^\circC$ без \text{} даёт красную ошибку парсера.
+      function normalizeMathSource(expr) {
+        return String(expr || '')
+          .replace(/\^\s*\{\s*\\circ\s*\}\s*C(?![A-Za-zА-Яа-я])/g, '^{\\circ}\\text{C}')
+          .replace(/\^\s*\\circ\s*C(?![A-Za-zА-Яа-я])/g, '^\\circ\\text{C}')
+          .replace(/\\circ\s*C(?![A-Za-zА-Яа-я])/g, '\\circ\\text{C}');
+      }
+
+      function prepareLatexHtml(value) {
+        let text = stripLatexServiceCommands(String(value || ''));
+        if (!text.trim()) return '';
+
+        // 1. Прячем формулы: внутри них нельзя экранировать & и <.
+        const math = [];
+        text = text.replace(/\$\$([\s\S]*?)\$\$|\$([^$]*?)\$/g, function (match, display, inline) {
+          const isDisplay = display != null;
+          const expr = normalizeMathSource(isDisplay ? display : inline);
+          math.push(isDisplay ? '$$' + expr + '$$' : '$' + expr + '$');
+          return '\u0001MATH' + (math.length - 1) + '\u0001';
+        });
+
+        // 2. Картинки — отдельными токенами, чтобы не экранировать HTML.
+        const images = [];
+        const imageToken = function (name, inline) {
+          const html = latexImageHtmlClient(name, inline);
+          if (!html) return ' ';
+          images.push(html);
+          return '\u0000KIMIMG' + (images.length - 1) + '\u0000';
+        };
+        text = text.replace(/\\kimimg\s*\{([^{}]*)\}/g, function (match, name) {
+          return imageToken(name, false);
+        });
+        text = text.replace(/\\includegraphics\*?\s*(?:\[([^\]]*)\])?\s*\{([^{}]*)\}/g, function (match, options, name) {
+          return imageToken(name, Boolean(options && /height\s*=/.test(options)));
+        });
+
+        // 3. Таблицы — в отдельные токены (их ячейки уже готовый HTML).
+        const tables = [];
+        text = latexTablesToHtml(text, tables);
+
+        // 4. Остальной текст — в HTML.
+        let html = latexTextToHtml(text);
+
+        // 5. Возвращаем таблицы, формулы и картинки.
+        html = html.replace(/\u0002TABLE(\d+)\u0002/g, function (match, index) {
+          return tables[Number(index)] || '';
+        });
+        html = html.replace(/\u0001MATH(\d+)\u0001/g, function (match, index) {
+          return math[Number(index)] || '';
+        });
+        html = html.replace(/\u0000KIMIMG(\d+)\u0000/g, function (match, index) {
+          return images[Number(index)] || '';
+        });
+
+        return html.trim();
+      }
+
+      function formatTaskContent(value) {
+        const raw = String(value == null ? '' : value);
+        if (!raw.trim()) {
+          return '<span class="attempt-photo-empty" style="display:block">Не указано</span>';
+        }
+        if (window.katex && typeof window.katex.render === 'function') {
+          return prepareLatexHtml(raw);
+        }
+        // KaTeX не загрузился — остаётся прежний regex-рендер.
+        return formatLatexToHtml(raw);
+      }
+
+      function typesetMathIn(element) {
+        if (!element || typeof window.renderMathInElement !== 'function') return;
+        try {
+          window.renderMathInElement(element, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '$', right: '$', display: false },
+              { left: '\\(', right: '\\)', display: false },
+              { left: '\\[', right: '\\]', display: true }
+            ],
+            throwOnError: false,
+            strict: false,
+            trust: true,
+            macros: { '\\R': '\\mathbb{R}' }
+          });
+        } catch (err) {
+          console.warn('KaTeX: не удалось отрендерить формулы', err);
+        }
+      }
+
       function formatLatexToHtml(value) {
         let text = stripLatexServiceCommands(value);
         if (!text.trim()) return '<span class="attempt-photo-empty" style="display:block">Не указано</span>';
@@ -5136,6 +5437,11 @@
         const maxPart1 = tasks.reduce(function (sum, task) { return sum + (Number(task.max_points) || 0); }, 0);
         els.attemptPart1Score.textContent = (attempt.score_part1 || 0) + ' / ' + (maxPart1 || attempt.max_part1 || 0);
 
+        attemptState.part1Tasks = tasks;
+        attemptState.activePart1 = null;
+        els.attemptPart1Preview.hidden = true;
+        els.attemptPart1Preview.innerHTML = '';
+
         if (!attempt.key_found) {
           els.attemptPart1Summary.innerHTML =
             '<div class="attempt-photo-empty">Ключ варианта не найден. ' +
@@ -5147,7 +5453,7 @@
           return;
         }
 
-        els.attemptPart1Summary.innerHTML = tasks.map(function (task) {
+        els.attemptPart1Summary.innerHTML = tasks.map(function (task, index) {
           const key = String(task.num);
           const detail = attempt.part1_summary.find(function (item) { return String(item.num) === key; });
           const points = detail && detail.points != null ? detail.points : null;
@@ -5161,13 +5467,65 @@
             'Правильный ответ: ' + correctAnswer,
             'Балл: ' + (points == null ? 'нет данных' : points + ' из ' + task.max_points)
           ].join('\n');
-          return '<span class="part1-item ' + cls + '" title="' + esc(tooltip) + '">' +
+          return '<span class="part1-item ' + cls + '" role="button" tabindex="0"' +
+            ' data-part1-index="' + index + '" title="' + esc(tooltip) + '">' +
             '<span>№' + esc(task.num) + '</span>' +
             '<b>' + esc(studentAnswer || 'пусто') + '</b>' +
             '<span class="part1-key">ключ: ' + esc(correctAnswer) + '</span>' +
             '<span>' + mark + ' ' + (points == null ? '' : esc(points) + '/' + esc(task.max_points)) + '</span>' +
             '</span>';
         }).join('');
+      }
+
+      function renderPart1Preview(index) {
+        const task = (attemptState.part1Tasks || [])[Number(index)];
+        if (!task) return;
+
+        attemptState.activePart1 = Number(index);
+        Array.prototype.forEach.call(
+          els.attemptPart1Summary.querySelectorAll('[data-part1-index]'),
+          function (item) {
+            item.classList.toggle('is-active', Number(item.dataset.part1Index) === Number(index));
+          }
+        );
+
+        const detail = (attemptState.current && attemptState.current.part1_summary || [])
+          .find(function (item) { return String(item.num) === String(task.num); });
+        const points = detail && detail.points != null ? detail.points : null;
+        const studentAnswer = detail && detail.student_answer ? String(detail.student_answer) : '—';
+        const correctAnswer = task.answer == null || task.answer === '' ? '—' : String(task.answer);
+
+        const condition = task.condition || task.condition_html || 'Условие не найдено в базе задач.';
+        const solution = task.solution || task.solution_html || 'Решение не указано.';
+        const unit = task.unit ? formatTaskContent(task.unit) : '';
+
+        els.attemptPart1Preview.innerHTML =
+          '<div class="part1-preview-head">' +
+            '<span>№ ' + esc(task.num) + ' · предпросмотр</span>' +
+            (task.kim_line ? '<span class="attempt-task-chip">Линия ' + esc(task.kim_line) + '</span>' : '') +
+            (unit ? '<span class="attempt-task-chip">' + unit + '</span>' : '') +
+            '<button type="button" class="part1-preview-close" data-part1-close title="Свернуть">×</button>' +
+          '</div>' +
+          '<div class="part1-preview-body">' +
+            '<div class="part1-preview-condition"><b>Условие:</b> ' + formatTaskContent(condition) + '</div>' +
+            '<div class="part1-preview-answers">' +
+              '<div><span>Ответ ученика</span><b>' + esc(studentAnswer) + '</b></div>' +
+              '<div><span>Эталонный ответ</span><b>' + formatTaskContent(correctAnswer) + '</b></div>' +
+              '<div><span>Балл</span><b>' +
+                (points == null ? '—' : esc(points) + ' из ' + esc(task.max_points)) + '</b></div>' +
+            '</div>' +
+            '<details class="part1-preview-solution"' + (task.part === 1 ? '' : '') + '>' +
+              '<summary>Показать решение</summary>' +
+              '<div class="latex-content">' + formatTaskContent(solution) + '</div>' +
+            '</details>' +
+          '</div>';
+
+        els.attemptPart1Preview.hidden = false;
+        typesetMathIn(els.attemptPart1Preview);
+
+        if (typeof els.attemptPart1Preview.scrollIntoView === 'function') {
+          els.attemptPart1Preview.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
       }
 
       function renderAttemptPart2(attempt) {
@@ -5218,16 +5576,18 @@
               '<div class="attempt-task-meta">' + meta.join('') + '</div>' +
             '</div>' +
             '<div class="attempt-task-condition"><b>Условие:</b> ' +
-              (task.condition_html || formatLatexToHtml(task.condition || 'Условие не найдено в базе задач.')) + '</div>' +
+              formatTaskContent(task.condition || task.condition_html || 'Условие не найдено в базе задач.') + '</div>' +
             '<div class="attempt-task-subhead">Эталонное решение / критерии</div>' +
             '<div class="latex-content">' +
-              (task.solution_html || formatLatexToHtml(task.solution || 'Решение не указано.')) + '</div>' +
+              formatTaskContent(task.solution || task.solution_html || 'Решение не указано.') + '</div>' +
             '<div class="attempt-task-answer">Ответ: ' +
-              (task.answer_html || formatLatexToHtml(task.answer == null || task.answer === '' ? '—' : task.answer)) + '</div>' +
+              formatTaskContent(task.answer == null || task.answer === '' ? '—' : task.answer) + '</div>' +
             '<div class="attempt-score-row"><span class="attempt-score-label">Балл за задание:</span>' +
               scoreButtons.join('') + '</div>' +
             '</article>';
         }).join('');
+
+        typesetMathIn(els.attemptPart2Tasks);
       }
 
       function updateAttemptLiveScore() {
@@ -5321,9 +5681,16 @@
       }
 
       function openPhotoLightbox(index) {
+        showLightboxPhoto(Number(index));
+      }
+
+      function showLightboxPhoto(index) {
         const attempt = attemptState.current;
         const photos = attempt && Array.isArray(attempt.photos) ? attempt.photos : [];
-        const photo = photos[Number(index)];
+        if (!photos.length) return;
+        const total = photos.length;
+        const safeIndex = ((Number(index) % total) + total) % total;
+        const photo = photos[safeIndex];
         if (!photo) return;
         const candidates = photoCandidates(photo);
         const src = candidates[0] || '';
@@ -5331,16 +5698,24 @@
 
         attemptState.photo = {
           src: src,
-          name: photo.name || ('Фото ' + (Number(index) + 1)),
+          name: photo.name || ('Фото ' + (safeIndex + 1)),
+          index: safeIndex,
+          total: total,
           rotation: 0,
           zoom: 1
         };
-        els.photoLightboxName.textContent = attemptState.photo.name;
+        els.photoLightboxName.textContent =
+          attemptState.photo.name + ' · ' + (safeIndex + 1) + ' из ' + total;
         els.photoLightboxImg.setAttribute('data-photo-fallback', JSON.stringify(candidates.slice(1)));
         els.photoLightboxImg.onerror = function () { advancePhotoSrc(this); };
         els.photoLightboxImg.src = src;
         applyPhotoTransform();
         els.photoLightbox.hidden = false;
+      }
+
+      function stepLightboxPhoto(delta) {
+        if (!attemptState.photo || !attemptState.photo.total) return;
+        showLightboxPhoto(attemptState.photo.index + delta);
       }
 
       function applyPhotoTransform() {
@@ -5353,7 +5728,7 @@
         if (!els.photoLightbox || els.photoLightbox.hidden) return;
         els.photoLightbox.hidden = true;
         els.photoLightboxImg.removeAttribute('src');
-        attemptState.photo = { src: '', name: '', rotation: 0, zoom: 1 };
+        attemptState.photo = { src: '', name: '', index: 0, total: 0, rotation: 0, zoom: 1 };
       }
 
       // ── События ─────────────────────────────────────────────────────────────
@@ -5402,6 +5777,31 @@
           openPhotoLightbox(Number(card.dataset.photoIndex));
         });
 
+        els.attemptPart1Summary.addEventListener('click', function (event) {
+          const item = event.target.closest('[data-part1-index]');
+          if (!item) return;
+          renderPart1Preview(Number(item.dataset.part1Index));
+        });
+
+        els.attemptPart1Summary.addEventListener('keydown', function (event) {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          const item = event.target.closest('[data-part1-index]');
+          if (!item) return;
+          event.preventDefault();
+          renderPart1Preview(Number(item.dataset.part1Index));
+        });
+
+        els.attemptPart1Preview.addEventListener('click', function (event) {
+          if (!event.target.closest('[data-part1-close]')) return;
+          els.attemptPart1Preview.hidden = true;
+          els.attemptPart1Preview.innerHTML = '';
+          attemptState.activePart1 = null;
+          Array.prototype.forEach.call(
+            els.attemptPart1Summary.querySelectorAll('.part1-item.is-active'),
+            function (item) { item.classList.remove('is-active'); }
+          );
+        });
+
         els.attemptPart2Tasks.addEventListener('click', function (event) {
           const button = event.target.closest('[data-score-task]');
           if (!button || !attemptState.current) return;
@@ -5425,6 +5825,14 @@
             closePhotoLightbox();
             return;
           }
+          if (event.target.closest('[data-photo-prev]')) {
+            stepLightboxPhoto(-1);
+            return;
+          }
+          if (event.target.closest('[data-photo-next]')) {
+            stepLightboxPhoto(1);
+            return;
+          }
           const zoomButton = event.target.closest('[data-photo-zoom]');
           if (zoomButton) {
             const delta = Number(zoomButton.dataset.photoZoom) || 0;
@@ -5432,18 +5840,37 @@
             applyPhotoTransform();
             return;
           }
-          if (event.target.closest('[data-photo-rotate]')) {
+          if (event.target.closest('[data-photo-rotate-left]')) {
+            attemptState.photo.rotation = (attemptState.photo.rotation + 270) % 360;
+            applyPhotoTransform();
+            return;
+          }
+          if (event.target.closest('[data-photo-rotate-right]')) {
             attemptState.photo.rotation = (attemptState.photo.rotation + 90) % 360;
             applyPhotoTransform();
           }
         });
 
         document.addEventListener('keydown', function (event) {
-          if (event.key !== 'Escape') return;
-          if (!els.photoLightbox.hidden) {
+          if (els.photoLightbox.hidden) {
+            if (event.key !== 'Escape') return;
+            if (!els.attemptModal.hidden) closeAttemptReview();
+            return;
+          }
+
+          // Стрелки переключают страницы решения, пока открыт просмотр фото.
+          if (event.key === 'ArrowLeft') {
+            event.preventDefault();
+            stepLightboxPhoto(-1);
+            return;
+          }
+          if (event.key === 'ArrowRight') {
+            event.preventDefault();
+            stepLightboxPhoto(1);
+            return;
+          }
+          if (event.key === 'Escape') {
             closePhotoLightbox();
-          } else if (!els.attemptModal.hidden) {
-            closeAttemptReview();
           }
         });
 

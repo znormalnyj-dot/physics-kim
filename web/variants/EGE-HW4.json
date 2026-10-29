@@ -18,7 +18,7 @@
       "kim_line": 1,
       "rule": "numeric",
       "max_points": 1,
-      "unit": "м"
+      "unit": "м/с²"
     },
     {
       "num": 3,
@@ -26,7 +26,7 @@
       "kim_line": 1,
       "rule": "numeric",
       "max_points": 1,
-      "unit": "м"
+      "unit": "м/с²"
     },
     {
       "num": 4,
@@ -41,7 +41,8 @@
       "part": 1,
       "kim_line": 1,
       "rule": "numeric",
-      "max_points": 1
+      "max_points": 1,
+      "unit": "м/с"
     },
     {
       "num": 6,
