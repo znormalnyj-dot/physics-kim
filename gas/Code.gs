@@ -268,26 +268,32 @@ function processStudentAttempt(data) {
 
     data.photos.forEach(function (photoObj, idx) {
       if (!photoObj || !photoObj.dataUrl) return;
-      const parts = String(photoObj.dataUrl).split(",");
-      const mimeMatch = String(photoObj.dataUrl).match(/data:(.*);base64/);
-      if (parts.length < 2) return;
-      const mimeType = (mimeMatch && mimeMatch[1]) || "image/jpeg";
-      const blob = Utilities.newBlob(Utilities.base64Decode(parts[1]), mimeType, `Part2_Page_${idx + 1}.jpg`);
-      const file = studentFolder.createFile(blob);
-
       try {
-        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-      } catch (shareErr) {
-        // Домен может запрещать публикацию по ссылке — работу всё равно сохраняем.
-      }
+        const parts = String(photoObj.dataUrl).split(",");
+        const mimeMatch = String(photoObj.dataUrl).match(/data:(.*);base64/);
+        if (parts.length < 2) return;
+        const mimeType = (mimeMatch && mimeMatch[1]) || "image/jpeg";
+        const blob = Utilities.newBlob(Utilities.base64Decode(parts[1]), mimeType, `Part2_Page_${idx + 1}.jpg`);
+        const file = studentFolder.createFile(blob);
 
-      const id = file.getId();
-      photos.push({
-        name: file.getName(),
-        fileId: id,
-        viewUrl: "https://drive.google.com/file/d/" + id + "/view",
-        thumbUrl: "https://drive.google.com/thumbnail?id=" + id + "&sz=w1600"
-      });
+        try {
+          file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        } catch (shareErr) {
+          // Домен может запрещать публикацию по ссылке — работу всё равно сохраняем.
+        }
+
+        const id = file.getId();
+        photos.push({
+          name: String(photoObj.name || file.getName()),
+          fileId: id,
+          mimeType: mimeType,
+          viewUrl: "https://drive.google.com/file/d/" + id + "/view",
+          thumbUrl: "https://drive.google.com/thumbnail?id=" + id + "&sz=w1600"
+        });
+      } catch (photoErr) {
+        // Один повреждённый снимок не должен ронять отправку всей работы.
+        console.warn("Не удалось сохранить фото " + (idx + 1) + ": " + photoErr);
+      }
     });
 
     folderUrl = studentFolder.getUrl();

@@ -396,8 +396,21 @@ const { execSync } = require('child_process');
       .replace(/\\ChemForm(?![A-Za-z])/g, '');
   }
 
+  // Кириллица внутри $...$ в T2A/pdflatex не работает («\cyrh invalid in math mode»).
+  // Оборачиваем кириллические фрагменты в \text{...}, не трогая готовые \text{...}.
+  function protectCyrillicInMath(value) {
+    const wrap = (body) => String(body || '').replace(
+      /(\\text\s*\{[^{}]*\}|\\mathrm\s*\{[^{}]*\}|\\operatorname\s*\{[^{}]*\})|([А-Яа-яЁё]+)/g,
+      (match, safe, cyrillic) => (safe ? safe : `\\text{${cyrillic}}`)
+    );
+    return String(value || '').replace(/\$\$([\s\S]*?)\$\$|\$([^$]*?)\$/g, (match, display, inline) => {
+      if (display != null) return `$$${wrap(display)}$$`;
+      return `$${wrap(inline)}$`;
+    });
+  }
+
   function sanitizeLatex(value) {
-    return fixKnownLatexTypos(stripInvisibleChars(value))
+    const result = fixKnownLatexTypos(stripInvisibleChars(value))
       .replace(/[α-ωΑ-Ωµ]/g, (ch) => `\\ensuremath{${GREEK_TO_LATEX[ch] || ch}}`)
       .replace(/²/g, '\\ensuremath{{}^{2}}')
       .replace(/³/g, '\\ensuremath{{}^{3}}')
@@ -421,16 +434,68 @@ const { execSync } = require('child_process');
       .replace(/–/g, '-')
       .replace(/·/g, '\\ensuremath{\\cdot}')
       .replace(/±/g, '\\ensuremath{\\pm}');
+    return protectCyrillicInMath(result);
+  }
+
+  // Каноническая LaTeX-запись единицы измерения для PDF-бланка.
+  // Гарантирует, что кириллица всегда внутри \text{...}, а степень — в математике.
+  function normalizeUnitLatex(unit) {
+    let u = stripInvisibleChars(String(unit == null ? '' : unit)).trim();
+    if (!u) return '';
+    u = u.replace(/\u00A0/g, ' ');
+
+    if (u.includes('$')) {
+      return u
+        .replace(/\^\s*\{\s*2\s*\}/g, '^{2}')
+        .replace(/\^2(?![0-9])/g, '^{2}')
+        .replace(/\^\s*\{\s*3\s*\}/g, '^{3}')
+        .replace(/\^3(?![0-9])/g, '^{3}')
+        .replace(/\^\s*\{\s*-1\s*\}/g, '^{-1}');
+    }
+
+    if (u === '%' || u === '\\%') return '$\\%$';
+    if (/^(°C|\\degree\s*C|\\circ\s*C)$/i.test(u)) return '$^\\circ\\text{C}$';
+    if (u === 'Ом' || u === '\\Omega') return '$\\text{Ом}$';
+
+    let power = '';
+    const powMatch = u.match(/^(.*?)(?:\^\{?([-0-9]+)\}?|([²³]|⁻¹))$/);
+    if (powMatch) {
+      u = powMatch[1].trim();
+      if (powMatch[2]) power = powMatch[2];
+      else if (powMatch[3] === '²') power = '2';
+      else if (powMatch[3] === '³') power = '3';
+      else if (powMatch[3] === '⁻¹') power = '-1';
+    }
+    u = u.replace(/[{}]/g, '').trim();
+    if (!u) return '';
+    return `$\\text{${u}}${power ? `^{${power}}` : ''}$`;
   }
 
   // Очистка единиц измерения для отображения в веб-бланке
   function cleanUnitForWeb(unit) {
     if (!unit) return '';
-    return stripInvisibleChars(unit)
-      .replace(/\\text\{([^}]+)\}/g, '$1')
-      .replace(/[$]/g, '')
-      .replace(/\^2/g, '²')
-      .replace(/\^3/g, '³')
+    let text = stripInvisibleChars(unit)
+      .replace(/\\text\{([^}]*)\}/g, '$1')
+      .replace(/\\mathrm\{([^}]*)\}/g, '$1')
+      .replace(/\\operatorname\{([^}]*)\}/g, '$1')
+      .replace(/\^\s*\{?\s*\\circ\s*\}?\s*\\text\s*\{\s*C\s*\}/gi, '°C')
+      .replace(/\^\s*\{?\s*\\circ\s*\}?\s*C\b/g, '°C')
+      .replace(/\^\s*\{?\s*\\circ\s*\}?/g, '°')
+      .replace(/\\circ/g, '°')
+      .replace(/\\%/g, '%')
+      .replace(/\\cdot(?![A-Za-z])/g, '·')
+      .replace(/\\Omega(?![A-Za-z])/g, 'Ом')
+      .replace(/[${}]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    text = text.replace(/\^\s*\{?\s*(-?\d+)\s*\}?/g, (match, power) => {
+      const map = { '2': '²', '3': '³', '-1': '⁻¹' };
+      return map[power] || `^${power}`;
+    });
+    return text
+      .replace(/²/g, '²')
+      .replace(/³/g, '³')
       .trim();
   }
 
@@ -589,7 +654,7 @@ const { execSync } = require('child_process');
   // Компактные рисунки: старые записи с центрированным \includegraphics
   // автоматически переводим на макрос \kimimg из fipi_style.sty.
   function compactFigureLatex(latex) {
-    return String(latex || '')
+    let text = String(latex || '')
       .replace(
         /\\begin\{center\}\s*\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}\s*\\end\{center\}/g,
         (_m, imgPath) => `\\kimimg{${imgPath}}`
@@ -599,6 +664,23 @@ const { execSync } = require('child_process');
       // Вложенные center в ячейках таблицы оставляют «Misplaced \cr».
       .replace(/\\begin\{center\}/g, '')
       .replace(/\\end\{center\}/g, '');
+
+    // Два рисунка подряд — ставим рядом, а не друг под другом:
+    // иначе задача с графиками А и Б раздувается на полстраницы.
+    text = text.replace(
+      /\\kimimg\{([^{}]+)\}\s*(?:\\leavevmode\s*)?\\kimimg\{([^{}]+)\}/g,
+      (_m, first, second) => `\\kimimgs{${first}}{${second}}`
+    );
+
+    // Мелкие картинки внутри формул (height=1.4em) — единый неразрывный бокс.
+    // Разрешаем перенос строки после каждой, иначе три картинки подряд
+    // вылезают за правое поле (Overfull \hbox 60+ pt).
+    text = text.replace(
+      /(\\includegraphics(?:\[[^\]]*\])?\{[^{}]+\})/g,
+      '$1\\allowbreak{}'
+    );
+
+    return text;
   }
 
   for (const t of selectedTasks) {
@@ -617,7 +699,7 @@ const { execSync } = require('child_process');
       } else if (task.grading_rule === 'ordered_sequence') {
         answerBlock = `\\ansAB`;
       } else {
-        answerBlock = `\\ansline{${sanitizeLatex(task.unit || '')}}`;
+        answerBlock = `\\ansline{${normalizeUnitLatex(task.unit || '')}}`;
       }
     }
     return `\\kimtask{${index}}{${task.latex_condition}\n${answerBlock}}`;
@@ -691,11 +773,13 @@ const { execSync } = require('child_process');
 
   if (part1Tasks.length > 0) {
     teacherTex += `\\section*{Таблица ответов к Части 1 (Вариант ${EXAM}-${VARIANT_ID})}
+\\noindent\\resizebox{\\linewidth}{!}{%
 \\begin{tabular}{|c|c|c|c|c|c|}
 \\hline
-\\textbf{№} & \\textbf{Линия КИМ (ФИПИ)} & \\textbf{ID задачи} & \\textbf{Тип проверки} & \\textbf{Макс. балл} & \\textbf{Эталонный ответ} \\\\ \\hline
+\\textbf{№} & \\textbf{Линия} & \\textbf{ID задачи} & \\textbf{Тип} & \\textbf{Балл} & \\textbf{Эталонный ответ} \\\\ \\hline
 ${keyMap.filter(k => k.part === 1).map(k => `${k.num} & ${k.kim_line ?? '-'} & \\texttt{${escapeLatex(k.id)}} & \\texttt{${escapeLatex(k.rule)}} & ${k.max_points} & \\textbf{${escapeAnswerCell(k.answer)}} \\\\ \\hline`).join('\n')}
-\\end{tabular}
+\\end{tabular}%
+}
 \\vspace{12pt}
 `;
   }
