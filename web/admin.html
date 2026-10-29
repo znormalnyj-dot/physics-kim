@@ -4613,9 +4613,12 @@
           els.dbPill.textContent = 'База недоступна';
           els.dbPill.classList.remove('ok');
           els.globalError.hidden = false;
+          const isLocalHost = location.hostname === '127.0.0.1' || location.hostname === 'localhost';
           els.globalError.textContent = 'Не удалось загрузить статистику: ' + error.message +
-            '. Убедитесь, что сервер запущен командой «node server.js», ' +
-            'и откройте панель по адресу ' + location.origin + '/admin.';
+            (isLocalHost
+              ? '. Проверьте, что сервер запущен командой «node server.js», и обновите страницу.'
+              : '. Панель работает только через локальный сервер: запустите «node server.js» ' +
+                'и откройте http://127.0.0.1:3000/admin. Опубликованная копия не имеет доступа к API.');
           els.buildBtn.disabled = true;
           els.topicsList.innerHTML = '<div class="empty-state"><b>Нет связи с сервером</b>' +
             'Запустите <code>node server.js</code> и обновите страницу.</div>';
